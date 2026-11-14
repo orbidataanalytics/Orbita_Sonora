@@ -1,0 +1,39 @@
+.partituras details { margin: .35rem 0; }
+.partituras details > summary { padding: .65rem 0; font-size: 1.1rem; font-weight: 650; cursor: pointer; }
+.reproduccion-partitura { padding-top: .9rem; }
+.partitura-cabecera { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .5rem; margin: .8rem 0 .55rem; }
+#partitura-musical, #daw-panel { scroll-margin-top: 6rem; }
+#daw-panel { margin-top: .6rem; border-top: 1px solid var(--edge); }
+#daw-estado:empty { display: none; }
+.daw-acciones { margin-top: .65rem; }
+#descargar-wav { margin: .45rem 0; }
+#partitura-tecnica { border-top: 1px solid var(--borde, #445770); margin-top: .7rem; }
+#partitura-tecnica > summary { font-size: .95rem; }
+#partitura-tecnica .score-svg { min-width: 0; }
+.notas-recorrido { display: flex; flex-wrap: wrap; gap: .25rem 1.1rem; margin: .55rem 0 0; }
+.notas-recorrido p { margin: 0; }
+#ajustes-partitura { display: flex; gap: .75rem; flex-wrap: wrap; border: 0; padding: .5rem 0; margin: 0; }
+#ajustes-partitura label, .partitura-controles label { display: flex; gap: .4rem; align-items: center; flex-wrap: wrap; }
+#mus-bpm { width: 4.6rem; }
+.partitura-controles { margin-top: .55rem; }
+.hoja-partitura[hidden] { display: none; }
+.hoja-partitura { padding: .8rem; min-width: 0; overflow-x: auto; background: #fff; color: #151a20; border-radius: .4rem; position: relative; isolation: isolate; }
+.hoja-partitura svg { display: block; }
+.hoja-partitura .cursor-musical { z-index: 1 !important; pointer-events: none; }
+@media (max-width: 620px) {
+    .cabecera { flex-wrap: wrap; }
+    .cabecera nav { flex: 1 1 100%; flex-wrap: wrap; }
+    .cabecera nav > #nav-analisis { display: inline; }
+    .reproduccion-partitura { align-items: flex-start; }
+    .hoja-partitura svg { min-width: 0; }
+}
+#partitura-impresion { position: absolute; left: -20000px; top: 0; width: 750px; color: #101722; background: white; }
+@media print {
+    body.imprimir-partitura > :not(#partitura-impresion) { display: none !important; }
+    body.imprimir-partitura > #partitura-impresion { display: block !important; position: static; width: auto; height: auto; }
+    #partitura-impresion header { margin: 0 0 3mm; color: #101722; }
+    #partitura-impresion header h1 { font-size: 18pt; margin: 0 0 2mm; }
+    #partitura-impresion header p { margin: 0 0 1mm; font-size: 9pt; }
+    #partitura-impresion svg { display: block; width: 100%; height: auto; break-inside: avoid; }
+    #partitura-impresion [id^="osmdSvgPage"]:not(:last-child) { break-after: page; }
+}

@@ -1,0 +1,82 @@
+{
+  "id": "817fefa1daf51b75",
+  "titulo": "GEOS Aerosols (2025)",
+  "portada": "https://svs.gsfc.nasa.gov/vis/a000000/a005600/a005669/Aerosols_2025-08-19T20_00_00_1920x1080.png",
+  "fuente": "https://svs.gsfc.nasa.gov/5669/",
+  "medios": [
+    {
+      "id": "897e0e0ddcc59764",
+      "tipo": "imagen",
+      "url": "https://svs.gsfc.nasa.gov/vis/a000000/a005600/a005669/Aerosols_2025-08-19T20_00_00_1920x1080.png",
+      "titulo": "Visualization still image showing aerosols as modeled by NASA's Goddard Earth Observing System (GEOS) on August 19, 20",
+      "grupo": "GEOS Aerosols (2025)",
+      "fuente": "https://svs.gsfc.nasa.gov/5669/#media_group_380698",
+      "descripcion": "",
+      "ancho": 1920,
+      "alto": 1080,
+      "poster": null,
+      "variantes": [
+        {
+          "url": "https://svs.gsfc.nasa.gov/vis/a000000/a005600/a005669/Aerosols_2025-08-19T20_00_00_3840x2160.png",
+          "nombre": "Aerosols_2025-08-19T20_00_00_3840x2160.png",
+          "ancho": 3840,
+          "alto": 2160
+        },
+        {
+          "url": "https://svs.gsfc.nasa.gov/vis/a000000/a005600/a005669/Aerosols_2025-08-19T20_00_00_5760x3240.png",
+          "nombre": "Aerosols_2025-08-19T20_00_00_5760x3240.png",
+          "ancho": 5760,
+          "alto": 3240
+        },
+        {
+          "url": "https://svs.gsfc.nasa.gov/vis/a000000/a005600/a005669/Aerosols_2025-08-19T20_00_00_7680x4320.png",
+          "nombre": "Aerosols_2025-08-19T20_00_00_7680x4320.png",
+          "ancho": 7680,
+          "alto": 4320
+        }
+      ],
+      "vista_local": "datos/paquetes/svs-5669/portada.jpg",
+      "copia_local": "datos/paquetes/svs-5669/descargas/Aerosols_2025-08-19T20_00_00_1920x1080.png"
+    },
+    {
+      "id": "7092e5c334cbf191",
+      "tipo": "imagen",
+      "url": "https://svs.gsfc.nasa.gov/vis/a000000/a005600/a005669/Aerosols_2025-08-19T20_00_00_1500x1179_72dpi.png",
+      "titulo": "Print-Quality Version (14:11 Aspect Ratio)",
+      "grupo": "GEOS Aerosols (2025)",
+      "fuente": "https://svs.gsfc.nasa.gov/5669/#media_group_380699",
+      "descripcion": "",
+      "ancho": 1500,
+      "alto": 1179,
+      "poster": null,
+      "variantes": [
+        {
+          "url": "https://svs.gsfc.nasa.gov/vis/a000000/a005600/a005669/Aerosols_2025-08-19T20_00_00_4200x3300_300dpi.png",
+          "nombre": "Aerosols_2025-08-19T20_00_00_4200x3300_300dpi.png",
+          "ancho": 4200,
+          "alto": 3300
+        }
+      ]
+    },
+    {
+      "id": "7359c1f19db78c2f",
+      "tipo": "imagen",
+      "url": "https://svs.gsfc.nasa.gov/vis/a000000/a005600/a005669/Aerosols_cbar.png",
+      "titulo": "Colorbar for the aerosols visualization.",
+      "grupo": "GEOS Aerosols (2025)",
+      "fuente": "https://svs.gsfc.nasa.gov/5669/#media_group_380701",
+      "descripcion": "",
+      "ancho": 1500,
+      "alto": 300,
+      "poster": null,
+      "variantes": []
+    }
+  ],
+  "proveedor": "NASA SVS",
+  "svs_id": 5669,
+  "seccion": null,
+  "es_galeria": false,
+  "pendientes": [],
+  "portada_local": "datos/paquetes/svs-5669/portada.jpg",
+  "medio_inicial": "897e0e0ddcc59764"
+}

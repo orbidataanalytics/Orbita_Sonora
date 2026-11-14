@@ -1,0 +1,147 @@
+{
+  "id": "e7d70f4c44b4b858",
+  "titulo": "A 3D View of an Atmospheric River from an Earth System Model",
+  "portada": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004960/atmos_rivers_narrated_4k.00090_print.jpg",
+  "fuente": "https://svs.gsfc.nasa.gov/4960/",
+  "medios": [
+    {
+      "id": "00a482361c8c22d2",
+      "tipo": "imagen",
+      "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004960/atmos_rivers_narrated_4k.00090_print.jpg",
+      "titulo": "Narrated atmospheric rivers movie Coming soon to our YouTube channel.",
+      "grupo": "A 3D View of an Atmospheric River from an Earth System Model",
+      "fuente": "https://svs.gsfc.nasa.gov/4960/#media_group_315482",
+      "descripcion": "Narrated atmospheric rivers movieComing soon to our YouTube channel.",
+      "ancho": 1024,
+      "alto": 576,
+      "poster": null,
+      "variantes": [],
+      "vista_local": "datos/paquetes/svs-4960/portada.jpg"
+    },
+    {
+      "id": "8e2177f988ffc23c",
+      "tipo": "video",
+      "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004960/atmos_rivers_narrated_HD.webm",
+      "titulo": "Narrated atmospheric rivers movie Coming soon to our YouTube channel.",
+      "grupo": "A 3D View of an Atmospheric River from an Earth System Model",
+      "fuente": "https://svs.gsfc.nasa.gov/4960/#media_group_315482",
+      "descripcion": "Narrated atmospheric rivers movieComing soon to our YouTube channel.",
+      "ancho": 1920,
+      "alto": 1080,
+      "poster": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004960/atmos_rivers_narrated_4k.00090_print.jpg",
+      "variantes": [
+        {
+          "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004960/atmos_rivers_narrated_HD.mp4",
+          "nombre": "atmos_rivers_narrated_HD.mp4",
+          "ancho": 1920,
+          "alto": 1080
+        },
+        {
+          "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004960/atmos_rivers_narrated_4k.mp4",
+          "nombre": "atmos_rivers_narrated_4k.mp4",
+          "ancho": 3840,
+          "alto": 2160
+        }
+      ]
+    },
+    {
+      "id": "63ae03d65fdd27a5",
+      "tipo": "imagen",
+      "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004960/atmos_river.0324_rfm23_2021-11-29_1351.04370_print.jpg",
+      "titulo": "Non-narrated version of atmospheric rivers visualization",
+      "grupo": "A 3D View of an Atmospheric River from an Earth System Model",
+      "fuente": "https://svs.gsfc.nasa.gov/4960/#media_group_315483",
+      "descripcion": "Non-narrated version of atmospheric rivers visualization",
+      "ancho": 1024,
+      "alto": 576,
+      "poster": null,
+      "variantes": []
+    },
+    {
+      "id": "2d3607d48869d559",
+      "tipo": "video",
+      "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004960/atmos_river_HD.webm",
+      "titulo": "Non-narrated version of atmospheric rivers visualization",
+      "grupo": "A 3D View of an Atmospheric River from an Earth System Model",
+      "fuente": "https://svs.gsfc.nasa.gov/4960/#media_group_315483",
+      "descripcion": "Non-narrated version of atmospheric rivers visualization",
+      "ancho": 1920,
+      "alto": 1080,
+      "poster": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004960/atmos_river.0324_rfm23_2021-11-29_1351.04370_print.jpg",
+      "variantes": [
+        {
+          "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004960/atmos_river_HD.mp4",
+          "nombre": "atmos_river_HD.mp4",
+          "ancho": 1920,
+          "alto": 1080
+        },
+        {
+          "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004960/atmos_river_4k.mp4",
+          "nombre": "atmos_river_4k.mp4",
+          "ancho": 3840,
+          "alto": 2160
+        }
+      ]
+    },
+    {
+      "id": "94144d2727ed7adb",
+      "tipo": "imagen",
+      "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004960/atmo_rivers_cbars01_print.jpg",
+      "titulo": "Earth surface layer color",
+      "grupo": "A 3D View of an Atmospheric River from an Earth System Model",
+      "fuente": "https://svs.gsfc.nasa.gov/4960/#media_group_315484",
+      "descripcion": "Earth surface layer color. Data on the Earth's surface is mapped in order of the color tables (snow on top and ocean on the bottom). When the data layers have very low values, that layer becomes transparent allowing the layers underneath to be seen.",
+      "ancho": 1024,
+      "alto": 1131,
+      "poster": null,
+      "variantes": [
+        {
+          "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004960/atmo_rivers_cbars01.png",
+          "nombre": "atmo_rivers_cbars01.png",
+          "ancho": 1683,
+          "alto": 1859
+        }
+      ]
+    },
+    {
+      "id": "8af0ff3565209236",
+      "tipo": "imagen",
+      "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004960/atmos_river_DATE_ONLY.06300_print.jpg",
+      "titulo": "Date overlay for this visualization",
+      "grupo": "A 3D View of an Atmospheric River from an Earth System Model",
+      "fuente": "https://svs.gsfc.nasa.gov/4960/#media_group_315485",
+      "descripcion": "Date overlay for this visualization",
+      "ancho": 1024,
+      "alto": 576,
+      "poster": null,
+      "variantes": []
+    },
+    {
+      "id": "6ab09584a9129275",
+      "tipo": "video",
+      "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004960/atmos_river_DATE_ONLY_HD.webm",
+      "titulo": "Date overlay for this visualization",
+      "grupo": "A 3D View of an Atmospheric River from an Earth System Model",
+      "fuente": "https://svs.gsfc.nasa.gov/4960/#media_group_315485",
+      "descripcion": "Date overlay for this visualization",
+      "ancho": 1920,
+      "alto": 1080,
+      "poster": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004960/atmos_river_DATE_ONLY.06300_print.jpg",
+      "variantes": [
+        {
+          "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004960/atmos_river_DATE_ONLY_HD.mp4",
+          "nombre": "atmos_river_DATE_ONLY_HD.mp4",
+          "ancho": 1920,
+          "alto": 1080
+        }
+      ]
+    }
+  ],
+  "proveedor": "NASA SVS",
+  "svs_id": 4960,
+  "seccion": null,
+  "es_galeria": false,
+  "pendientes": [],
+  "portada_local": "datos/paquetes/svs-4960/portada.jpg",
+  "medio_inicial": "00a482361c8c22d2"
+}

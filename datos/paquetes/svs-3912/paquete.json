@@ -1,0 +1,36 @@
+{
+  "id": "a1750ae31711f564",
+  "titulo": "Global Sea Surface Currents and Temperature",
+  "portada": "https://svs.gsfc.nasa.gov/vis/a000000/a003900/a003912/ecco2_and_grid.jpg",
+  "fuente": "https://svs.gsfc.nasa.gov/3912/#media_group_349716",
+  "medios": [
+    {
+      "id": "b289c28583184d62",
+      "tipo": "imagen",
+      "url": "https://svs.gsfc.nasa.gov/vis/a000000/a003900/a003912/ecco2_and_grid.jpg",
+      "titulo": "Full resolution ECCO2 flow field illustrating the distribution of the actual flow vector data points relative to the f",
+      "grupo": "Global Sea Surface Currents and Temperature",
+      "fuente": "https://svs.gsfc.nasa.gov/3912/#media_group_349716",
+      "descripcion": "Full resolution ECCO2 flow field illustrating the distribution of the actual flow vector data points relative to the flow curves. The white dots represent locations where the ECCO2 model defines the ocean current directions. Locations in between those locations are interpolated.",
+      "ancho": 6840,
+      "alto": 3420,
+      "poster": null,
+      "variantes": [
+        {
+          "url": "https://svs.gsfc.nasa.gov/vis/a000000/a003900/a003912/ecco2_and_grid.tif",
+          "nombre": "ecco2_and_grid.tif",
+          "ancho": 6840,
+          "alto": 3420
+        }
+      ],
+      "vista_local": "datos/paquetes/svs-3912/portada.jpg"
+    }
+  ],
+  "proveedor": "NASA SVS",
+  "svs_id": 3912,
+  "seccion": "media_group_349716",
+  "es_galeria": false,
+  "pendientes": [],
+  "portada_local": "datos/paquetes/svs-3912/portada.jpg",
+  "medio_inicial": "b289c28583184d62"
+}

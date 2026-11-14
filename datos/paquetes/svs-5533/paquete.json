@@ -1,0 +1,155 @@
+{
+  "id": "38f14451c412efdf",
+  "titulo": "Air Quality Model Runs",
+  "portada": "https://svs.gsfc.nasa.gov/vis/a000000/a005500/a005533/AirQuality_Sphere_1920x1080_0000.png",
+  "fuente": "https://svs.gsfc.nasa.gov/5533/",
+  "medios": [
+    {
+      "id": "7ebcae4210a581b8",
+      "tipo": "imagen",
+      "url": "https://svs.gsfc.nasa.gov/vis/a000000/a005500/a005533/AirQuality_Sphere_1920x1080_0000.png",
+      "titulo": "Visualization showcasing the transport of Carbon Monoxide (CO), Particulate Matter (PM 2.5), Ozone (O~3~) and Nitrous ",
+      "grupo": "Air Quality Model Runs",
+      "fuente": "https://svs.gsfc.nasa.gov/5533/#media_group_378003",
+      "descripcion": "",
+      "ancho": 1920,
+      "alto": 1080,
+      "poster": null,
+      "variantes": [
+        {
+          "url": "https://svs.gsfc.nasa.gov/vis/a000000/a005500/a005533/AirQuality_Sphere_5760x3240_0000.png",
+          "nombre": "AirQuality_Sphere_5760x3240_0000.png",
+          "ancho": 5760,
+          "alto": 3240
+        }
+      ],
+      "vista_local": "datos/paquetes/svs-5533/portada.jpg"
+    },
+    {
+      "id": "f4ebed75cd97150f",
+      "tipo": "video",
+      "url": "https://svs.gsfc.nasa.gov/vis/a000000/a005500/a005533/AirQuality_SphereWithLabels_5760x3240.mp4",
+      "titulo": "Visualization showcasing the transport of Carbon Monoxide (CO), Particulate Matter (PM 2.5), Ozone (O~3~) and Nitrous ",
+      "grupo": "Air Quality Model Runs",
+      "fuente": "https://svs.gsfc.nasa.gov/5533/#media_group_378003",
+      "descripcion": "",
+      "ancho": 5760,
+      "alto": 3240,
+      "poster": "https://svs.gsfc.nasa.gov/vis/a000000/a005500/a005533/AirQuality_Sphere_1920x1080_0000.png",
+      "variantes": []
+    },
+    {
+      "id": "c25cade88685922f",
+      "tipo": "imagen",
+      "url": "https://svs.gsfc.nasa.gov/vis/a000000/a005500/a005533/AirQuality_WithLabels_1920x1080_0000.png",
+      "titulo": "Visualization showcasing the transport of Carbon Monoxide (CO), Particulate Matter (PM 2.5), Ozone (O~3~) and Nitrous ",
+      "grupo": "Air Quality Model Runs",
+      "fuente": "https://svs.gsfc.nasa.gov/5533/#media_group_378004",
+      "descripcion": "",
+      "ancho": 1920,
+      "alto": 1080,
+      "poster": null,
+      "variantes": [
+        {
+          "url": "https://svs.gsfc.nasa.gov/vis/a000000/a005500/a005533/AirQuality_WithLabels_5760x3240_0000.png",
+          "nombre": "AirQuality_WithLabels_5760x3240_0000.png",
+          "ancho": 5760,
+          "alto": 3240
+        }
+      ]
+    },
+    {
+      "id": "ee0506878c47ef0f",
+      "tipo": "video",
+      "url": "https://svs.gsfc.nasa.gov/vis/a000000/a005500/a005533/AirQuality_MapWithLabels_5760x3240.mp4",
+      "titulo": "Visualization showcasing the transport of Carbon Monoxide (CO), Particulate Matter (PM 2.5), Ozone (O~3~) and Nitrous ",
+      "grupo": "Air Quality Model Runs",
+      "fuente": "https://svs.gsfc.nasa.gov/5533/#media_group_378004",
+      "descripcion": "",
+      "ancho": 5760,
+      "alto": 3240,
+      "poster": "https://svs.gsfc.nasa.gov/vis/a000000/a005500/a005533/AirQuality_WithLabels_1920x1080_0000.png",
+      "variantes": []
+    },
+    {
+      "id": "593cfd3a22ffb31e",
+      "tipo": "imagen",
+      "url": "https://svs.gsfc.nasa.gov/vis/a000000/a005500/a005533/AirQuality_SphereLong_1920x1080_3030.png",
+      "titulo": "Visualization showcasing the transport of Carbon Monoxide (CO), Particulate Matter (PM 2.5), Ozone (O~3~) and Nitrous ",
+      "grupo": "Air Quality Model Runs",
+      "fuente": "https://svs.gsfc.nasa.gov/5533/#media_group_378005",
+      "descripcion": "",
+      "ancho": 1920,
+      "alto": 1080,
+      "poster": null,
+      "variantes": [
+        {
+          "url": "https://svs.gsfc.nasa.gov/vis/a000000/a005500/a005533/AirQuality_SphereLong_5760x3240_3030.png",
+          "nombre": "AirQuality_SphereLong_5760x3240_3030.png",
+          "ancho": 5760,
+          "alto": 3240
+        }
+      ]
+    },
+    {
+      "id": "92cf1e8a6e8efcbf",
+      "tipo": "video",
+      "url": "https://svs.gsfc.nasa.gov/vis/a000000/a005500/a005533/AirQuality_Sphere_5760x3240_long.mp4",
+      "titulo": "Visualization showcasing the transport of Carbon Monoxide (CO), Particulate Matter (PM 2.5), Ozone (O~3~) and Nitrous ",
+      "grupo": "Air Quality Model Runs",
+      "fuente": "https://svs.gsfc.nasa.gov/5533/#media_group_378005",
+      "descripcion": "",
+      "ancho": 5760,
+      "alto": 3240,
+      "poster": "https://svs.gsfc.nasa.gov/vis/a000000/a005500/a005533/AirQuality_SphereLong_1920x1080_3030.png",
+      "variantes": []
+    },
+    {
+      "id": "c17ac4d647424b24",
+      "tipo": "imagen",
+      "url": "https://svs.gsfc.nasa.gov/vis/a000000/a005500/a005533/AirQualityWithLabels_3840x1080_30fps_0000.png",
+      "titulo": "**Earth Information Center Version for the Hyperwall (32:9 Aspect ratio, 7680x2160 pixels resolution)** Visualization ",
+      "grupo": "Air Quality Model Runs",
+      "fuente": "https://svs.gsfc.nasa.gov/5533/#media_group_378312",
+      "descripcion": "",
+      "ancho": 3840,
+      "alto": 1080,
+      "poster": null,
+      "variantes": [
+        {
+          "url": "https://svs.gsfc.nasa.gov/vis/a000000/a005500/a005533/AirQualityWithLabels_7680x2160_30fps_0000.png",
+          "nombre": "AirQualityWithLabels_7680x2160_30fps_0000.png",
+          "ancho": 7680,
+          "alto": 2160
+        }
+      ]
+    },
+    {
+      "id": "07b75aa574969976",
+      "tipo": "video",
+      "url": "https://svs.gsfc.nasa.gov/vis/a000000/a005500/a005533/EIC_AirQuality_Preview_3840x1080.mp4",
+      "titulo": "**Earth Information Center Version for the Hyperwall (32:9 Aspect ratio, 7680x2160 pixels resolution)** Visualization ",
+      "grupo": "Air Quality Model Runs",
+      "fuente": "https://svs.gsfc.nasa.gov/5533/#media_group_378312",
+      "descripcion": "",
+      "ancho": 3840,
+      "alto": 1080,
+      "poster": "https://svs.gsfc.nasa.gov/vis/a000000/a005500/a005533/AirQualityWithLabels_3840x1080_30fps_0000.png",
+      "variantes": [
+        {
+          "url": "https://svs.gsfc.nasa.gov/vis/a000000/a005500/a005533/EIC_AirQuality_NMNH_7680x2160.mp4",
+          "nombre": "EIC_AirQuality_NMNH_7680x2160.mp4",
+          "ancho": 7680,
+          "alto": 2160
+        }
+      ]
+    }
+  ],
+  "proveedor": "NASA SVS",
+  "svs_id": 5533,
+  "seccion": null,
+  "es_galeria": false,
+  "pendientes": [],
+  "portada_local": "datos/paquetes/svs-5533/portada.jpg",
+  "medio_inicial": "7ebcae4210a581b8"
+}

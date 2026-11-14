@@ -1,0 +1,86 @@
+{
+  "version": 1,
+  "paquetes": [
+    {
+      "id": "fbdcbd571216a225",
+      "titulo": "Earth Information Center (EIC)",
+      "manifiesto": "datos/paquetes/svs-40467/paquete.json",
+      "portada": "datos/paquetes/svs-40467/portada.jpg",
+      "imagenes": 290,
+      "videos": 179,
+      "descargas_incluidas": 0
+    },
+    {
+      "id": "d26c5bf01d93e48e",
+      "titulo": "Change in Night Lights between 2012 and 2023 - EIC Version",
+      "manifiesto": "datos/paquetes/svs-5313/paquete.json",
+      "portada": "datos/paquetes/svs-5313/portada.jpg",
+      "imagenes": 1,
+      "videos": 1,
+      "descargas_incluidas": 1
+    },
+    {
+      "id": "a1750ae31711f564",
+      "titulo": "Global Sea Surface Currents and Temperature",
+      "manifiesto": "datos/paquetes/svs-3912/paquete.json",
+      "portada": "datos/paquetes/svs-3912/portada.jpg",
+      "imagenes": 1,
+      "videos": 0,
+      "descargas_incluidas": 0
+    },
+    {
+      "id": "817fefa1daf51b75",
+      "titulo": "GEOS Aerosols (2025)",
+      "manifiesto": "datos/paquetes/svs-5669/paquete.json",
+      "portada": "datos/paquetes/svs-5669/portada.jpg",
+      "imagenes": 3,
+      "videos": 0,
+      "descargas_incluidas": 1
+    },
+    {
+      "id": "38f14451c412efdf",
+      "titulo": "Air Quality Model Runs",
+      "manifiesto": "datos/paquetes/svs-5533/paquete.json",
+      "portada": "datos/paquetes/svs-5533/portada.jpg",
+      "imagenes": 4,
+      "videos": 4,
+      "descargas_incluidas": 0
+    },
+    {
+      "id": "e85be9cdddc8ae12",
+      "titulo": "Perpetual Ocean 2: Western Boundary Currents",
+      "manifiesto": "datos/paquetes/svs-5425/paquete.json",
+      "portada": "datos/paquetes/svs-5425/portada.jpg",
+      "imagenes": 13,
+      "videos": 9,
+      "descargas_incluidas": 0
+    },
+    {
+      "id": "2ad7e5e8687663b8",
+      "titulo": "Lightning Events Detected from the International Space Station (ISS) 2017-2023",
+      "manifiesto": "datos/paquetes/svs-5011/paquete.json",
+      "portada": "datos/paquetes/svs-5011/portada.jpg",
+      "imagenes": 2,
+      "videos": 2,
+      "descargas_incluidas": 0
+    },
+    {
+      "id": "e7d70f4c44b4b858",
+      "titulo": "A 3D View of an Atmospheric River from an Earth System Model",
+      "manifiesto": "datos/paquetes/svs-4960/paquete.json",
+      "portada": "datos/paquetes/svs-4960/portada.jpg",
+      "imagenes": 4,
+      "videos": 3,
+      "descargas_incluidas": 0
+    },
+    {
+      "id": "ec7e7c48dee44e09",
+      "titulo": "GEDI Forest Height",
+      "manifiesto": "datos/paquetes/svs-4950/paquete.json",
+      "portada": "datos/paquetes/svs-4950/portada.jpg",
+      "imagenes": 23,
+      "videos": 12,
+      "descargas_incluidas": 1
+    }
+  ]
+}

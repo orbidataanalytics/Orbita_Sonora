@@ -1,0 +1,765 @@
+{
+  "id": "ec7e7c48dee44e09",
+  "titulo": "GEDI Forest Height",
+  "portada": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_global.0900_print.jpg",
+  "fuente": "https://svs.gsfc.nasa.gov/4950/",
+  "medios": [
+    {
+      "id": "5b421b14eaf72e99",
+      "tipo": "imagen",
+      "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_global_w_colorbar_0900_print.jpg",
+      "titulo": "This visualization depicts a global view of forest height data collected by the GEDI instrument aboard the Internation",
+      "grupo": "GEDI Forest Height",
+      "fuente": "https://svs.gsfc.nasa.gov/4950/#media_group_316231",
+      "descripcion": "This visualization depicts a global view of forest height data collected by the GEDI instrument aboard the International Space Station. Brown and dark green represent shorter vegetation. Bright green and white represent taller vegetation. This visualization uses data collected between April 2019 and April 2020. Height is exaggerated to depict variation at this scale.Coming soon to our YouTube channel.",
+      "ancho": 1024,
+      "alto": 576,
+      "poster": null,
+      "variantes": []
+    },
+    {
+      "id": "c91ce3dbdf5b37d5",
+      "tipo": "video",
+      "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_global_w_colorbar_1080p60.webm",
+      "titulo": "This visualization depicts a global view of forest height data collected by the GEDI instrument aboard the Internation",
+      "grupo": "GEDI Forest Height",
+      "fuente": "https://svs.gsfc.nasa.gov/4950/#media_group_316231",
+      "descripcion": "This visualization depicts a global view of forest height data collected by the GEDI instrument aboard the International Space Station. Brown and dark green represent shorter vegetation. Bright green and white represent taller vegetation. This visualization uses data collected between April 2019 and April 2020. Height is exaggerated to depict variation at this scale.Coming soon to our YouTube channel.",
+      "ancho": 1920,
+      "alto": 1080,
+      "poster": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_global_w_colorbar_0900_print.jpg",
+      "variantes": [
+        {
+          "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_global_w_colorbar_1080p60.mp4",
+          "nombre": "GEDI_global_w_colorbar_1080p60.mp4",
+          "ancho": 1920,
+          "alto": 1080
+        },
+        {
+          "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_global_w_colorbar_2160p30.mp4",
+          "nombre": "GEDI_global_w_colorbar_2160p30.mp4",
+          "ancho": 3840,
+          "alto": 2160
+        },
+        {
+          "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_global_w_colorbar_2160p60.mp4",
+          "nombre": "GEDI_global_w_colorbar_2160p60.mp4",
+          "ancho": 3840,
+          "alto": 2160
+        }
+      ],
+      "copia_local": "datos/paquetes/svs-4950/descargas/GEDI_global_w_colorbar_1080p60.webm"
+    },
+    {
+      "id": "01802b47e5c5e52a",
+      "tipo": "imagen",
+      "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_CA_w_colorbar_0850_print.jpg",
+      "titulo": "This is a closeup view of the GEDI forest height data collected for the west coast of the United States",
+      "grupo": "GEDI Forest Height",
+      "fuente": "https://svs.gsfc.nasa.gov/4950/#media_group_316232",
+      "descripcion": "This is a closeup view of the GEDI forest height data collected for the west coast of the United States. Data is drawn on the globe over time, depicting how data coverage increases with each satellite pass. Brown and dark green represent shorter vegetation. Bright green and white represent taller vegetation. This visualization uses data collected between April 2018 and April 2019. Height is exaggerated to depict variation at this scale.Coming soon to our YouTube channel.",
+      "ancho": 1024,
+      "alto": 576,
+      "poster": null,
+      "variantes": []
+    },
+    {
+      "id": "ef8ca88df975bdf1",
+      "tipo": "video",
+      "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_CA_w_colorbar_1080p60.webm",
+      "titulo": "This is a closeup view of the GEDI forest height data collected for the west coast of the United States",
+      "grupo": "GEDI Forest Height",
+      "fuente": "https://svs.gsfc.nasa.gov/4950/#media_group_316232",
+      "descripcion": "This is a closeup view of the GEDI forest height data collected for the west coast of the United States. Data is drawn on the globe over time, depicting how data coverage increases with each satellite pass. Brown and dark green represent shorter vegetation. Bright green and white represent taller vegetation. This visualization uses data collected between April 2018 and April 2019. Height is exaggerated to depict variation at this scale.Coming soon to our YouTube channel.",
+      "ancho": 1920,
+      "alto": 1080,
+      "poster": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_CA_w_colorbar_0850_print.jpg",
+      "variantes": [
+        {
+          "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_CA_w_colorbar_1080p60.mp4",
+          "nombre": "GEDI_CA_w_colorbar_1080p60.mp4",
+          "ancho": 1920,
+          "alto": 1080
+        },
+        {
+          "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_CA_w_colorbar_2160p30.mp4",
+          "nombre": "GEDI_CA_w_colorbar_2160p30.mp4",
+          "ancho": 3840,
+          "alto": 2160
+        },
+        {
+          "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_CA_w_colorbar_2160p60.mp4",
+          "nombre": "GEDI_CA_w_colorbar_2160p60.mp4",
+          "ancho": 3840,
+          "alto": 2160
+        }
+      ]
+    },
+    {
+      "id": "de681de88b76f6b5",
+      "tipo": "imagen",
+      "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_colorbar_0to50_01_print.jpg",
+      "titulo": "Forest height color bar spanning 0m to 50m",
+      "grupo": "GEDI Forest Height",
+      "fuente": "https://svs.gsfc.nasa.gov/4950/#media_group_316233",
+      "descripcion": "Forest height color bar spanning 0m to 50m",
+      "ancho": 1024,
+      "alto": 576,
+      "poster": null,
+      "variantes": [
+        {
+          "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_colorbar_0to50_01.tif",
+          "nombre": "GEDI_colorbar_0to50_01.tif",
+          "ancho": 3840,
+          "alto": 2160
+        }
+      ]
+    },
+    {
+      "id": "1b604322e6f976ee",
+      "tipo": "imagen",
+      "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_colorbar_0to75_01_print.jpg",
+      "titulo": "Forest height color bar spanning 0m to 75m",
+      "grupo": "GEDI Forest Height",
+      "fuente": "https://svs.gsfc.nasa.gov/4950/#media_group_316234",
+      "descripcion": "Forest height color bar spanning 0m to 75m",
+      "ancho": 1024,
+      "alto": 576,
+      "poster": null,
+      "variantes": [
+        {
+          "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_colorbar_0to75_01.tif",
+          "nombre": "GEDI_colorbar_0to75_01.tif",
+          "ancho": 3840,
+          "alto": 2160
+        }
+      ]
+    },
+    {
+      "id": "e1c42ed9a1573472",
+      "tipo": "imagen",
+      "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_colorbar_0to40_01_print.jpg",
+      "titulo": "Forest height color bar spanning 0m to 40m",
+      "grupo": "GEDI Forest Height",
+      "fuente": "https://svs.gsfc.nasa.gov/4950/#media_group_316235",
+      "descripcion": "Forest height color bar spanning 0m to 40m",
+      "ancho": 1024,
+      "alto": 576,
+      "poster": null,
+      "variantes": [
+        {
+          "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_colorbar_0to40_01.tif",
+          "nombre": "GEDI_colorbar_0to40_01.tif",
+          "ancho": 3840,
+          "alto": 2160
+        }
+      ]
+    },
+    {
+      "id": "c5c32de0cd316c8b",
+      "tipo": "imagen",
+      "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_global.0900_print.jpg",
+      "titulo": "This visualization depicts a global view of forest height data collected by the GEDI instrument aboard the Internation",
+      "grupo": "GEDI Forest Height",
+      "fuente": "https://svs.gsfc.nasa.gov/4950/#media_group_316236",
+      "descripcion": "This visualization depicts a global view of forest height data collected by the GEDI instrument aboard the International Space Station. Brown and dark green represent shorter vegetation. Bright green and white represent taller vegetation. This visualization uses data collected between April 2018 and April 2019. Height is exaggerated to depict variation at this scale. This version has no on screen color bar.",
+      "ancho": 1024,
+      "alto": 576,
+      "poster": null,
+      "variantes": [],
+      "vista_local": "datos/paquetes/svs-4950/portada.jpg"
+    },
+    {
+      "id": "6ccd6b4788b092e5",
+      "tipo": "video",
+      "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_global_2160p60.webm",
+      "titulo": "This visualization depicts a global view of forest height data collected by the GEDI instrument aboard the Internation",
+      "grupo": "GEDI Forest Height",
+      "fuente": "https://svs.gsfc.nasa.gov/4950/#media_group_316236",
+      "descripcion": "This visualization depicts a global view of forest height data collected by the GEDI instrument aboard the International Space Station. Brown and dark green represent shorter vegetation. Bright green and white represent taller vegetation. This visualization uses data collected between April 2018 and April 2019. Height is exaggerated to depict variation at this scale. This version has no on screen color bar.",
+      "ancho": 3840,
+      "alto": 2160,
+      "poster": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_global.0900_print.jpg",
+      "variantes": [
+        {
+          "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_global_2160p60.mp4",
+          "nombre": "GEDI_global_2160p60.mp4",
+          "ancho": 3840,
+          "alto": 2160
+        },
+        {
+          "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_global_prores.mov",
+          "nombre": "GEDI_global_prores.mov",
+          "ancho": 3840,
+          "alto": 2160
+        }
+      ]
+    },
+    {
+      "id": "0fe5cb37c672a9ce",
+      "tipo": "imagen",
+      "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_CA.4900_print.jpg",
+      "titulo": "This is a closeup view of the GEDI forest height data collected for the west coast of the United States",
+      "grupo": "GEDI Forest Height",
+      "fuente": "https://svs.gsfc.nasa.gov/4950/#media_group_316237",
+      "descripcion": "This is a closeup view of the GEDI forest height data collected for the west coast of the United States. Data is drawn on the globe over time, depicting how data coverage increases with each satellite pass. Brown and dark green represent shorter vegetation. Bright green and white represent taller vegetation. This visualization uses data collected between April 2018 and April 2019. Height is exaggerated to depict variation at this scale. This version has no on screen color bar.",
+      "ancho": 1024,
+      "alto": 576,
+      "poster": null,
+      "variantes": []
+    },
+    {
+      "id": "b25c8d32a966001f",
+      "tipo": "video",
+      "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_CA_2160p60.webm",
+      "titulo": "This is a closeup view of the GEDI forest height data collected for the west coast of the United States",
+      "grupo": "GEDI Forest Height",
+      "fuente": "https://svs.gsfc.nasa.gov/4950/#media_group_316237",
+      "descripcion": "This is a closeup view of the GEDI forest height data collected for the west coast of the United States. Data is drawn on the globe over time, depicting how data coverage increases with each satellite pass. Brown and dark green represent shorter vegetation. Bright green and white represent taller vegetation. This visualization uses data collected between April 2018 and April 2019. Height is exaggerated to depict variation at this scale. This version has no on screen color bar.",
+      "ancho": 3840,
+      "alto": 2160,
+      "poster": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_CA.4900_print.jpg",
+      "variantes": [
+        {
+          "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_CA_2160p60.mp4",
+          "nombre": "GEDI_CA_2160p60.mp4",
+          "ancho": 3840,
+          "alto": 2160
+        },
+        {
+          "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_CA_prores.mov",
+          "nombre": "GEDI_CA_prores.mov",
+          "ancho": 3840,
+          "alto": 2160
+        }
+      ]
+    },
+    {
+      "id": "c5749276877a548e",
+      "tipo": "imagen",
+      "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_FL_w_colorbar1400_print.jpg",
+      "titulo": "This is a closeup view of the GEDI forest height data collected over Florida",
+      "grupo": "GEDI Forest Height",
+      "fuente": "https://svs.gsfc.nasa.gov/4950/#media_group_316238",
+      "descripcion": "This is a closeup view of the GEDI forest height data collected over Florida. Data is drawn on the globe over time, depicting how data coverage increases with each satellite pass. Brown and dark green represent shorter vegetation. Bright green and white represent taller vegetation. This visualization uses data collected between April 2018 and April 2019. Height is exaggerated to depict variation at this scale.",
+      "ancho": 1024,
+      "alto": 576,
+      "poster": null,
+      "variantes": []
+    },
+    {
+      "id": "397909b2e36d17b7",
+      "tipo": "video",
+      "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_FL_w_colorbar_1080p60.webm",
+      "titulo": "This is a closeup view of the GEDI forest height data collected over Florida",
+      "grupo": "GEDI Forest Height",
+      "fuente": "https://svs.gsfc.nasa.gov/4950/#media_group_316238",
+      "descripcion": "This is a closeup view of the GEDI forest height data collected over Florida. Data is drawn on the globe over time, depicting how data coverage increases with each satellite pass. Brown and dark green represent shorter vegetation. Bright green and white represent taller vegetation. This visualization uses data collected between April 2018 and April 2019. Height is exaggerated to depict variation at this scale.",
+      "ancho": 1920,
+      "alto": 1080,
+      "poster": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_FL_w_colorbar1400_print.jpg",
+      "variantes": [
+        {
+          "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_FL_w_colorbar_1080p60.mp4",
+          "nombre": "GEDI_FL_w_colorbar_1080p60.mp4",
+          "ancho": 1920,
+          "alto": 1080
+        },
+        {
+          "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_FL_w_colorbar_2160p30.mp4",
+          "nombre": "GEDI_FL_w_colorbar_2160p30.mp4",
+          "ancho": 3840,
+          "alto": 2160
+        },
+        {
+          "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_FL_w_colorbar_2160p60.mp4",
+          "nombre": "GEDI_FL_w_colorbar_2160p60.mp4",
+          "ancho": 3840,
+          "alto": 2160
+        }
+      ]
+    },
+    {
+      "id": "ae1ce6e0b7e387a9",
+      "tipo": "imagen",
+      "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_Goddard_w_colorbar1394_print.jpg",
+      "titulo": "This is a closeup view of the GEDI forest height data collected over the Goddard Space Flight Center in Maryland",
+      "grupo": "GEDI Forest Height",
+      "fuente": "https://svs.gsfc.nasa.gov/4950/#media_group_316239",
+      "descripcion": "This is a closeup view of the GEDI forest height data collected over the Goddard Space Flight Center in Maryland. Data is drawn on the globe over time, depicting how data coverage increases with each satellite pass. Brown and dark green represent shorter vegetation. Bright green and white represent taller vegetation. This visualization uses data collected between April 2018 and April 2019. Height is exaggerated to depict variation at this scale.",
+      "ancho": 1024,
+      "alto": 576,
+      "poster": null,
+      "variantes": []
+    },
+    {
+      "id": "cef99f16bcef1730",
+      "tipo": "video",
+      "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_Goddard_w_colorbar_1080p60.webm",
+      "titulo": "This is a closeup view of the GEDI forest height data collected over the Goddard Space Flight Center in Maryland",
+      "grupo": "GEDI Forest Height",
+      "fuente": "https://svs.gsfc.nasa.gov/4950/#media_group_316239",
+      "descripcion": "This is a closeup view of the GEDI forest height data collected over the Goddard Space Flight Center in Maryland. Data is drawn on the globe over time, depicting how data coverage increases with each satellite pass. Brown and dark green represent shorter vegetation. Bright green and white represent taller vegetation. This visualization uses data collected between April 2018 and April 2019. Height is exaggerated to depict variation at this scale.",
+      "ancho": 1920,
+      "alto": 1080,
+      "poster": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_Goddard_w_colorbar1394_print.jpg",
+      "variantes": [
+        {
+          "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_Goddard_w_colorbar_1080p60.mp4",
+          "nombre": "GEDI_Goddard_w_colorbar_1080p60.mp4",
+          "ancho": 1920,
+          "alto": 1080
+        },
+        {
+          "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_Goddard_w_colorbar_2160p60.mp4",
+          "nombre": "GEDI_Goddard_w_colorbar_2160p60.mp4",
+          "ancho": 3840,
+          "alto": 2160
+        },
+        {
+          "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_Goddard_w_colorbar_2160p30.mp4",
+          "nombre": "GEDI_Goddard_w_colorbar_2160p30.mp4",
+          "ancho": 3840,
+          "alto": 2160
+        }
+      ]
+    },
+    {
+      "id": "1ee0a6503ac4b7eb",
+      "tipo": "imagen",
+      "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_Laurentides_w_colorbar1395_print.jpg",
+      "titulo": "This is a closeup view of the GEDI forest height data collected over the Laurentides region around Quebec Canada",
+      "grupo": "GEDI Forest Height",
+      "fuente": "https://svs.gsfc.nasa.gov/4950/#media_group_316240",
+      "descripcion": "This is a closeup view of the GEDI forest height data collected over the Laurentides region around Quebec Canada. Data is drawn on the globe over time, depicting how data coverage increases with each satellite pass. Brown and dark green represent shorter vegetation. Bright green and white represent taller vegetation. This visualization uses data collected between April 2018 and April 2019. Height is exaggerated to depict variation at this scale.",
+      "ancho": 1024,
+      "alto": 576,
+      "poster": null,
+      "variantes": []
+    },
+    {
+      "id": "891ec6667f167628",
+      "tipo": "video",
+      "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_Laurentides_w_colorbar_1080p60.webm",
+      "titulo": "This is a closeup view of the GEDI forest height data collected over the Laurentides region around Quebec Canada",
+      "grupo": "GEDI Forest Height",
+      "fuente": "https://svs.gsfc.nasa.gov/4950/#media_group_316240",
+      "descripcion": "This is a closeup view of the GEDI forest height data collected over the Laurentides region around Quebec Canada. Data is drawn on the globe over time, depicting how data coverage increases with each satellite pass. Brown and dark green represent shorter vegetation. Bright green and white represent taller vegetation. This visualization uses data collected between April 2018 and April 2019. Height is exaggerated to depict variation at this scale.",
+      "ancho": 1920,
+      "alto": 1080,
+      "poster": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_Laurentides_w_colorbar1395_print.jpg",
+      "variantes": [
+        {
+          "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_Laurentides_w_colorbar_1080p60.mp4",
+          "nombre": "GEDI_Laurentides_w_colorbar_1080p60.mp4",
+          "ancho": 1920,
+          "alto": 1080
+        },
+        {
+          "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_Laurentides_w_colorbar_2160p30.mp4",
+          "nombre": "GEDI_Laurentides_w_colorbar_2160p30.mp4",
+          "ancho": 3840,
+          "alto": 2160
+        },
+        {
+          "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_Laurentides_w_colorbar_2160p60.mp4",
+          "nombre": "GEDI_Laurentides_w_colorbar_2160p60.mp4",
+          "ancho": 3840,
+          "alto": 2160
+        }
+      ]
+    },
+    {
+      "id": "a4439d1f8454f0c8",
+      "tipo": "imagen",
+      "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_senegal_w_colorbar.11345_print.jpg",
+      "titulo": "This is a closeup view of the GEDI forest height data collected over Senegal",
+      "grupo": "GEDI Forest Height",
+      "fuente": "https://svs.gsfc.nasa.gov/4950/#media_group_316241",
+      "descripcion": "This is a closeup view of the GEDI forest height data collected over Senegal. Data is drawn on the globe over time, depicting how data coverage increases with each satellite pass. Brown and dark green represent shorter vegetation. Bright green and white represent taller vegetation. This visualization uses data collected between April 2018 and April 2019. Height is exaggerated to depict variation at this scale.",
+      "ancho": 1024,
+      "alto": 576,
+      "poster": null,
+      "variantes": []
+    },
+    {
+      "id": "05a30fe810371517",
+      "tipo": "video",
+      "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_senegal_w_colorbar_1080p60.webm",
+      "titulo": "This is a closeup view of the GEDI forest height data collected over Senegal",
+      "grupo": "GEDI Forest Height",
+      "fuente": "https://svs.gsfc.nasa.gov/4950/#media_group_316241",
+      "descripcion": "This is a closeup view of the GEDI forest height data collected over Senegal. Data is drawn on the globe over time, depicting how data coverage increases with each satellite pass. Brown and dark green represent shorter vegetation. Bright green and white represent taller vegetation. This visualization uses data collected between April 2018 and April 2019. Height is exaggerated to depict variation at this scale.",
+      "ancho": 1920,
+      "alto": 1080,
+      "poster": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_senegal_w_colorbar.11345_print.jpg",
+      "variantes": [
+        {
+          "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_senegal_w_colorbar_1080p60.mp4",
+          "nombre": "GEDI_senegal_w_colorbar_1080p60.mp4",
+          "ancho": 1920,
+          "alto": 1080
+        },
+        {
+          "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_senegal_w_colorbar_2160p60.mp4",
+          "nombre": "GEDI_senegal_w_colorbar_2160p60.mp4",
+          "ancho": 3840,
+          "alto": 2160
+        },
+        {
+          "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_senegal_w_colorbar_2160p30.mp4",
+          "nombre": "GEDI_senegal_w_colorbar_2160p30.mp4",
+          "ancho": 3840,
+          "alto": 2160
+        }
+      ]
+    },
+    {
+      "id": "dfcc610cf776ea8b",
+      "tipo": "imagen",
+      "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_FL_04.6900_print.jpg",
+      "titulo": "This is a closeup view of the GEDI forest height data collected over Florida",
+      "grupo": "GEDI Forest Height",
+      "fuente": "https://svs.gsfc.nasa.gov/4950/#media_group_316242",
+      "descripcion": "This is a closeup view of the GEDI forest height data collected over Florida. Data is drawn on the globe over time, depicting how data coverage increases with each satellite pass. Brown and dark green represent shorter vegetation. Bright green and white represent taller vegetation. This visualization uses data collected between April 2018 and April 2019. Height is exaggerated to depict variation at this scale. This version has no on screen color bar.",
+      "ancho": 1024,
+      "alto": 576,
+      "poster": null,
+      "variantes": []
+    },
+    {
+      "id": "054542b02ed4aad9",
+      "tipo": "video",
+      "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_FL_1080p60.webm",
+      "titulo": "This is a closeup view of the GEDI forest height data collected over Florida",
+      "grupo": "GEDI Forest Height",
+      "fuente": "https://svs.gsfc.nasa.gov/4950/#media_group_316242",
+      "descripcion": "This is a closeup view of the GEDI forest height data collected over Florida. Data is drawn on the globe over time, depicting how data coverage increases with each satellite pass. Brown and dark green represent shorter vegetation. Bright green and white represent taller vegetation. This visualization uses data collected between April 2018 and April 2019. Height is exaggerated to depict variation at this scale. This version has no on screen color bar.",
+      "ancho": 1920,
+      "alto": 1080,
+      "poster": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_FL_04.6900_print.jpg",
+      "variantes": [
+        {
+          "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_FL_1080p60.mp4",
+          "nombre": "GEDI_FL_1080p60.mp4",
+          "ancho": 1920,
+          "alto": 1080
+        },
+        {
+          "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_FL_2160p60.mp4",
+          "nombre": "GEDI_FL_2160p60.mp4",
+          "ancho": 3840,
+          "alto": 2160
+        },
+        {
+          "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_FL_2160p30.mp4",
+          "nombre": "GEDI_FL_2160p30.mp4",
+          "ancho": 3840,
+          "alto": 2160
+        }
+      ]
+    },
+    {
+      "id": "a6dd22726b500375",
+      "tipo": "imagen",
+      "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_Goddard_02.8394_print.jpg",
+      "titulo": "This is a closeup view of the GEDI forest height data collected over the Goddard Space Flight Center in Maryland",
+      "grupo": "GEDI Forest Height",
+      "fuente": "https://svs.gsfc.nasa.gov/4950/#media_group_316243",
+      "descripcion": "This is a closeup view of the GEDI forest height data collected over the Goddard Space Flight Center in Maryland. Data is drawn on the globe over time, depicting how data coverage increases with each satellite pass. Brown and dark green represent shorter vegetation. Bright green and white represent taller vegetation. This visualization uses data collected between April 2018 and April 2019. Height is exaggerated to depict variation at this scale. This version has no on screen color bar.",
+      "ancho": 1024,
+      "alto": 576,
+      "poster": null,
+      "variantes": []
+    },
+    {
+      "id": "a72d3e000ee96fc7",
+      "tipo": "video",
+      "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_Goddard_02_1080p60.webm",
+      "titulo": "This is a closeup view of the GEDI forest height data collected over the Goddard Space Flight Center in Maryland",
+      "grupo": "GEDI Forest Height",
+      "fuente": "https://svs.gsfc.nasa.gov/4950/#media_group_316243",
+      "descripcion": "This is a closeup view of the GEDI forest height data collected over the Goddard Space Flight Center in Maryland. Data is drawn on the globe over time, depicting how data coverage increases with each satellite pass. Brown and dark green represent shorter vegetation. Bright green and white represent taller vegetation. This visualization uses data collected between April 2018 and April 2019. Height is exaggerated to depict variation at this scale. This version has no on screen color bar.",
+      "ancho": 1920,
+      "alto": 1080,
+      "poster": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_Goddard_02.8394_print.jpg",
+      "variantes": [
+        {
+          "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_Goddard_02_1080p60.mp4",
+          "nombre": "GEDI_Goddard_02_1080p60.mp4",
+          "ancho": 1920,
+          "alto": 1080
+        },
+        {
+          "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_Goddard_2160p60.mp4",
+          "nombre": "GEDI_Goddard_2160p60.mp4",
+          "ancho": 3840,
+          "alto": 2160
+        },
+        {
+          "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_Goddard_2160p30.mp4",
+          "nombre": "GEDI_Goddard_2160p30.mp4",
+          "ancho": 3840,
+          "alto": 2160
+        }
+      ]
+    },
+    {
+      "id": "994441f97b227521",
+      "tipo": "imagen",
+      "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_Laurentides_02.9894_print.jpg",
+      "titulo": "This is a closeup view of the GEDI forest height data collected over the Laurentides region around Quebec Canada",
+      "grupo": "GEDI Forest Height",
+      "fuente": "https://svs.gsfc.nasa.gov/4950/#media_group_316244",
+      "descripcion": "This is a closeup view of the GEDI forest height data collected over the Laurentides region around Quebec Canada. Data is drawn on the globe over time, depicting how data coverage increases with each satellite pass. Brown and dark green represent shorter vegetation. Bright green and white represent taller vegetation. This visualization uses data collected between April 2018 and April 2019. Height is exaggerated to depict variation at this scale. This version has no on screen color bar.",
+      "ancho": 1024,
+      "alto": 576,
+      "poster": null,
+      "variantes": []
+    },
+    {
+      "id": "99829c55b4fe2f6f",
+      "tipo": "video",
+      "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_Laurentides_02_1080p60.webm",
+      "titulo": "This is a closeup view of the GEDI forest height data collected over the Laurentides region around Quebec Canada",
+      "grupo": "GEDI Forest Height",
+      "fuente": "https://svs.gsfc.nasa.gov/4950/#media_group_316244",
+      "descripcion": "This is a closeup view of the GEDI forest height data collected over the Laurentides region around Quebec Canada. Data is drawn on the globe over time, depicting how data coverage increases with each satellite pass. Brown and dark green represent shorter vegetation. Bright green and white represent taller vegetation. This visualization uses data collected between April 2018 and April 2019. Height is exaggerated to depict variation at this scale. This version has no on screen color bar.",
+      "ancho": 1920,
+      "alto": 1080,
+      "poster": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_Laurentides_02.9894_print.jpg",
+      "variantes": [
+        {
+          "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_Laurentides_02_1080p60.mp4",
+          "nombre": "GEDI_Laurentides_02_1080p60.mp4",
+          "ancho": 1920,
+          "alto": 1080
+        },
+        {
+          "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_Laurentides_02_2160p30.mp4",
+          "nombre": "GEDI_Laurentides_02_2160p30.mp4",
+          "ancho": 3840,
+          "alto": 2160
+        },
+        {
+          "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_Laurentides_02_2160p60.mp4",
+          "nombre": "GEDI_Laurentides_02_2160p60.mp4",
+          "ancho": 3840,
+          "alto": 2160
+        }
+      ]
+    },
+    {
+      "id": "2cc10246b03a6532",
+      "tipo": "imagen",
+      "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_senegal.11345_print.jpg",
+      "titulo": "This is a closeup view of the GEDI forest height data collected over Senegal",
+      "grupo": "GEDI Forest Height",
+      "fuente": "https://svs.gsfc.nasa.gov/4950/#media_group_316245",
+      "descripcion": "This is a closeup view of the GEDI forest height data collected over Senegal. Data is drawn on the globe over time, depicting how data coverage increases with each satellite pass. Brown and dark green represent shorter vegetation. Bright green and white represent taller vegetation. This visualization uses data collected between April 2018 and April 2019. Height is exaggerated to depict variation at this scale. This version has no on screen color bar.",
+      "ancho": 1024,
+      "alto": 576,
+      "poster": null,
+      "variantes": []
+    },
+    {
+      "id": "27a15a8107970272",
+      "tipo": "video",
+      "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_senegal_1080p60.webm",
+      "titulo": "This is a closeup view of the GEDI forest height data collected over Senegal",
+      "grupo": "GEDI Forest Height",
+      "fuente": "https://svs.gsfc.nasa.gov/4950/#media_group_316245",
+      "descripcion": "This is a closeup view of the GEDI forest height data collected over Senegal. Data is drawn on the globe over time, depicting how data coverage increases with each satellite pass. Brown and dark green represent shorter vegetation. Bright green and white represent taller vegetation. This visualization uses data collected between April 2018 and April 2019. Height is exaggerated to depict variation at this scale. This version has no on screen color bar.",
+      "ancho": 1920,
+      "alto": 1080,
+      "poster": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_senegal.11345_print.jpg",
+      "variantes": [
+        {
+          "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_senegal_1080p60.mp4",
+          "nombre": "GEDI_senegal_1080p60.mp4",
+          "ancho": 1920,
+          "alto": 1080
+        },
+        {
+          "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_senegal_2160p60.mp4",
+          "nombre": "GEDI_senegal_2160p60.mp4",
+          "ancho": 3840,
+          "alto": 2160
+        },
+        {
+          "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_senegal_2160p30.mp4",
+          "nombre": "GEDI_senegal_2160p30.mp4",
+          "ancho": 3840,
+          "alto": 2160
+        }
+      ]
+    },
+    {
+      "id": "24fa34f2c228125a",
+      "tipo": "imagen",
+      "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_global_w_colorbar_0230_print.jpg",
+      "titulo": "Still image depicting a global view of GEDI forest height data.",
+      "grupo": "GEDI Forest Height",
+      "fuente": "https://svs.gsfc.nasa.gov/4950/#media_group_316246",
+      "descripcion": "Still image depicting a global view of GEDI forest height data.",
+      "ancho": 1024,
+      "alto": 576,
+      "poster": null,
+      "variantes": [
+        {
+          "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_global_w_colorbar_0230_print.tif",
+          "nombre": "GEDI_global_w_colorbar_0230_print.tif",
+          "ancho": 3840,
+          "alto": 2160
+        }
+      ]
+    },
+    {
+      "id": "7974f88ec90bac98",
+      "tipo": "imagen",
+      "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_global_w_colorbar_0600_print.jpg",
+      "titulo": "Still image depicting a global view of GEDI forest height data.",
+      "grupo": "GEDI Forest Height",
+      "fuente": "https://svs.gsfc.nasa.gov/4950/#media_group_316247",
+      "descripcion": "Still image depicting a global view of GEDI forest height data.",
+      "ancho": 1024,
+      "alto": 576,
+      "poster": null,
+      "variantes": [
+        {
+          "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_global_w_colorbar_0600_print.tif",
+          "nombre": "GEDI_global_w_colorbar_0600_print.tif",
+          "ancho": 3840,
+          "alto": 2160
+        }
+      ]
+    },
+    {
+      "id": "3d216d2e81b15831",
+      "tipo": "imagen",
+      "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_global_w_colorbar_1055_print.jpg",
+      "titulo": "Still image depicting a global view of GEDI forest height data.",
+      "grupo": "GEDI Forest Height",
+      "fuente": "https://svs.gsfc.nasa.gov/4950/#media_group_316248",
+      "descripcion": "Still image depicting a global view of GEDI forest height data.",
+      "ancho": 1024,
+      "alto": 576,
+      "poster": null,
+      "variantes": [
+        {
+          "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_global_w_colorbar_1055_print.tif",
+          "nombre": "GEDI_global_w_colorbar_1055_print.tif",
+          "ancho": 3840,
+          "alto": 2160
+        }
+      ]
+    },
+    {
+      "id": "39cd65bbd26279ac",
+      "tipo": "imagen",
+      "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_global_w_colorbar_1900_print.jpg",
+      "titulo": "Still image depicting a global view of GEDI forest height data.",
+      "grupo": "GEDI Forest Height",
+      "fuente": "https://svs.gsfc.nasa.gov/4950/#media_group_316249",
+      "descripcion": "Still image depicting a global view of GEDI forest height data.",
+      "ancho": 1024,
+      "alto": 576,
+      "poster": null,
+      "variantes": [
+        {
+          "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_global_w_colorbar_1900_print.tif",
+          "nombre": "GEDI_global_w_colorbar_1900_print.tif",
+          "ancho": 3840,
+          "alto": 2160
+        }
+      ]
+    },
+    {
+      "id": "4b50fedd2f928bb5",
+      "tipo": "imagen",
+      "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_CA_w_colorbar_0150_print.jpg",
+      "titulo": "Still image depicting GEDI forest height data being collected over time",
+      "grupo": "GEDI Forest Height",
+      "fuente": "https://svs.gsfc.nasa.gov/4950/#media_group_316250",
+      "descripcion": "Still image depicting GEDI forest height data being collected over time. Camera is zoomed in on the west coast of the United States.",
+      "ancho": 1024,
+      "alto": 576,
+      "poster": null,
+      "variantes": [
+        {
+          "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_CA_w_colorbar_0150_print.tif",
+          "nombre": "GEDI_CA_w_colorbar_0150_print.tif",
+          "ancho": 3840,
+          "alto": 2160
+        }
+      ]
+    },
+    {
+      "id": "08b33668f7a41d0b",
+      "tipo": "imagen",
+      "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_CA_w_colorbar_0300_print.jpg",
+      "titulo": "Still image depicting GEDI forest height data being collected over time",
+      "grupo": "GEDI Forest Height",
+      "fuente": "https://svs.gsfc.nasa.gov/4950/#media_group_316251",
+      "descripcion": "Still image depicting GEDI forest height data being collected over time. Camera is zoomed in on the west coast of the United States.",
+      "ancho": 1024,
+      "alto": 576,
+      "poster": null,
+      "variantes": [
+        {
+          "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_CA_w_colorbar_0300_print.tif",
+          "nombre": "GEDI_CA_w_colorbar_0300_print.tif",
+          "ancho": 3840,
+          "alto": 2160
+        }
+      ]
+    },
+    {
+      "id": "3eefdd477d75a9bd",
+      "tipo": "imagen",
+      "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_CA_w_colorbar_1000_print.jpg",
+      "titulo": "Still image depicting GEDI forest height data being collected over time",
+      "grupo": "GEDI Forest Height",
+      "fuente": "https://svs.gsfc.nasa.gov/4950/#media_group_316252",
+      "descripcion": "Still image depicting GEDI forest height data being collected over time. Camera is zoomed in on the west coast of the United States.",
+      "ancho": 1024,
+      "alto": 576,
+      "poster": null,
+      "variantes": [
+        {
+          "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_CA_w_colorbar_1000_print.tif",
+          "nombre": "GEDI_CA_w_colorbar_1000_print.tif",
+          "ancho": 3840,
+          "alto": 2160
+        }
+      ]
+    },
+    {
+      "id": "5010c641f57c27bf",
+      "tipo": "imagen",
+      "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_CA_w_colorbar_1400_print.jpg",
+      "titulo": "Still image depicting GEDI forest height data being collected over time",
+      "grupo": "GEDI Forest Height",
+      "fuente": "https://svs.gsfc.nasa.gov/4950/#media_group_316253",
+      "descripcion": "Still image depicting GEDI forest height data being collected over time. Camera is zoomed in on the west coast of the United States.",
+      "ancho": 1024,
+      "alto": 576,
+      "poster": null,
+      "variantes": [
+        {
+          "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004950/GEDI_CA_w_colorbar_1400_print.tif",
+          "nombre": "GEDI_CA_w_colorbar_1400_print.tif",
+          "ancho": 3840,
+          "alto": 2160
+        }
+      ]
+    }
+  ],
+  "proveedor": "NASA SVS",
+  "svs_id": 4950,
+  "seccion": null,
+  "es_galeria": false,
+  "pendientes": [],
+  "portada_local": "datos/paquetes/svs-4950/portada.jpg",
+  "medio_inicial": "c5c32de0cd316c8b"
+}

@@ -1,0 +1,88 @@
+{
+  "id": "2ad7e5e8687663b8",
+  "titulo": "Lightning Events Detected from the International Space Station (ISS) 2017-2023",
+  "portada": "https://svs.gsfc.nasa.gov/vis/a000000/a005000/a005011/iss_lightning_preview.jpg",
+  "fuente": "https://svs.gsfc.nasa.gov/5011/",
+  "medios": [
+    {
+      "id": "263e104cec169437",
+      "tipo": "imagen",
+      "url": "https://svs.gsfc.nasa.gov/vis/a000000/a005000/a005011/iss_lightning_preview.jpg",
+      "titulo": "Lightning events detected by the LIS sensor on the ISS between January 2017 and July 2023 using a 10-day roving window",
+      "grupo": "Lightning Events Detected from the International Space Station (ISS) 2017-2023",
+      "fuente": "https://svs.gsfc.nasa.gov/5011/#media_group_370276",
+      "descripcion": "Lightning events detected by the LIS sensor on the ISS between January 2017 and July 2023 using a 10-day roving window. Data is from the quality controlled science dataset. Available resolution in the download menu are 1920x1080, 3840x2160 (4k), and 7680x2160 (created for EIC display).",
+      "ancho": 1024,
+      "alto": 576,
+      "poster": null,
+      "variantes": [],
+      "vista_local": "datos/paquetes/svs-5011/portada.jpg"
+    },
+    {
+      "id": "b0eb8444eb599f9a",
+      "tipo": "video",
+      "url": "https://svs.gsfc.nasa.gov/vis/a000000/a005000/a005011/iss_lightning_sphere_07312023.mp4",
+      "titulo": "Lightning events detected by the LIS sensor on the ISS between January 2017 and July 2023 using a 10-day roving window",
+      "grupo": "Lightning Events Detected from the International Space Station (ISS) 2017-2023",
+      "fuente": "https://svs.gsfc.nasa.gov/5011/#media_group_370276",
+      "descripcion": "Lightning events detected by the LIS sensor on the ISS between January 2017 and July 2023 using a 10-day roving window. Data is from the quality controlled science dataset. Available resolution in the download menu are 1920x1080, 3840x2160 (4k), and 7680x2160 (created for EIC display).",
+      "ancho": 1920,
+      "alto": 1080,
+      "poster": "https://svs.gsfc.nasa.gov/vis/a000000/a005000/a005011/iss_lightning_preview.jpg",
+      "variantes": [
+        {
+          "url": "https://svs.gsfc.nasa.gov/vis/a000000/a005000/a005011/iss_lightning_sphere_07312023_60p4k.mp4",
+          "nombre": "iss_lightning_sphere_07312023_60p4k.mp4",
+          "ancho": 3840,
+          "alto": 2160
+        },
+        {
+          "url": "https://svs.gsfc.nasa.gov/vis/a000000/a005000/a005011/iss_lightning_eic_display_2160p30_h2652.mp4",
+          "nombre": "iss_lightning_eic_display_2160p30_h2652.mp4",
+          "ancho": 7680,
+          "alto": 2160
+        }
+      ]
+    },
+    {
+      "id": "496ffb38dbe4d443",
+      "tipo": "imagen",
+      "url": "https://svs.gsfc.nasa.gov/vis/a000000/a005000/a005011/iss_lightning_sos_yearly_debug_2023_sos_2048p60.00420_print.jpg",
+      "titulo": "Global lightning events detected by the LIS on the ISS between March 2017 and July 2023",
+      "grupo": "Lightning Events Detected from the International Space Station (ISS) 2017-2023",
+      "fuente": "https://svs.gsfc.nasa.gov/5011/#media_group_372298",
+      "descripcion": "Global lightning events detected by the LIS on the ISS between March 2017 and July 2023. Movie in 4096x2048 resolution for SOS display.",
+      "ancho": 1024,
+      "alto": 512,
+      "poster": null,
+      "variantes": []
+    },
+    {
+      "id": "278292760f31e689",
+      "tipo": "video",
+      "url": "https://svs.gsfc.nasa.gov/vis/a000000/a005000/a005011/iss_lightning_sos_yearly_07312023_2048p60.mp4",
+      "titulo": "Global lightning events detected by the LIS on the ISS between March 2017 and July 2023",
+      "grupo": "Lightning Events Detected from the International Space Station (ISS) 2017-2023",
+      "fuente": "https://svs.gsfc.nasa.gov/5011/#media_group_372298",
+      "descripcion": "Global lightning events detected by the LIS on the ISS between March 2017 and July 2023. Movie in 4096x2048 resolution for SOS display.",
+      "ancho": 4096,
+      "alto": 2048,
+      "poster": "https://svs.gsfc.nasa.gov/vis/a000000/a005000/a005011/iss_lightning_sos_yearly_debug_2023_sos_2048p60.00420_print.jpg",
+      "variantes": [
+        {
+          "url": "https://svs.gsfc.nasa.gov/vis/a000000/a005000/a005011/iss_lightning_sos_yearly_debug_2023_sos_2048p60.mp4",
+          "nombre": "iss_lightning_sos_yearly_debug_2023_sos_2048p60.mp4",
+          "ancho": 4096,
+          "alto": 2048
+        }
+      ]
+    }
+  ],
+  "proveedor": "NASA SVS",
+  "svs_id": 5011,
+  "seccion": null,
+  "es_galeria": false,
+  "pendientes": [],
+  "portada_local": "datos/paquetes/svs-5011/portada.jpg",
+  "medio_inicial": "263e104cec169437"
+}

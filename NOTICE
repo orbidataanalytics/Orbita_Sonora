@@ -1,0 +1,28 @@
+Órbita Sonora
+ORBIDATA ANALYTICS
+
+Proyecto desarrollado en el ámbito del Semillero de Astronomía, Instrumentación
+y Ciencias Espaciales del ITM, también denominado Semillero de Astronomía ITM.
+Medellín, Colombia.
+
+Website for image processing in the sound domain
+
+El código del proyecto se publica bajo Apache License, Version 2.0.
+Los logos incluidos en esta documentación son los originales aportados por el equipo.
+Las grabaciones, datasets, imágenes y marcas de terceros conservan sus condiciones
+propias de uso y atribución.
+
+Visor GIS de Órbita Sonora
+El catálogo enlaza visualizaciones de NASA Scientific Visualization Studio (SVS).
+Las vistas previas se derivan de los archivos identificados en cada manifiesto.
+Mapa base derivado de Blue Marble Next Generation, NASA Earth Observatory, febrero de 2004.
+Geometrías de Natural Earth, dominio público.
+MapLibre GL JS 5.6.0, licencia en web/vendor/LICENSE-maplibre.txt.
+DM Sans y Space Grotesk, licencias SIL OFL en web/fonts/.
+Imagen GeoColor de respaldo de GOES-19, NOAA NESDIS STAR, sector norte de Sudamérica.
+OpenSheetMusicDisplay 1.9.8, licencia BSD-3 en web/vendor/LICENSE-osmd.txt.
+@tonejs/midi 2.0.28, licencia MIT en web/vendor/LICENSE-tonejs-midi.txt.
+Tone.js 15.1.22, licencia MIT en web/vendor/LICENSE-tone.txt.
+
+Descargas originales incluidas de NASA Scientific Visualization Studio. Créditos en los manifiestos de cada medio.
+Las huellas de los archivos se documentan en docs/ARCHIVOS_NASA_SHA256.txt.
