@@ -1,7 +1,6 @@
 import {lienzo} from './medios.js';
 import {PESO_PIXEL} from './estadistica-zonal.js';
 import {BANDAS} from './sonificacion.js';
-import {partituraRGB, posicionHz, posicionTiempo, tiempoPartitura} from './partitura-rgb.js';
 
 const porId = id => document.getElementById(id);
 export const CANALES = ['RGB', ...'RGB'];
@@ -20,7 +19,6 @@ export class Paneles {
         this.canales = CANALES.map(canal => porId('banda-' + canal));
         this.calor = porId('mapa-firmas');
         this.medio = porId('imagen-medio');
-        this.ventana = 4;
         for (const canvas of [...this.canales, this.calor, this.medio]) {
             canvas.tabIndex = 0;
             canvas.addEventListener('click', evento => this.buscarCanvas(evento, canvas));
@@ -33,17 +31,7 @@ export class Paneles {
                 this.buscar(indices[evento.key]);
             });
         }
-        for (const canal of 'RGB') {
-            porId('partitura-' + canal).addEventListener('click', evento => {
-                const svg = evento.currentTarget.querySelector('svg');
-                if (!svg || !this.secuencia) return;
-                const rect = svg.getBoundingClientRect();
-                const x = (evento.clientX - rect.left) / rect.width * 1000;
-                const tiempo = tiempoPartitura(x, this.inicio, this.fin);
-                if (tiempo < this.inicio || tiempo > this.fin) return;
-                this.buscar(this.secuencia.indice(tiempo));
-            });
-        }
+
     }
 
     buscarCanvas(evento, canvas) {
@@ -62,7 +50,6 @@ export class Paneles {
         this.secuencia = null;
         const lienzos = [...this.canales, this.calor, this.medio, porId('firma'), porId('curvas-ocupacion')];
         for (const canvas of lienzos) canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
-        for (const canal of 'RGB') porId('partitura-' + canal).replaceChildren();
         for (const id of ['notas-activas','rgb-sonoro','resumen-ocupacion','tabla-firmas']) porId(id).replaceChildren();
     }
 
@@ -75,10 +62,9 @@ export class Paneles {
         this.medio.height = Math.max(1, Math.round(alto * factor));
         this.indice = 0;
         this.ultimo = -1;
-        this.inicio = -1;
         this.fotograma = -1;
         this.actualizarOcupacion(8, 'completa');
-        this.actualizar(0, 0, true);
+        this.actualizar(0, true);
     }
 
     actualizarOcupacion(niveles, ambito) {
@@ -160,6 +146,20 @@ export class Paneles {
                 ctx.fillRect(0, y * b, canvas.width, b);
             }
             this.dibujarTramo(ctx, a, b);
+            const radio = (this.secuencia.tamanoZona - 1) / 2;
+            if (radio) {
+                const lado = this.secuencia.lado;
+                const i = Math.max(0, x - radio), j = Math.max(0, y - radio);
+                const ancho = Math.min(lado, x + radio + 1) - i;
+                const alto = Math.min(lado, y + radio + 1) - j;
+                ctx.fillStyle = '#8ce5c126';
+                ctx.fillRect(i * a, j * b, ancho * a, alto * b);
+                ctx.strokeStyle = '#8ce5c1';
+                ctx.lineWidth = 1.4;
+                ctx.setLineDash([4, 3]);
+                ctx.strokeRect(i * a, j * b, ancho * a, alto * b);
+                ctx.setLineDash([]);
+            }
         }
         ctx.strokeStyle = '#111b1c'; ctx.lineWidth = 3; ctx.strokeRect(x * a, y * b, a, b);
         ctx.strokeStyle = '#f4f6c1'; ctx.lineWidth = 1.3; ctx.strokeRect(x * a, y * b, a, b);
@@ -238,31 +238,7 @@ export class Paneles {
             `${'RGB'[i]} ${hz ? `${hz.toFixed(1)} Hz · ${sonoro[i]}/255` : 'silencio'}`).join('  |  ');
     }
 
-    partituras(indice, tiempo) {
-        const total = this.secuencia.duracion_s;
-        const inicio = Math.floor(Math.min(tiempo, Math.max(0, total - .00001)) / this.ventana) * this.ventana;
-        const cambio = inicio !== this.inicio;
-        this.inicio = inicio;
-        this.fin = Math.min(total, inicio + this.ventana);
-        const x = posicionTiempo(tiempo, inicio, this.fin);
-        for (const [canal, banda] of BANDAS.entries()) {
-            const panel = porId('partitura-' + banda.canal);
-            if (cambio) panel.innerHTML = partituraRGB(this.secuencia, banda, canal, inicio, this.fin);
-            const cursor = panel.querySelector('.score-cursor');
-            cursor?.setAttribute('x1', x);
-            cursor?.setAttribute('x2', x);
-            const punto = panel.querySelector('.score-point'), hz = this.secuencia.frecuencia(indice, canal);
-            if (punto) {
-                punto.setAttribute('visibility', hz ? 'visible' : 'hidden');
-                if (hz) {
-                    punto.setAttribute('cx', x);
-                    punto.setAttribute('cy', posicionHz(hz, banda));
-                }
-            }
-        }
-    }
-
-    actualizar(indice, tiempo, forzar = false) {
+    actualizar(indice, forzar = false) {
         if (!this.secuencia) return;
         this.indice = indice;
         if (indice !== this.ultimo || forzar) {
@@ -279,7 +255,5 @@ export class Paneles {
             this.marcador(this.medio, this.bases[0], x, y);
             this.firma(indice);
         }
-        if (porId('partitura-tecnica').open) this.partituras(indice, tiempo);
-        else this.inicio = -1;
     }
 }

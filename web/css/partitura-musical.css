@@ -6,10 +6,6 @@
 #daw-panel { margin-top: .6rem; border-top: 1px solid var(--edge); }
 #daw-estado:empty { display: none; }
 .daw-acciones { margin-top: .65rem; }
-#descargar-wav { margin: .45rem 0; }
-#partitura-tecnica { border-top: 1px solid var(--borde, #445770); margin-top: .7rem; }
-#partitura-tecnica > summary { font-size: .95rem; }
-#partitura-tecnica .score-svg { min-width: 0; }
 .notas-recorrido { display: flex; flex-wrap: wrap; gap: .25rem 1.1rem; margin: .55rem 0 0; }
 .notas-recorrido p { margin: 0; }
 #ajustes-partitura { display: flex; gap: .75rem; flex-wrap: wrap; border: 0; padding: .5rem 0; margin: 0; }
@@ -37,3 +33,11 @@
     #partitura-impresion svg { display: block; width: 100%; height: auto; break-inside: avoid; }
     #partitura-impresion [id^="osmdSvgPage"]:not(:last-child) { break-after: page; }
 }
+
+.letra-cancion { margin: .85rem 0 .35rem; padding: .8rem 0; border-top: 1px solid var(--edge); }
+.letra-cancion h4 { margin: 0 0 .4rem; }
+.letra-cancion textarea { display: block; width: min(100%, 32rem); resize: vertical; margin-top: .55rem; line-height: 1.52; }
+.letra-impresa { white-space: pre-wrap; }
+.guitarras-activas { display: flex; flex-wrap: wrap; gap: .35rem 1.05rem; font-size: .84rem; margin: .6rem 0; }
+.guitarras-activas b { margin-right: .25rem; }
+#mus-tempo-slider { width: 5.5rem; }

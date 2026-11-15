@@ -1,8 +1,9 @@
 export const INSTRUMENTOS = {
     percusion: {nombre: 'Percusión electrónica', programa: 0, golpe: 'bombo'},
     tambor: {nombre: 'Tambor de tom', programa: 0, golpe: 'tom'},
-    guitarra: {nombre: 'Guitarra acústica', programa: 24, cuerda: 'guitarra'},
-    guitarraElectrica: {nombre: 'Guitarra eléctrica', programa: 27, cuerda: 'guitarra'},
+    guitarra: {nombre: 'Acústica de nailon', programa: 24, cuerda: 'guitarra'},
+    guitarraAcero: {nombre: 'Acústica de acero', programa: 25, cuerda: 'guitarra'},
+    guitarraElectrica: {nombre: 'Eléctrica limpia', programa: 27, cuerda: 'guitarra'},
     bajo: {nombre: 'Bajo eléctrico', programa: 33, grave: true},
     bajoSintetico: {nombre: 'Bajo sintetizado', programa: 38, grave: true},
     sintetizador: {nombre: 'Sintetizador suave', programa: 89},
@@ -12,15 +13,16 @@ export const INSTRUMENTOS = {
 };
 
 const DOS_PI = 2 * Math.PI;
+export const TASA_AUDIO = 48000;
 const limit = (n, a, b) => Math.min(b, Math.max(a, n));
 export const aHz = midi => 440 * 2 ** ((midi - 69) / 12);
 export const aMidi = hz => Math.round(69 + 12 * Math.log2(hz / 440));
 
 export function mezclaInicial() {
     return {reverb: 0, espacio: .65, filtroY: false, pistas: [
-        {instrumento: 'bajo', volumen: .75, panorama: 0, mute: false, solo: false},
-        {instrumento: 'guitarra', volumen: .72, panorama: 0, mute: false, solo: false},
-        {instrumento: 'sintetizador', volumen: .76, panorama: 0, mute: false, solo: false},
+        {instrumento: 'guitarra', volumen: .48, panorama: -.23, mute: false, solo: false},
+        {instrumento: 'guitarra', volumen: .95, panorama: 0, mute: false, solo: false},
+        {instrumento: 'guitarra', volumen: .40, panorama: .23, mute: false, solo: false},
     ]};
 }
 
@@ -69,6 +71,7 @@ export class Voz {
         const s = Math.sin(f);
         switch (this.instrumento) {
             case 'guitarra':
+            case 'guitarraAcero':
                 return (s * .65 + .23 * Math.sin(2 * f) + .12 * Math.sin(3 * f)) * (.31 + .69 * Math.exp(-14 * t));
             case 'guitarraElectrica':
                 return Math.tanh((s + .25 * Math.sin(3 * f) + .11 * Math.sin(5 * f)) * 1.5) * (.42 + .58 * Math.exp(-8 * t));
@@ -132,16 +135,25 @@ class Reverberacion {
     }
 }
 
-export function renderizarArreglo({pistas, duracion, mezcla}, progreso = () => {}) {
-    const tasa = 48000, longitud = Math.max(1, Math.ceil(duracion * tasa));
+export function renderizarArreglo({pistas, duracion, mezcla, lectura, vozGrabada, muestras}, progreso = () => {}) {
+    const tasa = TASA_AUDIO, longitud = Math.max(1, Math.ceil(duracion * tasa));
     const canales = [new Float32Array(longitud), new Float32Array(longitud)];
     const intervaloProgreso = Math.max(1, Math.floor(longitud / 20));
+    const celdas = (lectura?.intensidades.length ?? 0) / 3;
+    const maximos = [32, 32, 32];
+    for (let i = 0; i < celdas; i++) {
+        if (!lectura.validez[i]) continue;
+        for (let c = 0; c < 3; c++) maximos[c] = Math.max(maximos[c], lectura.intensidades[3 * i + c]);
+    }
+    const avanceCelda = celdas ? celdas / (lectura.duracion * tasa) : 0;
+    const suavizado = 1 - Math.exp(-1 / (.003 * tasa));
     for (const [canal, eventos] of pistas.entries()) {
         const volumen = volumenPista(mezcla, canal);
         if (!volumen) continue;
         const pista = mezcla.pistas[canal], voz = new Voz(pista.instrumento, tasa, pista.muestra);
+        const grabacion = muestras?.[canal], esGuitarra = INSTRUMENTOS[pista.instrumento].cuerda === 'guitarra';
         const reverb = mezcla.reverb > 0 ? new Reverberacion(tasa) : null, retorno = [0, 0];
-        let pendiente = 0, nota = null, filtro = 0;
+        let pendiente = 0, nota = null, filtro = 0, celda = -1, nivel = 1, objetivo = 1;
         for (let i = 0; i < longitud; i++) {
             if (i % intervaloProgreso === 0) progreso((canal + i / longitud) / 3);
             if (nota?.fin <= i) nota = null;
@@ -151,7 +163,7 @@ export function renderizarArreglo({pistas, duracion, mezcla}, progreso = () => {
                 const e = espacioPixel(evento.x, evento.y, mezcla, pista.panorama);
                 nota = {
                     desde: i, fin: Math.round(evento.hasta * tasa),
-                    amplitud: .31 * volumen * evento.fuerza * (evento.acento ? 1.08 : 1),
+                    amplitud: (grabacion && esGuitarra ? .70 : .31) * volumen * evento.fuerza * (evento.acento ? 1.08 : 1),
                     izquierda: Math.cos((e.pan + 1) * Math.PI / 4),
                     derecha: Math.sin((e.pan + 1) * Math.PI / 4),
                     wet: e.wet, coeficiente: e.corte ? 1 - Math.exp(-DOS_PI * e.corte / tasa) : 1,
@@ -162,7 +174,17 @@ export function renderizarArreglo({pistas, duracion, mezcla}, progreso = () => {
             let l = 0, r = 0, wet = 0;
             if (nota) {
                 const envolvente = Math.min(1, (i - nota.desde) / 150, (nota.fin - i) / 400);
-                const valor = voz.muestraAudio() * nota.amplitud * envolvente;
+                if (celdas) {
+                    const actual = Math.min(celdas - 1, Math.floor(i * avanceCelda));
+                    if (actual !== celda) {
+                        const intensidad = lectura.validez[actual] ? lectura.intensidades[3 * actual + canal] : 0;
+                        const envolventeRGB = Math.sqrt(intensidad / 255);
+                        objetivo = esGuitarra ? .62 * envolventeRGB + .38 * (intensidad / maximos[canal]) ** 2.3 : envolventeRGB;
+                        celda = actual;
+                    }
+                    nivel += (objetivo - nivel) * suavizado;
+                }
+                const valor = (grabacion ? grabacion[i] : voz.muestraAudio()) * nota.amplitud * envolvente * nivel;
                 filtro += (valor - filtro) * nota.coeficiente;
                 l = filtro * nota.izquierda;
                 r = filtro * nota.derecha;
@@ -172,6 +194,24 @@ export function renderizarArreglo({pistas, duracion, mezcla}, progreso = () => {
             const borde = Math.min(1, (longitud - 1 - i) / 240);
             canales[0][i] += (l * (1 - wet) + retorno[0]) * borde;
             canales[1][i] += (r * (1 - wet) + retorno[1]) * borde;
+        }
+    }
+    if (vozGrabada) {
+        progreso(.98);
+        const {canales: grabados, tasa: tasaGrabada} = vozGrabada;
+        const relacion = tasaGrabada / tasa;
+        const muestras = Math.min(longitud, Math.ceil(grabados[0].length / relacion));
+        for (const [canal, salida] of canales.entries()) {
+            const original = grabados[canal] || grabados[0];
+            for (let i = 0; i < muestras; i++) {
+                const posicion = i * relacion;
+                const j = Math.min(original.length - 1, Math.floor(posicion));
+                const siguiente = Math.min(original.length - 1, j + 1);
+                const fraccion = posicion - j;
+                const borde = Math.min(1, i / 240, (muestras - 1 - i) / 480);
+                const voz = original[j] * (1 - fraccion) + original[siguiente] * fraccion;
+                salida[i] = (.7 * salida[i]) + .54 * borde * voz;
+            }
         }
     }
     progreso(1);

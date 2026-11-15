@@ -1,8 +1,9 @@
-# Empieza aquí
+# Órbita Sonora 5.7
 
-- [Cómo copiar los archivos, hacer commit y push con GitHub Desktop](PUBLICAR.md)
-- [Qué hace Órbita Sonora y cómo usarla](README.md)
-- [Qué archivo editar si quieres agregar, quitar o reparar algo](ARQUITECTURA.md)
-- Abre una imagen o un video. La **Partitura del arreglo** aparece arriba del **DAW**.
-- Pulsa **Tocar arreglo**, cambia un instrumento en el **DAW** y comprueba el cambio en el pentagrama. Descarga WAV, MIDI o MusicXML desde la partitura.
-- Elige **Líneas por filas** o **Curva de Hilbert** y pulsa **Sonificar píxeles RGB** para escuchar las frecuencias de las celdas.
+1. **Ver la entrega.** Descomprime el ZIP y abre `OrbitaSonora_GIS`. En Windows, haz doble clic en `ABRIR_ORBITA.bat`. Desde una terminal usa `python3 scripts/abrir_local.py`.
+2. **Oír la guitarra.** Elige una imagen y pulsa **Tocar arreglo**. La banda roja toca el bajo de guitarra, la verde la melodía y la azul las notas agudas.
+3. **Ver la partitura y el informe.** En **Partitura musical** están el pentagrama y la tablatura. **Abrir informe** incluye todos los compases y permite imprimir o descargar el HTML.
+4. **Añadir un cantante.** Marca **Activar voz y letra para cantar** para ver la guía vocal y editar la letra. En la partitura general se añade la cuarta parte. Si tienes una toma real, usa **Añadir una voz grabada**.
+5. **Publicar.** Abre `PUBLICAR_EN_GITHUB.bat` o ejecuta `python3 scripts/preparar_github.py --publicar`. Autoriza GitHub con tu cuenta cuando el navegador lo solicite. Comprueba que la página muestre **v5.7.0** al pie tras el despliegue.
+
+[Publicación y requisitos](PUBLICAR.md) · [Ejemplos del catálogo](README.md#1-dos-imágenes-para-escuchar) · [Rutas de los MP4](videos/README.md)

@@ -47,8 +47,7 @@
           "ancho": 3840,
           "alto": 2160
         }
-      ],
-      "copia_local": "datos/paquetes/svs-4950/descargas/GEDI_global_w_colorbar_1080p60.webm"
+      ]
     },
     {
       "id": "01802b47e5c5e52a",
@@ -167,7 +166,8 @@
       "alto": 576,
       "poster": null,
       "variantes": [],
-      "vista_local": "datos/paquetes/svs-4950/portada.jpg"
+      "vista_local": "datos/paquetes/svs-4950/portada.jpg",
+      "copia_local": "datos/paquetes/svs-4950/descargas/GEDI_global.0900_print.jpg"
     },
     {
       "id": "6ccd6b4788b092e5",

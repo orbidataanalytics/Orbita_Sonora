@@ -3,6 +3,7 @@ import {MascaraMedio} from './mascara.js';
 import {aMidi, mezclaInicial, renderizarArreglo} from './audio-pistas.js';
 import {renderizarRGB} from './sintesis-rgb.js';
 import {MediaZonal, TAMANOS_ZONA} from './estadistica-zonal.js';
+import {prepararMuestras} from './muestras.js';
 
 export const BANDAS = [
     {canal: 'R', min_hz: 20, max_hz: 250, clave: 'fa'},
@@ -37,6 +38,7 @@ export class SecuenciaSonora {
         this.inversa = new Uint32Array(this.pixeles);
         this.intensidades = new Uint8Array(this.pixeles * 3);
         this.intensidadesSonoras = new Uint8Array(this.pixeles * 3);
+        this.contrastes = new Uint8Array(this.pixeles);
         this.tamanoZona = TAMANOS_ZONA.includes(tamanoZona) ? tamanoZona : 1;
         this.escala = escala === 'lineal' ? 'lineal' : 'logaritmica';
         this.tablas = this.escala === 'lineal' ? FRECUENCIAS_LINEALES : FRECUENCIAS_LOG;
@@ -63,7 +65,9 @@ export class SecuenciaSonora {
             }
             this.validez[indice] = Number(alfa > 0);
             const propios = [0, 1, 2].map(c => Math.round(rgba[4 * posicion + c] * alfa));
-            const sonoros = alfa && zona ? zona.niveles(x, y, propios) : propios;
+            const perfil = alfa && zona ? zona.leer(x, y, propios) : null;
+            this.contrastes[indice] = perfil?.contraste ?? 0;
+            const sonoros = perfil?.rgb ?? propios;
             for (let canal = 0; canal < 3; canal++) {
                 this.intensidades[3 * indice + canal] = propios[canal];
                 this.intensidadesSonoras[3 * indice + canal] = sonoros[canal];
@@ -124,9 +128,16 @@ export class SecuenciaSonora {
     }
 }
 
-function sintetizarArreglo(arreglo, mezcla, avance, signal) {
-    const datos = {pistas: arreglo.eventosAudio(), duracion: arreglo.duracion, mezcla};
-    if (typeof Worker === 'undefined') return renderizarArreglo(datos, avance);
+async function sintetizarArreglo(arreglo, mezcla, vozGrabada, avance, signal) {
+    const s = arreglo.secuencia;
+    const datos = {pistas: arreglo.eventosAudio(), duracion: arreglo.duracion, mezcla, vozGrabada,
+        lectura: {intensidades: s.intensidadesSonoras, validez: s.validez, duracion: s.duracion_s}};
+    avance(.03);
+    datos.muestras = await prepararMuestras(datos, signal);
+    signal.throwIfAborted();
+    avance(.34);
+    const progresoMezcla = valor => avance(.34 + .66 * valor);
+    if (typeof Worker === 'undefined') return renderizarArreglo(datos, progresoMezcla);
     return new Promise((resolve, reject) => {
         const worker = new Worker(new URL('./audio-worker.js', import.meta.url), {type: 'module'});
         const cerrar = () => {
@@ -137,11 +148,11 @@ function sintetizarArreglo(arreglo, mezcla, avance, signal) {
         signal.addEventListener('abort', cancelar, {once: true});
         worker.onmessage = ({data}) => {
             if (data.resultado) { cerrar(); resolve(data.resultado); }
-            else avance(data.avance);
+            else progresoMezcla(data.avance);
         };
         worker.onerror = () => { cerrar(); reject(new Error('No se pudo preparar el arreglo.')); };
         worker.onmessageerror = () => { cerrar(); reject(new Error('No se pudo leer el audio del arreglo.')); };
-        worker.postMessage(datos);
+        worker.postMessage(datos, datos.muestras.filter(Boolean).map(muestra => muestra.buffer));
     });
 }
 
@@ -152,7 +163,7 @@ export class Transporte {
         this.notificar = notificar;
         this.avance = avance;
         this.tiempo = 0;
-        this.volumen = .55;
+        this.volumen = .67;
         this.mezcla = mezclaInicial();
         this.modo = 'arreglo';
         this.audios = new Map();
@@ -183,18 +194,19 @@ export class Transporte {
         return (this.modo === 'arreglo' ? this.arreglo?.duracion : this.secuencia?.duracion_s) ?? 0;
     }
 
-    async configurar(mezcla, arreglo = this.arreglo) {
+    async configurar(mezcla, arreglo = this.arreglo, vozGrabada = this.vozGrabada) {
         const anterior = this.mezcla;
         const comun = ['reverb', 'espacio', 'filtroY'].some(k => anterior[k] !== mezcla[k])
             || mezcla.pistas.some((pista, i) =>
                 ['volumen', 'panorama', 'mute', 'solo'].some(k => anterior.pistas[i][k] !== pista[k]));
-        const cambioArreglo = comun || arreglo !== this.arreglo
+        const cambioArreglo = comun || arreglo !== this.arreglo || vozGrabada !== this.vozGrabada
             || mezcla.pistas.some((pista, i) => anterior.pistas[i].muestra !== pista.muestra);
         const afecta = this.modo === 'rgb' ? comun : cambioArreglo;
         const reanudar = afecta && (this.nodo || this.preparando);
         if (afecta) this.pausar(false);
         this.mezcla = mezcla;
         this.arreglo = arreglo;
+        this.vozGrabada = vozGrabada;
         if (comun) this.invalidarAudio('rgb');
         if (cambioArreglo) this.invalidarAudio('arreglo');
         if (!afecta) {
@@ -215,7 +227,7 @@ export class Transporte {
             return guardado.promesa;
         }
         const trabajo = new AbortController(), {signal} = trabajo;
-        const secuencia = this.secuencia, arreglo = this.arreglo, mezcla = this.mezcla;
+        const secuencia = this.secuencia, arreglo = this.arreglo, mezcla = this.mezcla, vozGrabada = this.vozGrabada;
         const audio = {trabajo, buffer: null, progreso: 0};
         const avance = valor => {
             if (signal.aborted) return;
@@ -225,7 +237,8 @@ export class Transporte {
         this.audios.set(modo, audio);
         audio.promesa = Promise.resolve().then(() => {
             signal.throwIfAborted();
-            return modo === 'arreglo' ? sintetizarArreglo(arreglo, mezcla, avance, signal)
+            return modo === 'arreglo' ? sintetizarArreglo(arreglo, mezcla,
+                mezcla.pistas.some(p => p.solo) ? null : vozGrabada, avance, signal)
                 : renderizarRGB(secuencia.datosAudio(mezcla), avance, signal);
         }).catch(error => {
             if (this.audios.get(modo) === audio) this.audios.delete(modo);

@@ -5,12 +5,12 @@ from fastapi import APIRouter
 GOES_SECTOR = "https://cdn.star.nesdis.noaa.gov/GOES19/ABI/SECTOR/nsa/GEOCOLOR/1800x1080.jpg"
 
 
-def crear_rutas():
+def crear_rutas(version):
     router = APIRouter(tags=["Sistema y GOES"])
 
-    @router.get("/")
-    def home():
-        return {"status": "online", "sistema": "Órbita Sonora API - Servidor Activo"}
+    @router.get("/health")
+    def salud():
+        return {"status": "online", "version": version}
 
     @router.get("/api/datos")
     def obtener_datos():

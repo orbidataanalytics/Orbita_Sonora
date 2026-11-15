@@ -3,9 +3,10 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Visor geográfico y sonificación de imágenes y videos de ORBIDATA ANALYTICS.">
+    <meta name="description" content="Visor geográfico y sonificación de imágenes de ORBIDATA ANALYTICS.">
     <meta name="orbita-api-base" content="https://orbitasonora.onrender.com">
-    <title>Órbita Sonora | Sonificación e instrumentos RGB</title>
+    <title>Órbita Sonora | Imágenes y música</title>
+    <link rel="icon" href="./docs/img/logo-orbita-sonora.png">
     <link rel="stylesheet" href="./web/vendor/maplibre-gl.css">
     <link rel="stylesheet" href="./web/css/visor.css">
     <link rel="stylesheet" href="./web/css/visor-analisis.css">
@@ -21,53 +22,64 @@
 <header class="cabecera">
     <a class="marca" href="./index.html">
         <img src="./docs/img/logo-orbita-sonora.png" alt="Órbita Sonora" width="182" height="69">
-        <span>Website for image processing in the sound domain</span>
     </a>
     <nav aria-label="Navegación principal">
-        <a href="#herramientas" id="nav-analisis">Análisis</a>
+        <a href="#catalogo" id="nav-catalogo">Imágenes</a>
         <a href="#partitura-musical" id="nav-partitura">Partituras</a>
         <a href="#daw-panel" id="abrir-daw">DAW</a>
-        <button type="button" id="abrir-interpretaciones" disabled>Interpretaciones</button>
-        <a class="boton primario" href="#importar" id="abrir-importar">+ Agregar paquete</a>
+        <button class="boton primario" type="button" id="abrir-importar">Cargar imagen</button>
     </nav>
 </header>
 
 <main class="pagina">
-    <section class="portada" aria-label="Rocola y vista satelital">
+    <section class="portada" aria-label="Rocola y pantalla">
         <div class="rocola-home">
-            <details id="rocola-desplegable" open>
-                <summary>Rocola</summary>
-                <div class="rocola-cuerpo">
-                    <div class="rocola-arco" aria-hidden="true"></div>
-                    <div class="rocola-ventana">
-                        <button id="vinilo" class="rocola-vinilo" type="button" aria-label="Elegir o reproducir un disco">
-                            <span id="vinilo-arte" class="vinilo-arte"></span>
-                        </button>
-                    </div>
-                    <div class="rocola-pantalla">
-                        <strong id="disco-titulo">Elige una visualización</strong>
-                        <p id="disco-subtitulo">Pulsa el disco o abre el catálogo.</p>
-                    </div>
-                    <div class="rocola-parlante"><span>Órbita Sonora</span></div>
-                    <div class="rocola-botones">
-                        <button type="button" class="rocola-rojo" id="disco-pausa" aria-label="Pausar disco" disabled>Ⅱ</button>
-                        <button type="button" class="rocola-verde" id="disco-play" aria-label="Reproducir el arreglo del disco" title="Reproducir el arreglo del disco" disabled>▶</button>
-                        <button type="button" class="rocola-azul" id="abrir-catalogo" aria-label="Abrir catálogo">☰</button>
-                    </div>
+            <div class="rocola-cuerpo">
+                <div class="rocola-ventana">
+                    <button id="vinilo" class="rocola-vinilo" type="button" aria-label="Tocar o pausar el arreglo">
+                        <span id="vinilo-arte" class="vinilo-arte"></span>
+                    </button>
                 </div>
-            </details>
+                <div class="rocola-pantalla">
+                    <strong id="disco-titulo">Rocola</strong>
+                    <p id="disco-subtitulo">Elige una imagen</p>
+                </div>
+                <div class="rocola-botones">
+                    <button type="button" class="rocola-verde" id="disco-play" aria-label="Tocar el arreglo" title="Tocar el arreglo" disabled>▶</button>
+                    <button type="button" class="rocola-rojo" id="disco-pausa" aria-label="Pausar el arreglo" title="Pausar el arreglo" disabled>Ⅱ</button>
+                    <a class="boton rocola-azul" id="abrir-catalogo" href="#catalogo">Imágenes</a>
+                </div>
+            </div>
         </div>
-        <figure class="goes-panel">
+        <section id="pantalla" class="goes-panel" aria-labelledby="pantalla-titulo">
             <div class="goes-cabecera">
-                <div><h1>Colombia desde GOES</h1><p>GeoColor · Norte de Suramérica</p></div>
-                <button id="ampliar-goes" class="boton discreto" type="button">Ampliar imagen</button>
+                <h1 id="pantalla-titulo">Colombia desde GOES</h1>
+                <button id="cerrar-video" class="boton discreto" type="button" hidden>Volver a GOES</button>
             </div>
-            <div class="goes-imagen">
+            <div class="pantalla-marco">
                 <img id="goes-imagen" src="./web/geo/goes19-nsa-respaldo.jpg" width="1800" height="1080"
-                    alt="Imagen GeoColor de GOES-19 sobre Colombia y el norte de Suramérica">
+                    alt="GeoColor de GOES-19 sobre Colombia y el norte de Suramérica">
+                <video id="interpretacion-video" aria-label="Video de la interpretación" controls playsinline preload="metadata" hidden></video>
             </div>
-            <figcaption><span id="goes-estado" role="status">NOAA / NESDIS</span><a href="https://star.nesdis.noaa.gov/goes/sector.php?sat=G19&amp;sector=nsa" target="_blank" rel="noopener">Ver en NOAA ↗</a></figcaption>
-        </figure>
+            <div class="pantalla-pie">
+                <a id="goes-estado" href="https://star.nesdis.noaa.gov/goes/sector.php?sat=G19&amp;sector=nsa" target="_blank" rel="noopener">NOAA / NESDIS</a>
+                <button id="goes-mini" class="goes-mini" type="button" aria-label="Restaurar imagen GOES" hidden>
+                    <img id="goes-mini-imagen" src="./web/geo/goes19-nsa-respaldo.jpg" width="1800" height="1080" alt=""> GOES
+                </button>
+                <div class="controles pantalla-acciones" id="video-acciones">
+                    <button type="button" id="abrir-interpretaciones" class="boton" hidden>Ver interpretación</button>
+                    <label id="interpretacion-selector-grupo" hidden>Grabación <select id="interpretacion-selector"></select></label>
+                    <label class="boton discreto video-archivo">Abrir MP4 <input id="interpretacion-archivo" type="file" accept=".mp4,video/mp4"></label>
+                </div>
+            </div>
+            <p class="pantalla-carpeta" id="interpretacion-carpeta" hidden></p>
+            <p class="pantalla-estado" id="interpretacion-listado-estado" role="status"></p>
+        </section>
+    </section>
+
+    <section id="catalogo" class="catalogo" aria-labelledby="titulo-catalogo">
+        <h2 id="titulo-catalogo">Imágenes para escuchar</h2>
+        <div id="lista-paquetes" class="galeria-imagenes"></div>
     </section>
 
     <div class="resumen-estudio">
@@ -76,114 +88,55 @@
             <progress id="progreso-medio" max="100" value="0" aria-label="Preparación del medio y la partitura"></progress>
             <output id="progreso-medio-valor" for="progreso-medio">0 %</output>
         </div></div>
-        <a href="#herramientas" class="boton discreto" id="abrir-analisis">Medio y análisis ↓</a>
     </div>
-    <details id="herramientas" class="herramientas">
-        <summary>Medio, mapa y análisis de datos</summary>
-        <div class="detalle-medio">
-        <section class="panel observatorio" aria-labelledby="titulo-paquete">
-            <div class="panel-cabeza seleccion">
-                <div><p id="proveedor" class="rotulo"></p><h2 id="titulo-paquete">Observatorio</h2></div>
-                <a id="fuente-paquete" class="boton discreto" target="_blank" rel="noopener" hidden>Fuente original ↗</a>
-            </div>
-            <div class="barra-modos">
-                <div class="segmentos" role="group" aria-label="Vista">
-                    <button id="ver-medio" type="button" aria-pressed="true">Medio</button>
-                    <button id="ver-mapa" type="button" aria-pressed="false">Mapa 2D</button>
-                    <button id="ver-globo" type="button" aria-pressed="false">Globo 3D</button>
-                </div>
-                <button id="abrir-geo" type="button" class="boton discreto">Georreferenciar</button>
-            </div>
-            <div class="ventana-visual">
-                <div id="mapa" style="visibility:hidden" aria-label="Visor geográfico interactivo"></div>
-                <div id="escena-medio" class="escena-medio">
-                    <canvas id="imagen-medio" width="760" height="460" aria-label="Medio con el píxel activo; pulsa para buscar una posición"></canvas>
-                </div>
-                <div id="mensaje-mapa" class="mensaje-mapa" role="status"></div>
-            </div>
-            <div class="pie-visor">
-                <span id="geo-estado">Sin georreferencia</span>
-                <label>Opacidad <input id="opacidad" type="range" min="0" max="1" step=".05" value=".82"></label>
-                <button id="centrar" class="boton discreto" type="button">Centrar capa</button>
-            </div>
-        </section>
-
-
-        <aside class="panel detalle-datos" aria-label="Opciones del medio">
-            <div class="medio-activo">
-                <strong id="titulo-medio"></strong>
-                <p id="archivo-activo" class="numeros"></p>
-                <p id="info-medio"></p>
-                <label id="fila-variante" hidden>Archivo <select id="variante"></select></label>
-                <div class="acciones-medio">
-                    <a id="fuente-medio" target="_blank" rel="noopener" hidden>Descarga original ↗</a>
-                    <button id="cargar-original" type="button" hidden>Reintentar archivo original</button>
-                </div>
-            </div>
-
-            <div class="mascara-controles">
-                <label>Fondo del medio
-                    <select id="modo-fondo"><option value="alfa" selected>Usar transparencia original</option><option value="auto">Quitar fondo uniforme</option><option value="area">Solo área seleccionada</option></select>
-                </label>
-                <label id="tolerancia-grupo">Tolerancia <input id="tolerancia-fondo" type="range" min="0" max="100" value="28"></label>
-                <div class="controles"><button type="button" id="abrir-mascara" class="boton">Delimitar área</button><button type="button" id="quitar-mascara" class="boton" hidden>Quitar área</button></div>
-                <p id="estado-mascara" role="status"></p>
-            </div>
-        </aside>
-        </div>
-
-    <details id="video-fuente-panel" class="panel video-fuente" hidden>
-        <summary>Video fuente sincronizado</summary>
-        <label><input id="video-sincronizado" type="checkbox" checked> Seguir la reproducción</label>
-        <p>Para usar los controles normales del video, desmarca la sincronización.</p>
-        <div class="video-escena"><span class="video-cursor" hidden aria-hidden="true"></span></div>
-    </details>
-
-    <section class="panel transporte" aria-labelledby="titulo-recorrido">
-        <h2 id="titulo-recorrido">Recorrido del medio</h2>
-        <div class="opciones">
-            <label>Recorrido <select id="recorrido" aria-describedby="ritmo-lectura"></select></label>
-            <label>Cuadrícula <select id="cuadricula"><option value="8">8 × 8</option><option value="16">16 × 16</option><option value="32">32 × 32</option><option value="64" selected>64 × 64</option><option value="128">128 × 128</option></select></label>
-            <label>Velocidad del recorrido <select id="velocidad-recorrido"><option value=".5">0.5×</option><option value="1" selected>1×</option><option value="1.5">1.5×</option><option value="2">2×</option></select></label>
-            <label>Intensidad a frecuencia <select id="escala-frecuencia"><option value="logaritmica">Logarítmica</option><option value="lineal">Lineal</option></select></label>
-            <label>Zona sonora <select id="tamano-zona" aria-describedby="regla-zona"></select></label>
-            <label id="duracion-fila">Duración de imagen <select id="duracion"><option value="12">12 s</option><option value="24" selected>24 s</option><option value="48">48 s</option></select></label>
-            <label>Agrupar firmas <select id="niveles"><option value="4">4 niveles</option><option value="8" selected>8 niveles</option><option value="16">16 niveles</option></select></label>
-            <label id="inicio-fila" hidden>Inicio del video en s <input id="inicio-video" type="number" min="0" step=".1" value="0" style="width:72px"><button id="cambiar-tramo" type="button">Aplicar</button></label>
-            <label>Ocupación <select id="ambito"><option value="completa">Recorrido completo</option><option value="cursor">Hasta el cursor</option></select></label>
-        </div>
-        <div class="notas-recorrido">
-            <p id="ritmo-lectura"></p>
-            <p id="regla-zona">1 × 1 usa el RGB de la celda activa.</p>
-        </div>
-    </section>
-    </details>
+    <figure id="original-panel" class="panel original-panel" hidden>
+        <div id="original-imagen" class="original-imagen"></div>
+        <figcaption>
+            <div><h2>Imagen original</h2><p id="original-titulo"></p></div>
+            <a id="fuente-medio" class="boton discreto" target="_blank" rel="noopener" hidden>Descarga original ↗</a>
+        </figcaption>
+    </figure>
 
     <article class="panel partituras" aria-labelledby="titulo-sonido">
         <div class="transport-top reproduccion-partitura">
             <div><h2 id="titulo-sonido">Reproducción</h2><p id="sonido-estado" role="status">Selecciona un medio.</p></div>
             <div class="controles">
                 <button id="mus-escuchar" class="boton primario" type="button" aria-pressed="false" disabled>▶ Tocar arreglo</button>
-                <button id="play" class="boton" type="button" aria-pressed="false" disabled>▶ Sonificar píxeles RGB</button>
                 <button id="pausa" class="boton" type="button" disabled>Pausa</button>
-                <label>Volumen <input id="volumen" type="range" min="0" max="1" step=".01" value=".55"></label>
+                <label id="tempo-ensayo">Tempo <input id="mus-bpm" type="number" value="68" required min="40" max="168" step="1" aria-label="Tempo del arreglo"> <span id="mus-pulso">negras por minuto</span></label>
+                <input id="mus-tempo-slider" type="range" min="40" max="168" step="1" value="68" aria-label="Ajustar tempo" disabled>
+                <label>Tónica <select id="mus-tonica" disabled></select></label>
+                <label>Volumen <input id="volumen" type="range" min="0" max="1" step=".01" value=".67"></label>
             </div>
         </div>
         <div id="progreso-audio-fila" class="avance-fila" hidden>
-            <span id="progreso-audio-texto">Generando audio RGB</span>
+            <span id="progreso-audio-texto">Preparando el arreglo</span>
             <progress id="progreso-audio" max="100" value="0" aria-labelledby="progreso-audio-texto"></progress>
             <output id="progreso-audio-valor" for="progreso-audio">0 %</output>
         </div>
         <div class="linea-tiempo"><span id="tiempo-actual" class="numeros">0.000 s</span><input id="linea-tiempo" type="range" aria-label="Instante de reproducción" min="0" max="1" step=".001" value="0" disabled><span id="tiempo-total" class="numeros">0.000 s</span></div>
+        <div id="guitarras-activas" class="guitarras-activas" aria-label="Notas de las tres bandas" hidden>
+            <span><b class="rojo">R</b> <output id="nota-guitarra-r"></output></span>
+            <span><b class="verde">G</b> <output id="nota-guitarra-g"></output></span>
+            <span><b class="azul">B</b> <output id="nota-guitarra-b"></output></span>
+        </div>
+
+        <div class="controles controles-recorrido">
+            <label>Recorrido <select id="recorrido"></select></label>
+            <label>Cuadrícula <select id="cuadricula"><option value="8">8 × 8</option><option value="16">16 × 16</option><option value="32" selected>32 × 32</option><option value="64">64 × 64</option><option value="128">128 × 128</option></select></label>
+            <label>Velocidad de lectura <select id="velocidad-recorrido"><option value=".5">0,5×</option><option value="1" selected>1×</option><option value="1.5">1,5×</option><option value="2">2×</option></select></label>
+            <label>Zona sonora <select id="tamano-zona" aria-describedby="regla-zona"></select></label>
+        </div>
+        <p id="regla-zona">70 % del píxel activo y 30 % de sus vecinos.</p>
 
         <section id="partitura-musical" aria-labelledby="titulo-partitura">
             <div class="partitura-cabecera">
-                <h3 id="titulo-partitura">Partitura del arreglo</h3>
-                <a class="boton discreto" href="#daw-panel">Mezclar instrumentos ↓</a>
+                <h3 id="titulo-partitura">Partitura musical</h3>
+                <a class="boton discreto" href="#daw-panel" id="partitura-daw">Instrumentos ↓</a>
             </div>
             <p id="mus-origen" class="numeros"></p>
             <div class="controles partitura-controles">
-                <label>Vista <select id="mus-parte" disabled><option value="todos">Partitura general</option><option value="0">R · Rojo</option><option value="1">G · Verde</option><option value="2">B · Azul</option></select></label>
+                <label>Vista <select id="mus-parte" disabled><option value="1" selected>G · Guitarra</option><option value="todos">Partitura general</option><option id="mus-opcion-voz" value="guitarra-voz" disabled hidden>Guitarra y voz</option><option value="0">R · Rojo</option><option value="2">B · Azul</option></select></label>
                 <button id="mus-anterior" type="button" class="boton" disabled aria-label="Compases anteriores">‹</button>
                 <span id="mus-compases" class="numeros"></span>
                 <button id="mus-siguiente" type="button" class="boton" disabled aria-label="Compases siguientes">›</button>
@@ -191,7 +144,7 @@
                 <label><input id="mus-seguir" type="checkbox" checked> Seguir reproducción</label>
             </div>
             <p id="mus-estado" role="status">Selecciona un medio.</p>
-                <p id="mus-afinaciones" class="numeros" hidden></p>
+            <p id="mus-afinaciones" class="numeros" hidden></p>
             <button id="mus-reintentar" type="button" class="boton" hidden>Volver a mostrar el pentagrama</button>
             <div id="mus-lienzo" class="hoja-partitura" aria-label="Pentagrama y tablatura" hidden></div>
             <div class="controles partitura-controles">
@@ -199,27 +152,37 @@
                 <button id="mus-midi" type="button" class="boton" disabled>MIDI del arreglo</button>
                 <button id="mus-exportar" type="button" class="boton" disabled>MusicXML</button>
                 <button id="mus-imprimir" type="button" class="boton" disabled>Imprimir / PDF</button>
+                <button id="informe" type="button" class="boton" disabled>Abrir informe</button>
             </div>
+            <section id="letra-cancion" class="letra-cancion" aria-labelledby="titulo-letra" hidden>
+                <h4 id="titulo-letra">Letra de la canción</h4>
+                <label><input id="letra-incluir" type="checkbox"> Activar voz y letra para cantar</label>
+                <textarea id="letra-sugerida" aria-label="Letra de la canción" rows="7" maxlength="1000" disabled hidden></textarea>
+                <details class="voz-humana" id="voz-panel" hidden>
+                    <summary>Añadir una voz grabada</summary>
+                    <label>Grabación de un cantante <input id="voz-archivo" type="file" accept=".wav,.mp3,.m4a,.ogg,.webm,audio/*"></label>
+                    <div class="controles">
+                        <label><input type="checkbox" id="voz-activa" disabled> Incluir cantante</label>
+                        <button id="voz-quitar" class="boton discreto" type="button" hidden>Quitar grabación</button>
+                    </div>
+                    <p id="voz-estado" role="status"></p>
+                </details>
+            </section>
             <details id="opciones-partitura">
                 <summary>Ajustes de composición</summary>
                 <fieldset id="ajustes-partitura" disabled>
-                    <label>Tónica <select id="mus-tonica"></select></label>
-                    <label>Modo <select id="mus-modo"><option value="mayor">Mayor pentatónica</option><option value="menor">Menor pentatónica</option><option value="cromatica">Cromática</option></select></label>
-                    <label>Alturas máximas por canal <select id="mus-alturas"></select></label>
+                    <label>Modo <select id="mus-modo"><option value="mayor">Mayor</option><option value="menor">Menor</option></select></label>
+                    <label>Alturas por acorde <select id="mus-alturas"></select></label>
                     <label>Dificultad <select id="mus-nivel"><option value="inicial">Inicial</option><option value="intermedio">Intermedia</option></select></label>
                     <label>Compás <select id="mus-compas"></select></label>
-                    <label><span id="mus-pulso">Negras por minuto</span> <input id="mus-bpm" type="number" value="100" min="48" max="168" step="1"></label>
-                    <label>División <select id="mus-figura"><option value="corchea">Corchea</option><option value="pulso">Pulso</option><option value="semicorchea">Semicorchea</option></select></label>
+                    <label>Ritmo <select id="mus-figura"><option value="zonal">Según el contraste</option><option value="pulso">Pulso</option><option value="corchea">Corcheas</option><option value="semicorchea">Semicorcheas</option></select></label>
                     <label>Afinación de guitarra <select id="mus-afinacion"></select></label>
                 </fieldset>
             </details>
         </section>
 
-        <section id="daw-panel" aria-labelledby="daw-titulo">
-            <div class="partitura-cabecera">
-                <h3 id="daw-titulo">DAW · Instrumentación RGB</h3>
-                <a class="boton discreto" href="#partitura-musical">Ver partitura ↑</a>
-            </div>
+        <details id="daw-panel">
+            <summary>DAW · Instrumentos</summary>
             <div id="daw-pistas" class="daw-pistas"></div>
             <div class="controles daw-acciones">
                 <button id="daw-escuchar" type="button" class="boton primario" aria-pressed="false" disabled>▶ Tocar arreglo</button>
@@ -250,17 +213,48 @@
                 <p id="daw-vivo-estado" role="status"></p>
                 <div id="daw-eventos" class="daw-eventos" aria-label="Eventos recientes"></div>
             </details>
-        </section>
-
-        <details id="partitura-tecnica" open>
-            <summary>Partitura espectral RGB del recorrido</summary>
-            <label>Ventana <select id="ventana-partitura"><option value=".5">0,5 s</option><option value="2">2 s</option><option value="4" selected>4 s</option><option value="8">8 s</option><option value="12">12 s</option></select></label>
-            <p>Frecuencia en Hz por celda. El grosor de la línea representa la intensidad RGB.</p>
-            <button id="descargar-wav" class="boton" type="button" disabled>WAV de píxeles RGB</button>
-            <div id="partitura-R"></div><div id="partitura-G"></div><div id="partitura-B"></div>
         </details>
+
     </article>
 
+    <details id="herramientas" class="herramientas">
+        <summary>Análisis de la imagen</summary>
+        <div class="opciones">
+            <label>Duración de imagen <select id="duracion"><option value="12">12 s</option><option value="24" selected>24 s</option><option value="48">48 s</option></select></label>
+            <label>Intensidad a frecuencia <select id="escala-frecuencia"><option value="logaritmica">Logarítmica</option><option value="lineal">Lineal</option></select></label>
+            <label>Agrupar firmas <select id="niveles"><option value="4">4 niveles</option><option value="8" selected>8 niveles</option><option value="16">16 niveles</option></select></label>
+            <label>Ocupación <select id="ambito"><option value="completa">Recorrido completo</option><option value="cursor">Hasta el cursor</option></select></label>
+            <label id="fila-variante" hidden>Archivo <select id="variante"></select></label>
+        </div>
+        <div class="detalle-medio">
+            <div class="panel observatorio">
+                <div class="barra-modos">
+                    <div class="segmentos" role="group" aria-label="Vista">
+                        <button id="ver-medio" type="button" aria-pressed="true">Píxel activo</button>
+                        <button id="ver-mapa" type="button" aria-pressed="false">Mapa 2D</button>
+                        <button id="ver-globo" type="button" aria-pressed="false">Globo 3D</button>
+                    </div>
+                    <button id="abrir-geo" type="button" class="boton discreto">Georreferenciar</button>
+                </div>
+                <div class="ventana-visual">
+                    <div id="mapa" style="visibility:hidden" aria-label="Visor geográfico interactivo"></div>
+                    <div id="escena-medio" class="escena-medio"><canvas id="imagen-medio" width="760" height="460" aria-label="Imagen con la celda activa"></canvas></div>
+                    <div id="mensaje-mapa" class="mensaje-mapa" role="status"></div>
+                </div>
+                <div class="pie-visor">
+                    <span id="geo-estado">Sin georreferencia</span>
+                    <label>Opacidad <input id="opacidad" type="range" min="0" max="1" step=".05" value=".82"></label>
+                    <button id="centrar" class="boton discreto" type="button">Centrar capa</button>
+                </div>
+            </div>
+            <div class="panel mascara-controles">
+                <p id="archivo-activo"></p>
+                <label>Fondo <select id="modo-fondo"><option value="alfa" selected>Transparencia original</option><option value="auto">Quitar fondo uniforme</option><option value="area">Solo área seleccionada</option></select></label>
+                <label id="tolerancia-grupo">Tolerancia <input id="tolerancia-fondo" type="range" min="0" max="100" value="28"></label>
+                <div class="controles"><button type="button" id="abrir-mascara" class="boton">Delimitar área</button><button type="button" id="quitar-mascara" class="boton" hidden>Quitar área</button></div>
+                <p id="estado-mascara" role="status"></p>
+            </div>
+        </div>
     <section id="analisis" class="analisis" aria-labelledby="titulo-analisis">
         <div class="encabezado analisis-titulo"><div><p class="rotulo">PÍXEL ACTIVO</p><h2 id="titulo-analisis">Imagen y firmas RGB</h2></div><p id="pixel-activo" class="estado numeros">–</p></div>
         <div class="panel bandas-panel">
@@ -274,12 +268,11 @@
             <article class="panel grafico"><h3>Ocupación de firmas</h3><div class="ocupacion"><canvas id="mapa-firmas" width="256" height="256" aria-label="Mapa de repetición de firmas"></canvas><div><div class="leyenda-color"></div><div class="leyenda-label"><span>Menos</span><span>Más</span></div><p id="resumen-ocupacion"></p><p>Gris · excluido o pendiente</p><div id="tabla-firmas"></div></div></div><canvas id="curvas-ocupacion" width="640" height="160" aria-label="Curvas de las firmas más repetidas"></canvas></article>
         </div>
         <article class="panel informe">
-            <div><h3>Píxeles destacados e informe</h3><p id="marcas-estado">0 marcas manuales</p></div>
+            <div><h3>Píxeles destacados</h3><p id="marcas-estado">0 marcas manuales</p></div>
             <div class="controles">
                 <input id="nota-marca" maxlength="180" placeholder="Nota opcional" aria-label="Nota de la marca">
                 <button id="marcar" class="boton" type="button" disabled>Marcar píxel</button>
                 <button id="marcas-geojson" class="boton" type="button" disabled>Exportar marcas SIG</button>
-                <button id="informe" class="boton" type="button" disabled>Preparar informe</button>
                 <button id="descargar-datos" class="boton" type="button" disabled>Descargar datos</button>
             </div>
             <div id="lista-marcas"></div>
@@ -287,43 +280,16 @@
     </section>
 
 
+    </details>
+
     <footer class="pie">
         <div><img src="./docs/img/logo-orbidata-analytics.png" width="63" height="63" alt="ORBIDATA ANALYTICS"><span>ORBIDATA ANALYTICS</span></div>
         <div><img src="./docs/img/logo-semillero-itm.png" width="63" height="63" alt="Semillero de Astronomía ITM"><span>Semillero de Astronomía, Instrumentación y Ciencias Espaciales del ITM</span></div>
-        <a href="https://github.com/orbidataanalytics/OrbitaSonora#readme">Documentación ↗</a>
+        <a href="https://github.com/orbidataanalytics/OrbitaSonora#readme">Documentación · v5.7.0 ↗</a>
     </footer>
 </main>
 
-<dialog id="catalogo-dialogo" class="dialogo catalogo-dialogo">
-    <div class="dialogo-interior">
-        <div class="panel-cabeza"><h2>Catálogo de discos</h2><button type="button" data-cerrar="catalogo-dialogo" aria-label="Cerrar catálogo">×</button></div>
-        <div class="catalogo-columnas">
-            <div><div class="catalogo-cabecera"><h3>Páginas</h3><span id="cuenta-paquetes" class="dato"></span></div>
-                <label class="busqueda"><span class="solo-lectores">Buscar paquetes</span><input id="buscar-paquete" type="search" placeholder="Buscar página o paquete"></label>
-                <div class="lista-paquetes" id="lista-paquetes"></div>
-            </div>
-            <div><div class="catalogo-cabecera"><h3 id="titulo-submenu">Imágenes y videos</h3><span id="cuenta-medios" class="dato"></span></div>
-                <label class="busqueda"><span class="solo-lectores">Buscar medios</span><input id="buscar-medio" type="search" placeholder="Buscar dentro de esta página"></label>
-            <div class="segmentos filtros" role="group" aria-label="Filtrar medios">
-                <button data-filtro="todos" type="button" aria-pressed="true">Todos</button>
-                <button data-filtro="imagen" type="button" aria-pressed="false">Imágenes</button>
-                <button data-filtro="video" type="button" aria-pressed="false">Videos</button>
-            </div>
-            <div class="lista-medios" id="lista-medios"></div>
-
-            </div>
-        </div>
-        <button id="catalogo-agregar" type="button" class="boton">+ Agregar paquete</button>
-        <button id="catalogo-interpretaciones" type="button" class="boton" disabled>Ver interpretaciones</button>
-    </div>
-</dialog>
-
-<dialog id="goes-dialogo" class="dialogo goes-dialogo">
-    <div class="dialogo-interior">
-        <div class="panel-cabeza"><h2>GeoColor de GOES-19</h2><button type="button" data-cerrar="goes-dialogo" aria-label="Cerrar imagen GOES">×</button></div>
-        <img id="goes-grande" width="1800" height="1080" alt="Vista ampliada de Colombia y el norte de Suramérica">
-    </div>
-</dialog>
+<input id="archivos" type="file" accept=".jpg,.jpeg,.png,.webp,.avif,.bmp,.gif" aria-label="Cargar imagen local" hidden>
 
 <dialog id="mascara-dialogo" class="dialogo mascara-dialogo">
     <div class="dialogo-interior">
@@ -334,43 +300,6 @@
         <div class="controles"><button id="mascara-aplicar" class="boton primario" type="button" disabled>Usar esta área</button>
             <button id="mascara-deshacer" class="boton" type="button">Quitar último punto</button><button id="mascara-limpiar" class="boton" type="button">Empezar de nuevo</button></div>
     </div>
-</dialog>
-
-<dialog id="interpretaciones" class="dialogo daw-dialogo">
-    <div class="dialogo-interior">
-        <div class="panel-cabeza"><h2>Interpretaciones</h2><button type="button" data-cerrar="interpretaciones" aria-label="Cerrar interpretaciones">×</button></div>
-        <p id="interpretacion-paquete"></p>
-        <p>Carpeta del paquete <code id="interpretacion-carpeta"></code></p>
-        <p id="interpretacion-listado-estado" role="status"></p>
-        <label id="interpretacion-selector-grupo" hidden>Video publicado <select id="interpretacion-selector"></select></label>
-        <video id="interpretacion-video" class="interpretacion-video" controls playsinline preload="metadata" hidden></video>
-        <details>
-            <summary>Mezclar una grabación con tres pistas</summary>
-            <form id="mezclar-interpretacion">
-                <label>Video original <input name="video" type="file" accept="video/*" required></label>
-                <div id="interpretacion-pistas" class="daw-pistas"></div>
-                <p>El audio final reúne las tres pistas y dura lo mismo que el video. Un ajuste positivo retrasa una pista. Uno negativo recorta su inicio.</p>
-                <label>Nombre del MP4 <input id="interpretacion-nombre" name="nombre" value="interpretacion.mp4" pattern="[a-z0-9]+(?:_[a-z0-9]+)*\.mp4" maxlength="100" required></label>
-                <div class="controles">
-                    <button id="interpretacion-mezclar" type="submit" class="boton primario">Mezclar y previsualizar</button>
-                    <a id="interpretacion-descargar" class="boton" hidden>Descargar MP4</a>
-                </div>
-                <p id="interpretacion-estado" role="status"></p>
-            </form>
-        </details>
-    </div>
-</dialog>
-
-<dialog id="importar" class="dialogo">
-    <form id="form-importar">
-        <div class="panel-cabeza"><h2>Agregar paquete</h2><button type="button" class="boton" data-cerrar="importar" aria-label="Cerrar">×</button></div>
-        <label>Título del paquete <input id="titulo-nuevo" maxlength="150" placeholder="Se toma de la fuente si lo dejas vacío"></label>
-        <label>URLs públicas <textarea id="urls" rows="4" placeholder="Pega una URL por línea. Puedes incluir páginas SVS, imágenes y videos."></textarea></label>
-        <label>Archivos locales <input id="archivos" type="file" multiple></label>
-        <label>Imagen de portada <input id="portada-nueva" type="file" accept="image/*"></label>
-        <p id="importar-estado" role="status">Un paquete puede reunir varios medios.</p>
-        <button id="importar-enviar" type="submit" class="boton primario">Agregar al visor</button>
-    </form>
 </dialog>
 
 <dialog id="georreferencia" class="dialogo">

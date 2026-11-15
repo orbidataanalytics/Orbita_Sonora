@@ -1,65 +1,49 @@
-from pathlib import Path
-import sys,base64,math,importlib.util
-from collections import Counter
+from io import BytesIO
 import json
-r=Path(__file__).resolve().parents[1]
-sys.path.insert(0,str(r))
-from main import app
-from fastapi.testclient import TestClient
-client=TestClient(app)
-a=app.state.analisis
-assert client.get('/').json()=={'status':'online','sistema':'Órbita Sonora API - Servidor Activo'}
-assert client.get('/api/datos').json()['album']=='Análisis de datos'
-assert client.get('/api/goes').json()['image_url'].startswith('https://cdn.star.nesdis.noaa.gov/GOES19/ABI/SECTOR/nsa/')
-for c in a.canciones.values():
- cid=c['id'];n=c['pixeles'];dt=c['segundos_por_pixel']
- p=client.get('/api/partituras/'+cid).json()
- assert p['sha256_audio']==c['sha256_audio']
- for ch,band in p['bandas'].items():
-  anterior=0
-  for e in band['eventos']:
-   assert e[0]==anterior and 0<=e[0]<e[1]<=n
-   assert e[2] in (-2,-1) or 0<=e[2]<=140
-   if e[2]>=0:
-    assert band['min_hz']<=e[3]<=band['max_hz']
-    assert (e[1]-e[0])*dt>=.1-1e-6
-   anterior=e[1]
-  assert anterior==n
-  assert abs(sum(band['resumen'][k] for k in ['segundos_con_altura','segundos_sin_altura','segundos_silencio'])-c['duracion_s'])<.003
- for camino in ['filas','serpentina','hilbert']:
-  coordenadas=a.obtener_recorrido(c['lado'],camino)
-  assert len(set(coordenadas))==n
-  if camino!='filas':assert all(abs(x[0]-y[0])+abs(x[1]-y[1])==1 for x,y in zip(coordenadas,coordenadas[1:]))
-  for t in [0,.05,c['duracion_s']*.5,c['duracion_s'],c['duracion_s']+1]:
-   estado=client.get('/api/estado/'+cid,params={'tiempo':t,'recorrido':camino}).json()
-   i=min(n-1,int(t/c['duracion_s']*n))
-   assert estado['indice']==i
-   assert (estado['x'],estado['y'])==coordenadas[i]
-   for nota in estado['partituras'].values():assert nota['inicio_pixel']<=i<nota['fin_pixel_exclusivo']
-  for canal in ['RGB','R','G','B']:
-   im=client.get(f'/api/imagenes/{cid}/{canal}.png',params={'recorrido':camino})
-   assert im.status_code==200 and im.content[:8]==b'\x89PNG\r\n\x1a\n'
-  informe=client.get('/api/informe/'+cid,params={'recorrido':camino,'marcados':'0,101'}).json()
-  assert any(p['indice']==101 and 'Marca manual' in p['motivos'] for p in informe['pixeles_importantes'])
-  assert sum(f['repeticiones'] for f in informe['ocupacion']['firmas'])==informe['pixeles_activos']
-  for punto in informe['pixeles_importantes']:
-   assert (punto['x'],punto['y'])==coordenadas[punto['indice']]
- print('OK',cid,'recorridos, imágenes, alturas, informe y tiempo común')
-for path in ['/api/partituras/no-existe','/api/informe/no-existe']:assert client.get(path).status_code==404
-for query in ['marcados=x','marcados=-1','marcados=4096','niveles=5','recorrido=otro']:
- assert client.get('/api/informe/derezzed?'+query).status_code==422
-for path in ['/api/estado/derezzed?tiempo=nan','/api/estado/derezzed?tiempo=-1']:assert client.get(path).status_code==422
-print('OK rutas originales y validación de parámetros')
+from pathlib import Path
+import sys
 
-assert client.get('/visor').is_success
-assert client.get('/audio-a-imagen.html').content == client.get('/visor').content
-catalogo=json.loads((r/'datos/paquetes/catalogo.json').read_text())
-for paquete in catalogo['paquetes']:
-    m=json.loads((r/paquete['manifiesto']).read_text())
-    for medio in m['medios']:
-        for archivo in [medio,*medio.get('variantes',[])]:
-            assert not archivo['url'].lower().endswith(('.mp3','.wav'))
+from fastapi.testclient import TestClient
+from PIL import Image
+
+raiz = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(raiz))
+from main import app
+
+cliente = TestClient(app)
+version = json.loads((raiz / 'package.json').read_text(encoding='utf-8'))['version']
+portada = cliente.get('/')
+assert portada.status_code == 200 and 'text/html' in portada.headers['content-type']
+assert f'v{version}' in portada.text and 'galeria-imagenes' in portada.text
+for ruta in ('/index.html', '/rocola.html', '/rocola', '/visor'):
+    assert cliente.get(ruta).content == portada.content, ruta
+assert cliente.get('/health').json() == {'status': 'online', 'version': version}
+doc = cliente.get('/openapi.json').json()
+assert doc['info']['version'] == version
+assert '/api/visor/archivo' in doc['paths']
+assert cliente.get('/api/goes').json()['image_url'].startswith('https://cdn.star.nesdis.noaa.gov/GOES19/ABI/SECTOR/nsa/')
+for ruta in ('/api/canciones', '/datos/pixeles.json', '/datos/partituras.json', '/audio-a-imagen.html'):
+    assert cliente.get(ruta).status_code == 404, ruta
+print('OK portada en la raíz, versión y API actual')
+
+catalogo = cliente.get('/datos/paquetes/catalogo.json').json()
+assert len(catalogo['paquetes']) == 9
+for entrada in catalogo['paquetes']:
+    paquete = cliente.get('/' + entrada['manifiesto']).json()
+    principal = next(m for m in paquete['medios'] if m['id'] == paquete['medio_inicial'])
+    assert principal['tipo'] == 'imagen' and principal.get('copia_local'), principal['id']
+    for medio in paquete['medios']:
+        for archivo in [medio, *medio.get('variantes', [])]:
+            assert not archivo['url'].lower().endswith(('.mp3', '.wav'))
             if archivo.get('copia_local'):
-                resultado=client.get('/'+archivo['copia_local'],headers={'Range':'bytes=0-15'})
-                assert resultado.status_code==206, archivo['copia_local']
-print('OK visor, enlaces antiguos y archivos NASA de la aplicación')
+                resultado = cliente.get('/' + archivo['copia_local'], headers={'Range': 'bytes=0-15'})
+                assert resultado.status_code == 206, archivo['copia_local']
+                assert resultado.headers['content-type'].startswith('image/'), archivo['copia_local']
+print('OK nueve imágenes originales y respuestas de archivos parciales')
+
+imagen = BytesIO()
+Image.new('RGB', (8, 6), color=(48, 150, 202)).save(imagen, format='PNG')
+respuesta = cliente.post('/api/visor/archivo', files={'archivo': ('prueba.png', imagen.getvalue(), 'image/png')})
+assert respuesta.status_code == 200 and respuesta.content[:8] == b'\x89PNG\r\n\x1a\n'
+assert Image.open(BytesIO(respuesta.content)).getpixel((4, 3))[:3] == (48, 150, 202)
+print('OK normalización de imágenes')

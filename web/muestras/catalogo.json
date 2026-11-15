@@ -1,0 +1,254 @@
+{
+  "guitarra": {
+    "40": {
+      "archivo": "guitarra/40.wav",
+      "sha256": "971052cbf98ddc0327efa7cc70f2593666585acb193a1ee31f0f446797a3176b"
+    },
+    "42": {
+      "archivo": "guitarra/42.wav",
+      "sha256": "348ed8a0e60279f7184576cb7d379091ab9c346a9ea91c9b4b4f6d82c5bce879"
+    },
+    "44": {
+      "archivo": "guitarra/44.wav",
+      "sha256": "5d9c9ff3b0461543ffb2d8ca68b5607b1ffc80a115c159be2dda0e05798c05f2"
+    },
+    "46": {
+      "archivo": "guitarra/46.wav",
+      "sha256": "46176095617d09edb257f5cdd9ef685faa80693d0bd8b5f3e3e764372ae2ebda"
+    },
+    "48": {
+      "archivo": "guitarra/48.wav",
+      "sha256": "ca13e3efe010a11e4852b28e49b09055468fea792fa7c32b0a2e74d46f35d391"
+    },
+    "50": {
+      "archivo": "guitarra/50.wav",
+      "sha256": "eb79b4aa4d64f4b6ade1f2481417aa0b09854ff95aa8690a92d9e1e22901e0b4"
+    },
+    "52": {
+      "archivo": "guitarra/52.wav",
+      "sha256": "04df01047006a04791c94dddf6864536da9c2e049f16d53f23f91d2137e0aefd"
+    },
+    "54": {
+      "archivo": "guitarra/54.wav",
+      "sha256": "73936a3b3bf1adf39bcb847674ceb873f5fef957331daa72ededf2f319204e50"
+    },
+    "56": {
+      "archivo": "guitarra/56.wav",
+      "sha256": "2b35937b4d66bc87e98d1e21a662d7345d17ad8a6cb9f3429eefe15c3fba1422"
+    },
+    "58": {
+      "archivo": "guitarra/58.wav",
+      "sha256": "443574b9da5c652a3e12cf95bfc32aa415803a461dca158c2ec5c3f9e127d8b1"
+    },
+    "60": {
+      "archivo": "guitarra/60.wav",
+      "sha256": "578b0a3d7ad1f6ea008ede77c3c99e8681dbf37721ca2fc89bdc22ee00cfc999"
+    },
+    "62": {
+      "archivo": "guitarra/62.wav",
+      "sha256": "d05bcdef1c2060620edbe9b7622e34baf6102a9831fe7aeb64ab3c1d519e7ef6"
+    },
+    "64": {
+      "archivo": "guitarra/64.wav",
+      "sha256": "edbdcdb412b40ef11bc818ac9da43e20852e329ac18aee0c051676a3c573dc4d"
+    },
+    "66": {
+      "archivo": "guitarra/66.wav",
+      "sha256": "9f3b272f894b2a3961fa6327e14ce9de2c18730333659bb79423395f9a029f87"
+    },
+    "68": {
+      "archivo": "guitarra/68.wav",
+      "sha256": "4696c252efc810f878669a9727a391904ed56a5c78646fe07d753467cd99b2cb"
+    },
+    "70": {
+      "archivo": "guitarra/70.wav",
+      "sha256": "f50a0fc9cf0067a29297869c3b8836069b07e91494ac23b2be9db82ba0ea8b99"
+    },
+    "72": {
+      "archivo": "guitarra/72.wav",
+      "sha256": "d7159d68ac4a8d720978d9ab37c3fe4b58827bf5636d269cf6dbf4f474411c75"
+    },
+    "74": {
+      "archivo": "guitarra/74.wav",
+      "sha256": "4774bff8cafcb7ea7f342ec9391f5b417d8f8d8fe43270e5e798cda03fa19a37"
+    },
+    "76": {
+      "archivo": "guitarra/76.wav",
+      "sha256": "554b022eea58fafea6fd60b7f60c72d7712f821abced0d5cca1a5a3af4c82247"
+    }
+  },
+  "piano": {
+    "48": {
+      "archivo": "piano/48.wav",
+      "sha256": "dd1dce0b24542bda9d9e74d9e49253867d301a799ca96a8bc8f5558e01055a84"
+    },
+    "52": {
+      "archivo": "piano/52.wav",
+      "sha256": "6bd020a6dc5a3e32b89e31a1f213deecfef4ef67a9e23a8b7ba97b061a9c144c"
+    },
+    "56": {
+      "archivo": "piano/56.wav",
+      "sha256": "65433f1e5477289e80aa9549cf2e63a2695269387cc682c6096b91e2d28bab8c"
+    },
+    "60": {
+      "archivo": "piano/60.wav",
+      "sha256": "1ea72b7fc5eb218ecb711124988101d9afbd63ffb3a0312571bf8f6bf158ea1a"
+    },
+    "64": {
+      "archivo": "piano/64.wav",
+      "sha256": "5f43ea6d776e5384db31cfae90d619f6edeb43fe5347972f765f2703b5e52982"
+    },
+    "68": {
+      "archivo": "piano/68.wav",
+      "sha256": "a3e3f97fb5c5ad741e56ffdc7c65a197d479f86694c2aac8f76c5d858fade52c"
+    },
+    "72": {
+      "archivo": "piano/72.wav",
+      "sha256": "db4c7b02c63d30576b9635f0d43f96e406091210cab7735475c5f63ec2c1923e"
+    },
+    "76": {
+      "archivo": "piano/76.wav",
+      "sha256": "5f28c60e29592afdf9d782ffb67208a2f24cb24a06b800dc8d2ef5fb9792eb1b"
+    },
+    "80": {
+      "archivo": "piano/80.wav",
+      "sha256": "f9491b1a549dcdc9cd1e3abf647607470a9763470b9e659fba06203313408ced"
+    },
+    "84": {
+      "archivo": "piano/84.wav",
+      "sha256": "2ba0cfd3be24f9703e78e20c18389b1a446b9e0157101921b69698348c5b6813"
+    }
+  },
+  "guitarraAcero": {
+    "40": {
+      "archivo": "guitarraAcero/40.wav",
+      "sha256": "e5a27951139704ff00b669c07ba97644ef7f94fd13b9ec58ee9d2588592b72d8"
+    },
+    "42": {
+      "archivo": "guitarraAcero/42.wav",
+      "sha256": "c3ae75f90dfe9ab6117ae60d2b7b51b41c9600455a6b53a4d9fabcfc27fd0ff2"
+    },
+    "44": {
+      "archivo": "guitarraAcero/44.wav",
+      "sha256": "41cadfaba2669f54165ea2f4c2eb074b516b111a7d1d52d3106f2d9963dc0998"
+    },
+    "46": {
+      "archivo": "guitarraAcero/46.wav",
+      "sha256": "3c53312fe7e6ea0d7bbc638ceb7f7ea4def9aece8b9fa8702594493db42f6c2f"
+    },
+    "48": {
+      "archivo": "guitarraAcero/48.wav",
+      "sha256": "55238297fd1320d9247cf99d6dcc43c9f0f5d28c993205009d2a5cc8c136b095"
+    },
+    "50": {
+      "archivo": "guitarraAcero/50.wav",
+      "sha256": "f265e6ce3f361ea77531a2b616dd944601aa6715fcf8fc4a057537ad1d2fc262"
+    },
+    "52": {
+      "archivo": "guitarraAcero/52.wav",
+      "sha256": "1101bd0993e1286c5d74223b30ea2a3fe598ae1abf56b73dd5ed0fa6de45bc45"
+    },
+    "54": {
+      "archivo": "guitarraAcero/54.wav",
+      "sha256": "f9bc68e472f95bd3389c0a694b9734435ba7671532b594217c3dc166712ae616"
+    },
+    "56": {
+      "archivo": "guitarraAcero/56.wav",
+      "sha256": "1c349771ad461b33f4274152c8bc45cf01fca9d6472bb75381f0d73aae0a19c1"
+    },
+    "58": {
+      "archivo": "guitarraAcero/58.wav",
+      "sha256": "ae556979c89e58edc05bbf65df134717dd99e47feeda491612c498fb7624bde6"
+    },
+    "60": {
+      "archivo": "guitarraAcero/60.wav",
+      "sha256": "2d71ae9d5715ed952b273c480d519d9b8187e90a0d32cce6e19990ad7f7cd7a5"
+    },
+    "62": {
+      "archivo": "guitarraAcero/62.wav",
+      "sha256": "21ea179ffc47d642d183742277257b2517936b480bec17bbcbef7fabac06664d"
+    },
+    "64": {
+      "archivo": "guitarraAcero/64.wav",
+      "sha256": "f993acf1df2d46d1cc5d9e185b626114f777f2efc425e54d99608ba191f05f34"
+    },
+    "66": {
+      "archivo": "guitarraAcero/66.wav",
+      "sha256": "fc6bf6eaad89168aa39bfc5a402c87db8d80bdeb74cac9f9194fd348fe233e5d"
+    },
+    "68": {
+      "archivo": "guitarraAcero/68.wav",
+      "sha256": "c7e52f18403a75153e5c45d962f798ffe01b0fed67b1134d4eb047b7b31102fa"
+    },
+    "70": {
+      "archivo": "guitarraAcero/70.wav",
+      "sha256": "4ae219b6cb64a0a222427f89ce143cb4c6ef3e3eae51611bd7d3b6f56ae08f0b"
+    },
+    "72": {
+      "archivo": "guitarraAcero/72.wav",
+      "sha256": "738bb71c3f02b08fbf809e9c601bc17560e52ca20fbba7020f09efd2b070b7ca"
+    },
+    "74": {
+      "archivo": "guitarraAcero/74.wav",
+      "sha256": "51b362ec90f80c4aeafa6d3e526d9305f26e7bcfcd10f1b7cb6a2e39d3baf5e8"
+    },
+    "76": {
+      "archivo": "guitarraAcero/76.wav",
+      "sha256": "95cc8450a6cd21bb2a7e2a0c2b23bba51ccc6cab16e9822e1607b6b69c180ab9"
+    }
+  },
+  "guitarraElectrica": {
+    "36": {
+      "archivo": "guitarraElectrica/36.wav",
+      "sha256": "a462ba2c7f822d57cd30febd8b8bd8045b431d01e1d221831ea0c03cecf7c510"
+    },
+    "41": {
+      "archivo": "guitarraElectrica/41.wav",
+      "sha256": "3518dc567f4473137981c4b59de9e3ebabc035cba7ed2d2d56df729bd98ecc67"
+    },
+    "45": {
+      "archivo": "guitarraElectrica/45.wav",
+      "sha256": "21dbb69f26d1780cc4fdc2296cf6ea10d13efe63584c39a202bd5116737a43ae"
+    },
+    "48": {
+      "archivo": "guitarraElectrica/48.wav",
+      "sha256": "036f671bd3a4b74b7bf51e1535c3bb3c8cd32aea6e5dd68f7e402dc593291145"
+    },
+    "52": {
+      "archivo": "guitarraElectrica/52.wav",
+      "sha256": "858c65b53cbcc91102a22deb92086fdfc51fe3fb6f4452efc120b14a959561fb"
+    },
+    "55": {
+      "archivo": "guitarraElectrica/55.wav",
+      "sha256": "16861eaed70f0d3770f3ba5feda04273d0758203131c2dcbc038e2ec661b03a3"
+    },
+    "59": {
+      "archivo": "guitarraElectrica/59.wav",
+      "sha256": "b6bcf63668bc0b70cc2dc924ee5593444483e0e96556d91189ea8e86d02b95be"
+    },
+    "64": {
+      "archivo": "guitarraElectrica/64.wav",
+      "sha256": "8d6389051aa20ffb40cbb9f73475e288495451401141bc078196a58758b62a3a"
+    },
+    "67": {
+      "archivo": "guitarraElectrica/67.wav",
+      "sha256": "720b770f943ad0ca45db405a2a6f96be74dc3a50be599f14983d83999df0cca1"
+    },
+    "71": {
+      "archivo": "guitarraElectrica/71.wav",
+      "sha256": "d3af8a467604590922bf89b64e9101d5c84b62dae35f067ce1b7c7fc275dedb2"
+    },
+    "74": {
+      "archivo": "guitarraElectrica/74.wav",
+      "sha256": "7828378c9d7e242581d6f0c471402861e8e3cdc5f76f069208a21ef5b7933495"
+    },
+    "80": {
+      "archivo": "guitarraElectrica/80.wav",
+      "sha256": "40de4b5e91a46a6c907acc137dbf1a1ddd4542c06fef1eed3ea8229d32717a39"
+    },
+    "85": {
+      "archivo": "guitarraElectrica/85.wav",
+      "sha256": "d60a383ac11643d54399b5fdb7afcf5c7bb5219b8c7d2814f8418b2c876521e4"
+    }
+  }
+}

@@ -170,7 +170,7 @@ export class LectorMedios {
     async cargar(medio, opciones, signal, progreso = informarNada, informar = informarNada) {
         const {lado, duracion, inicio} = opciones;
         if (medio.tipo === 'imagen') {
-            const imagen = await this.abrirImagen(medio, signal, informar);
+            const imagen = opciones.imagen || await this.abrirImagen(medio, signal, informar);
             return {
                 ...imagen, fotogramas: [this.muestrear(imagen.imagen, lado)],
                 duracion, inicio: 0, duracionFuente: 0,

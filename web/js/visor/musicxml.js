@@ -1,25 +1,40 @@
 import {COMPASES, PERCUSION, nombreAfinado, notaEscrita, tonalidadNombre} from './arreglo.js';
+import {INSTRUMENTOS} from './audio-pistas.js';
 
 const XML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
 const FIGURAS = [[16,'whole',0],[12,'half',1],[8,'half',0],[6,'quarter',1],
     [4,'quarter',0],[3,'eighth',1],[2,'eighth',0],[1,'16th',0]];
 const campos = s => String(s).replace(/[&<>"']/g, v => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;'}[v]));
 const texto = nota => '<step>' + nota.paso + '</step>' + (nota.alter ? '<alter>' + nota.alter + '</alter>' : '') + '<octave>' + nota.octava + '</octave>';
+const abreviaturas = 'RGBV';
 
 export function afinacionTexto(afinacion) {
     return afinacion ? afinacion.cuerdas.map(n => nombreAfinado(n)).join(' · ') : '';
 }
 
+export function pistasDePartitura(arreglo, canal, voz) {
+    const pistas = arreglo.pistas;
+    if (canal === 'todos') return voz ? [...pistas, voz] : pistas;
+    if (canal === 'guitarra-voz' && voz) {
+        const guitarra = [pistas[1], pistas[0], pistas[2]].find(p => INSTRUMENTOS[p.instrumento].cuerda === 'guitarra') ?? pistas[1];
+        return [guitarra, voz];
+    }
+    return [pistas[Number(canal)] ?? pistas[1]];
+}
+
 export class MusicXML {
-    constructor(arreglo) {
+    constructor(arreglo, voz = null) {
         this.arreglo = arreglo;
+        this.voz = voz;
         this.compas = COMPASES[arreglo.opciones.compas];
         this.bemoles = arreglo.fifths < 0;
     }
 
     exportar({canal = 'todos', desde = 1, hasta = this.arreglo.compases, titulo = true, leyenda = true} = {}) {
         const a = this.arreglo;
-        const pistas = canal === 'todos' ? a.pistas : [a.pistas[Number(canal)]];
+        const pistas = pistasDePartitura(a, canal, this.voz).map(pista => ({
+            ...pista, tablatura: Boolean(pista.afinacion && canal !== 'todos'),
+        }));
         const nombre = titulo ? '<work><work-title>' + campos(a.titulo) + '</work-title></work>' : '';
         const creditos = '<identification><creator type="composer">Órbita Sonora / ORBIDATA ANALYTICS</creator>'
             + '<encoding><software>Órbita Sonora</software></encoding></identification>';
@@ -30,8 +45,9 @@ export class MusicXML {
 
     instrumento(pista) {
         const id = 'P' + (pista.canal + 1);
-        let xml = '<score-part id="' + id + '"><part-name>' + campos(pista.largo + ' · ' + pista.nombre)
-            + '</part-name><part-abbreviation>' + 'RGB'[pista.canal] + '</part-abbreviation>';
+        const nombre = pista.largo ? pista.largo + ' · ' + pista.nombre : pista.nombre;
+        let xml = '<score-part id="' + id + '"><part-name>' + campos(nombre)
+            + '</part-name><part-abbreviation>' + abreviaturas[pista.canal] + '</part-abbreviation>';
         if (pista.percusion) {
             for (const [n, golpe] of Object.entries(PERCUSION)) {
                 xml += '<score-instrument id="' + id + '-I' + n + '"><instrument-name>' + golpe.nombre + '</instrument-name></score-instrument>';
@@ -55,10 +71,10 @@ export class MusicXML {
                 + (this.arreglo.opciones.modo === 'cromatica' ? 'none' : this.arreglo.opciones.modo === 'mayor' ? 'major' : 'minor') + '</mode></key>';
         }
         xml += '<time><beats>' + this.compas.pulsos + '</beats><beat-type>' + this.compas.denominador + '</beat-type></time>';
-        if (pista.afinacion) xml += '<staves>2</staves>';
-        xml += '<clef' + (pista.afinacion ? ' number="1"' : '') + '><sign>' + pista.clave + '</sign>'
+        if (pista.tablatura) xml += '<staves>2</staves>';
+        xml += '<clef' + (pista.tablatura ? ' number="1"' : '') + '><sign>' + pista.clave + '</sign>'
             + (pista.clave === 'G' ? '<line>2</line>' : pista.clave === 'F' ? '<line>4</line>' : '') + '</clef>';
-        if (pista.afinacion) {
+        if (pista.tablatura) {
             const cuerdas = pista.afinacion.cuerdas;
             xml += '<clef number="2"><sign>TAB</sign><line>' + Math.ceil(cuerdas.length / 2) + '</line></clef>'
                 + '<staff-details number="2"><staff-lines>' + cuerdas.length + '</staff-lines>'
@@ -70,7 +86,7 @@ export class MusicXML {
                 }).join('') + '</staff-details>';
         }
         if (pista.transposicion) {
-            xml += '<transpose' + (pista.afinacion ? ' number="1"' : '')
+            xml += '<transpose' + (pista.tablatura ? ' number="1"' : '')
                 + '><chromatic>0</chromatic><octave-change>-1</octave-change></transpose>';
         }
         return xml + '</attributes>';
@@ -147,7 +163,7 @@ export class MusicXML {
         return '<note>' + tipo + '<duration>' + evento.duracion + '</duration>' + uniones
             + (silencio || tab ? '' : '<instrument id="' + instrumento + '"/>')
             + '<voice>' + staff + '</voice>' + figuras + (golpe?.cabeza === 'x' ? '<notehead>x</notehead>' : '')
-            + (pista.afinacion ? '<staff>' + staff + '</staff>' : '') + barras + detalles + '</note>';
+            + (pista.tablatura ? '<staff>' + staff + '</staff>' : '') + barras + detalles + '</note>';
     }
 
     parte(pista, desde, hasta, leyenda) {
@@ -158,12 +174,23 @@ export class MusicXML {
             const nivel = compas.dinamica;
             if (nivel && nivel !== ultimoNivel) {
                 xml += '<direction placement="below"><direction-type><dynamics><' + nivel + '/></dynamics></direction-type>'
-                    + (pista.afinacion ? '<staff>1</staff>' : '') + '</direction>';
+                    + (pista.tablatura ? '<staff>1</staff>' : '') + '</direction>';
                 ultimoNivel = nivel;
             }
             const figuras = this.ritmo(compas);
-            xml += figuras.map(e => this.nota(pista, e, 1)).join('');
-            if (pista.afinacion) {
+            const inicio = (compas.numero - 1) * this.arreglo.unidadesCompas;
+            const acordes = pista.afinacion ? new Map(this.arreglo.armonia
+                .filter(a => a.desde >= inicio && a.desde < inicio + this.arreglo.unidadesCompas && a.intensidad.some(Boolean))
+                .map(a => [a.desde, a.nombre])) : null;
+            for (const e of figuras) {
+                if (acordes?.has(e.inicio)) {
+                    xml += '<direction placement="above"><direction-type><words>' + campos(acordes.get(e.inicio))
+                        + '</words></direction-type>'
+                        + (pista.tablatura ? '<staff>1</staff>' : '') + '</direction>';
+                }
+                xml += this.nota(pista, e, 1);
+            }
+            if (pista.tablatura) {
                 xml += '<backup><duration>' + this.arreglo.unidadesCompas + '</duration></backup>'
                     + figuras.map(e => this.nota(pista, e, 2)).join('');
             }

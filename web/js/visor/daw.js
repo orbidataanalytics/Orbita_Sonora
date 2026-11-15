@@ -2,11 +2,12 @@ import {aHz, INSTRUMENTOS, mezclaInicial, archivoWav, renderizarNota, volumenPis
 import {ArchivosMIDI} from './midi.js';
 import {AudioVivo, CanalVivo} from './audio-vivo.js';
 import {descargar} from './informe.js';
+import {notaGrabada} from './muestras.js';
 
 const porId = id => document.getElementById(id);
 const nombres = ['Rojo', 'Verde', 'Azul'];
 const colores = ['#f58f92', '#91d9a7', '#9bb8f7'];
-const CLAVE_MEZCLA = 'mezcla-daw-v1';
+const CLAVE_MEZCLA = 'mezcla-daw-v2';
 
 export class EstudioDAW {
     constructor(transporte, catalogo, acciones) {
@@ -162,10 +163,12 @@ export class EstudioDAW {
         await contexto.resume();
         if (turno !== this.turnoPrueba) return;
         const primera = this.transporte.arreglo?.eventosAudio(canal)[0];
-        const frecuencia = aHz(primera?.midi ?? (INSTRUMENTOS[pista.instrumento].grave ? 40 : 60));
+        const midi = primera?.midi ?? (INSTRUMENTOS[pista.instrumento].grave ? 40 : 60);
         const nivel = (primera?.fuerza ?? .7) * Math.max(.5, pista.volumen);
+        const grabada = await notaGrabada(contexto, pista.instrumento, midi, nivel);
+        if (turno !== this.turnoPrueba) return;
         const fuente = this.prueba = contexto.createBufferSource();
-        fuente.buffer = renderizarNota(contexto, pista, frecuencia, .75, nivel, primera?.timbre ?? pista.instrumento);
+        fuente.buffer = grabada ?? renderizarNota(contexto, pista, aHz(midi), .75, nivel, primera?.timbre ?? pista.instrumento);
         fuente.connect(this.transporte.ganancia);
         const estado = porId('daw-estado');
         const texto = 'Probando ' + INSTRUMENTOS[pista.instrumento].nombre + ' · ' + 'RGB'[canal];
@@ -244,7 +247,6 @@ export class EstudioDAW {
             this.transporte.pausar();
         };
         porId('daw-wav').onclick = () => this.exportarWAV('arreglo').catch(error => this.acciones.informarError(error));
-        porId('descargar-wav').onclick = () => this.exportarWAV('rgb').catch(error => this.acciones.informarError(error));
         porId('mus-midi').onclick = () => this.exportarMIDI();
         porId('daw-url').value = this.vivo.url;
         porId('daw-conectar').onclick = async () => {

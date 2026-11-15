@@ -24,5 +24,9 @@ OpenSheetMusicDisplay 1.9.8, licencia BSD-3 en web/vendor/LICENSE-osmd.txt.
 @tonejs/midi 2.0.28, licencia MIT en web/vendor/LICENSE-tonejs-midi.txt.
 Tone.js 15.1.22, licencia MIT en web/vendor/LICENSE-tone.txt.
 
+Guitarras de nailon y acero y piano grabados por Meta Open Sound, CC0 1.0 Universal.
+Guitarra eléctrica limpia FSBS de FreePats, CC0 1.0 Universal.
+Edición de formato, duración y nivel para el visor. Origen de cada nota en web/muestras/FUENTES.md.
+
 Descargas originales incluidas de NASA Scientific Visualization Studio. Créditos en los manifiestos de cada medio.
 Las huellas de los archivos se documentan en docs/ARCHIVOS_NASA_SHA256.txt.

@@ -1,23 +1,24 @@
-import {ReproductorVideo} from './reproductor-video.js';
 import {coleccionMarcas} from './marcas-sig.js';
-import {Catalogo, recurso} from './catalogo.js';
+import {Catalogo, extension, recurso} from './catalogo.js';
 import {VisorGIS, leerGeografia, posicionGeografica} from './gis.js';
 import {descargar, Informe} from './informe.js';
-import {LectorMedios, liberarVideo} from './medios.js';
+import {LectorMedios} from './medios.js';
 import {Paneles} from './paneles.js';
 import {SecuenciaSonora, Transporte} from './sonificacion.js';
 import {SeleccionArea} from './mascara.js';
 import {Rocola} from './rocola.js';
 import {EstudioDAW} from './daw.js';
-import {ArregloMusical} from './arreglo.js';
+import {ArregloMusical, nombreAfinado, tonalidadNombre} from './arreglo.js';
 import {PartituraMusical} from './partitura-musical.js';
-import {VentanaInterpretaciones} from './interpretaciones.js';
-import {TAMANOS_ZONA} from './estadistica-zonal.js';
+import {InterpretacionesEnPantalla} from './interpretaciones.js';
+import {letraInicial} from './letra.js';
+import {VozGrabada} from './voz-grabada.js';
+import {TAMANOS_ZONA, ZONA_INICIAL} from './estadistica-zonal.js';
 import {NOMBRES_RECORRIDO} from '../recorridos.js';
 
 const porId = id => document.getElementById(id);
-const botones = ['play', 'mus-escuchar', 'pausa', 'descargar-wav', 'marcar', 'informe', 'descargar-datos', 'linea-tiempo'];
-const tipos = {imagen: 'Imagen', video: 'Video'};
+const botones = ['mus-escuchar', 'pausa', 'marcar', 'informe', 'descargar-datos', 'linea-tiempo'];
+const FORMATOS_LOCAL = new Set(['jpg', 'jpeg', 'png', 'webp', 'avif', 'bmp', 'gif']);
 const modoId = {medio: 'ver-medio', mercator: 'ver-mapa', globe: 'ver-globo'};
 
 class AplicacionVisor {
@@ -26,7 +27,7 @@ class AplicacionVisor {
         this.lector = new LectorMedios();
         this.transporte = new Transporte((t, activo, preparando) => this.actualizar(t, activo, preparando),
             (avance, modo) => this.progresoAudio(avance, modo));
-        this.videoFuente = new ReproductorVideo(porId('video-fuente-panel'), porId('video-sincronizado'), () => this.transporte.pausar());
+        this.vozGrabada = new VozGrabada(this.transporte);
         this.rocola = new Rocola({
             disco: () => this.secuencia ? this.alternarReproduccion() : this.rocola.abrirCatalogo(),
             reproducir: () => this.reproducir(),
@@ -39,8 +40,9 @@ class AplicacionVisor {
             informarError: error => this.errorAudio(error),
         });
         this.partitura = new PartituraMusical(() => this.configurarMusica(this.daw.mezcla, true).catch(e => this.estado(e.message, true)),
-            tiempo => this.transporte.buscar(tiempo, 'arreglo').catch(e => this.errorAudio(e)), () => this.transporte.pausar());
-        this.interpretaciones = new VentanaInterpretaciones(() => {
+            tiempo => this.transporte.buscar(tiempo, 'arreglo').catch(e => this.errorAudio(e)), () => this.transporte.pausar(),
+            () => this.letraActual());
+        this.interpretaciones = new InterpretacionesEnPantalla(() => {
             this.transporte.pausar();
             this.daw.detenerMIDI();
             this.daw.detenerPrueba();
@@ -50,7 +52,6 @@ class AplicacionVisor {
         this.gis = new VisorGIS(porId('mapa'), porId('mensaje-mapa'), (indice, tiempo) => this.buscar(indice, tiempo));
         this.entradas = [];
         this.marcas = [];
-        this.filtro = 'todos';
         this.vista = 'medio';
         this.portadas = new Map();
         this.enlazar();
@@ -62,8 +63,7 @@ class AplicacionVisor {
             this.entradas = [...precargados, ...locales];
             this.pintarPaquetes();
             await this.daw.restaurarGuardada();
-            this.pintarMedios();
-            this.estado('Listo. Elige un disco en el catálogo.');
+            this.estado('Elige una imagen de la galería.');
         } catch (error) {
             this.estado(error.message, true);
         }
@@ -91,7 +91,7 @@ class AplicacionVisor {
         const valor = Math.round(avance * 100);
         this.mostrarAvance('audio', valor);
         porId('progreso-audio-texto').textContent = modo === 'arreglo'
-            ? (valor === 100 ? 'Arreglo listo' : 'Generando audio del arreglo')
+            ? (valor === 100 ? 'Arreglo listo' : valor < 34 ? 'Preparando las notas de los instrumentos' : 'Mezclando el arreglo')
             : (valor === 100 ? 'Audio RGB generado' : 'Sintetizando píxeles RGB con Tone.js');
         this.daw.progreso(valor, modo);
     }
@@ -100,9 +100,7 @@ class AplicacionVisor {
         const s = this.secuencia;
         const origen = s.datos.copia ? 'Descarga original incluida' : s.datos.normalizado
             ? 'Descarga original decodificada por la API' : 'Archivo abierto';
-        const tramo = this.medio.tipo === 'video'
-            ? ` · tramo ${s.datos.inicio.toFixed(1)}–${(s.datos.inicio + this.datos.duracion).toFixed(1)} s` : '';
-        this.progreso(100, origen + tramo + (mostrada ? ' · Partituras visibles' : ' · Partitura RGB disponible'));
+        this.progreso(100, origen + (mostrada ? ' · Partitura visible' : ' · Partitura disponible en MusicXML'));
     }
 
     enlace(id, url) {
@@ -112,127 +110,73 @@ class AplicacionVisor {
         else a.removeAttribute('href');
     }
 
-    tarjeta(titulo, detalle, activa, portada, accion) {
-        const boton = document.createElement('button');
-        boton.className = 'tarjeta' + (portada ? '' : ' tarjeta-medio');
-        boton.type = 'button';
-        boton.setAttribute('aria-current', String(activa));
-        let icono;
-        if (portada) {
-            icono = document.createElement('img');
-            icono.alt = '';
-            icono.loading = 'lazy';
-            icono.src = portada;
-            icono.onerror = () => {
-                const marcador = document.createElement('span');
-                marcador.className = 'sin-portada';
-                marcador.textContent = '◉';
-                icono.replaceWith(marcador);
-            };
-        } else {
-            icono = document.createElement('span');
-            icono.className = 'tipo-icono';
-            icono.textContent = detalle.startsWith('Video') ? '▶' : '◫';
-        }
-        const texto = document.createElement('span');
-        const fuerte = document.createElement('strong');
-        const pequeno = document.createElement('small');
-        fuerte.textContent = titulo;
-        pequeno.textContent = detalle;
-        texto.append(fuerte, pequeno);
-        boton.append(icono, texto);
-        boton.addEventListener('click', accion);
-        return boton;
+    portada(paquete) {
+        const archivo = paquete.portada_archivo;
+        if (archivo && !this.portadas.has(paquete.id)) this.portadas.set(paquete.id, URL.createObjectURL(archivo));
+        const url = paquete.portada_local || paquete.portada;
+        return this.portadas.get(paquete.id) || (url ? recurso(url) : null);
     }
 
     pintarPaquetes() {
-        const consulta = porId('buscar-paquete').value.trim().toLocaleLowerCase();
-        porId('cuenta-paquetes').textContent = String(this.entradas.length);
-        const tarjetas = this.entradas.filter(p => p.titulo.toLocaleLowerCase().includes(consulta)).map(p => {
-            if (p.portada_archivo && !this.portadas.has(p.id)) this.portadas.set(p.id, URL.createObjectURL(p.portada_archivo));
-            const imagenes = p.imagenes ?? p.medios.filter(m => m.tipo === 'imagen').length;
-            const videos = p.videos ?? p.medios.filter(m => m.tipo === 'video').length;
-            const portada = this.portadas.get(p.id) || (p.portada && recurso(p.portada));
-            const descargas = p.descargas_incluidas ? ` · ${p.descargas_incluidas} descargas incluidas` : '';
-            return this.tarjeta(p.titulo, `${imagenes} imágenes · ${videos} videos${descargas}`,
-                p.id === this.paquete?.id, portada, () => this.seleccionarPaquete(p));
+        const tarjetas = this.entradas.flatMap(paquete => {
+            const medios = paquete.medios?.filter(m => m.tipo === 'imagen');
+            if (medios ? !medios.length : !paquete.imagenes) return [];
+            const portada = this.portada(paquete);
+            if (!portada) return [];
+            const boton = document.createElement('button');
+            boton.type = 'button';
+            boton.dataset.paquete = paquete.id;
+            boton.title = paquete.titulo;
+            boton.setAttribute('aria-label', paquete.titulo);
+            boton.setAttribute('aria-pressed', String(paquete.id === this.paquete?.id));
+            const imagen = document.createElement('img');
+            imagen.alt = '';
+            imagen.loading = 'lazy';
+            imagen.src = portada;
+            imagen.onerror = () => boton.remove();
+            boton.append(imagen);
+            boton.onclick = () => this.seleccionarPaquete(paquete);
+            return [boton];
         });
         porId('lista-paquetes').replaceChildren(...tarjetas);
     }
 
-    pintarMedios() {
-        const medios = this.paquete?.medios || [];
-        const consulta = porId('buscar-medio').value.trim().toLocaleLowerCase();
-        const seleccionados = medios.filter(m => (this.filtro === 'todos' || m.tipo === this.filtro)
-            && [m.titulo, m.grupo, m.url, m.archivo?.name].some(t => t?.toLocaleLowerCase().includes(consulta)));
-        porId('cuenta-medios').textContent = `${seleccionados.length} / ${medios.length}`;
-        const tarjetas = seleccionados.map(medio => this.tarjeta(medio.titulo,
-            [tipos[medio.tipo], medio.copia_local && 'Descarga incluida', medio.grupo].filter(Boolean).join(' · '),
-            medio.id === this.medio?.id,
-            medio.vista_local && medio.tipo === 'imagen' ? recurso(medio.vista_local) : null,
-            () => {
-                porId('catalogo-dialogo').close();
-                this.seleccionarMedio(medio);
-            }));
-        if (!tarjetas.length) {
-            const texto = document.createElement('p');
-            texto.className = 'lista-vacia';
-            texto.textContent = this.paquete ? 'No hay medios para este filtro.' : 'Elige una página para ver sus imágenes y videos.';
-            tarjetas.push(texto);
-        }
-        if (this.filtro === 'todos') for (const pendiente of this.paquete?.pendientes || []) {
-            if (!pendiente.url) continue;
-            const a = document.createElement('a');
-            a.className = 'boton discreto';
-            a.textContent = pendiente.titulo + ' ↗';
-            a.href = pendiente.url;
-            a.target = '_blank';
-            a.rel = 'noopener';
-            tarjetas.push(a);
-        }
-        porId('lista-medios').replaceChildren(...tarjetas);
-    }
-
-    async seleccionarPaquete(entrada, abrirMedio = false) {
-        if (!entrada) return;
+    async seleccionarPaquete(entrada) {
         this.peticionPaquete?.abort();
         this.peticionMedio?.abort();
         const peticion = this.peticionPaquete = new AbortController();
+        this.medio = null;
+        this.paquete = null;
         this.reiniciarMedio();
-        this.estado('Abriendo paquete…');
+        this.interpretaciones.reiniciar();
+        this.estado('Abriendo la imagen…');
         try {
             const paquete = await this.catalogo.cargar(entrada, peticion.signal);
             if (peticion.signal.aborted) return;
+            const imagenes = paquete.medios.filter(m => m.tipo === 'imagen');
+            const medio = imagenes.find(m => m.id === paquete.medio_inicial)
+                || imagenes.find(m => m.copia_local) || imagenes[0];
+            if (!medio) throw new Error('Este disco requiere una imagen.');
             this.paquete = paquete;
-            for (const id of ['abrir-interpretaciones','catalogo-interpretaciones']) porId(id).disabled = false;
-            porId('titulo-paquete').textContent = paquete.titulo;
-            porId('proveedor').textContent = paquete.proveedor || 'Paquete local';
-            this.enlace('fuente-paquete', paquete.fuente);
-            this.filtro = 'todos';
-            porId('buscar-medio').value = '';
-            porId('titulo-submenu').textContent = paquete.titulo;
-            this.pintarPaquetes();
-            this.marcarFiltro();
-            const inicial = paquete.medios.find(m => m.id === paquete.medio_inicial)
-                || paquete.medios.find(m => m.tipo === 'imagen') || paquete.medios[0];
-            if (abrirMedio) await this.seleccionarMedio(inicial);
-            else this.estado('Selecciona la imagen o el video que quieres sonificar.');
+            for (const boton of porId('lista-paquetes').querySelectorAll('button')) {
+                boton.setAttribute('aria-pressed', String(boton.dataset.paquete === paquete.id));
+            }
+            this.interpretaciones.preparar(paquete).catch(error => this.estado(error.message, true));
+            await this.seleccionarMedio(medio);
         } catch (error) {
             if (!peticion.signal.aborted) this.estado(error.message, true);
         }
     }
 
-    marcarFiltro() {
-        document.querySelectorAll('[data-filtro]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.filtro === this.filtro)));
-        this.pintarMedios();
-    }
-
-    reiniciarMedio() {
+    reiniciarMedio(conservarVoz = false) {
         this.secuencia = null;
         porId('sonido-estado').textContent = 'Selecciona un medio.';
         this.daw.detenerPrueba();
+        porId('original-panel').hidden = true;
+        porId('letra-cancion').hidden = true;
+        porId('guitarras-activas').hidden = true;
+        porId('original-imagen').replaceChildren();
         this.datos = null;
-        this.videoFuente.cargar(null);
         this.progreso(null);
         this.mostrarAvance('audio', null);
         this.geo = null;
@@ -246,6 +190,11 @@ class AplicacionVisor {
         porId('estado-mascara').textContent = '';
         this.refrescarGeo();
         this.transporte.cargar(null);
+        this.vozGrabada.panel.hidden = true;
+        if (!conservarVoz) {
+            this.vozGrabada.panel.open = false;
+            this.vozGrabada.limpiar();
+        }
         this.partitura.cargar(null);
         this.paneles.limpiar();
         porId('pixel-activo').textContent = '–';
@@ -258,29 +207,23 @@ class AplicacionVisor {
         this.deshabilitarControles();
     }
 
-    async seleccionarMedio(medio, opcion = 0, reiniciarTramo = true) {
+    async seleccionarMedio(medio, opcion = 0, conservarImagen = false) {
         if (!medio) return;
         this.peticionMedio?.abort();
         const peticion = this.peticionMedio = new AbortController();
-        this.reiniciarMedio();
+        const anterior = conservarImagen && this.opcion === opcion ? this.datos : null;
+        this.reiniciarMedio(conservarImagen);
         this.medio = medio;
         this.opcion = opcion;
         this.datos = null;
         this.marcas = [];
         this.pintarMarcas();
-        this.pintarMedios();
-        porId('titulo-medio').textContent = medio.titulo;
-        porId('info-medio').textContent = medio.descripcion || tipos[medio.tipo];
-        porId('duracion-fila').hidden = medio.tipo !== 'imagen';
-        porId('inicio-fila').hidden = medio.tipo !== 'video';
-        if (reiniciarTramo) porId('inicio-video').value = '0';
-        const archivos = [medio, ...(medio.variantes || [])];
+        const archivos = [medio, ...(medio.variantes || []).filter(a => a.copia_local)];
         const varianteElegida = archivos[opcion] || medio;
-        const elegido = varianteElegida === medio ? medio : {...medio, ...varianteElegida,
-            titulo: medio.titulo, vista_local: null, copia_local: varianteElegida.copia_local};
+        const elegido = {...medio, ...varianteElegida, titulo: this.paquete.titulo,
+            copia_local: varianteElegida.copia_local};
         this.enlace('fuente-medio', elegido.url);
         porId('archivo-activo').textContent = elegido.archivo?.name || elegido.nombre || elegido.url?.split('/').at(-1) || '';
-        porId('cargar-original').hidden = true;
         const variante = porId('variante');
         variante.replaceChildren(...archivos.map((m, i) => {
             const opcion = document.createElement('option');
@@ -290,8 +233,7 @@ class AplicacionVisor {
         }));
         variante.value = String(opcion);
         porId('fila-variante').hidden = archivos.length <= 1;
-        this.rocola.montar(medio.titulo, this.paquete.titulo, this.portadas.get(this.paquete.id)
-            || (this.paquete.portada_local || this.paquete.portada ? recurso(this.paquete.portada_local || this.paquete.portada) : null));
+        this.rocola.montar(this.paquete.titulo, medio.archivo?.name || 'Imagen seleccionada', this.portada(this.paquete));
         this.progreso(10, 'Abriendo el archivo…');
         porId('sonido-estado').textContent = 'Preparando los píxeles.';
         try {
@@ -299,16 +241,15 @@ class AplicacionVisor {
             const fondo = this.catalogo.ajuste(this.clave('fondo'));
             const datos = await this.lector.cargar(elegido, {
                 lado: Number(porId('cuadricula').value), duracion: Number(porId('duracion').value),
-                inicio: Number(porId('inicio-video').value),
-            }, peticion.signal, (hechos, total) => this.progreso(30 + 45 * hechos / total, `Muestreando fotogramas ${hechos} de ${total}…`),
-            mensaje => this.progreso(22, mensaje));
+                inicio: 0, imagen: anterior,
+            }, peticion.signal, undefined, mensaje => this.progreso(22, mensaje));
             const [guardada, modoFondo] = await Promise.all([geografia, fondo]);
-            if (peticion.signal.aborted) {
-                if (datos.video) liberarVideo(datos.video, datos.blob);
-                return;
-            }
+            if (peticion.signal.aborted) return;
             this.datos = datos;
-            this.videoFuente.cargar(datos);
+            datos.imagen.alt = this.paquete.titulo;
+            porId('original-imagen').replaceChildren(datos.imagen);
+            porId('original-titulo').textContent = this.paquete.titulo;
+            porId('original-panel').hidden = false;
             this.medioLeido = elegido;
             this.fondo = modoFondo || {modo: medio.mascara?.modo || 'alfa', tolerancia: 28, poligono: null};
             porId('modo-fondo').value = this.fondo.modo;
@@ -321,27 +262,23 @@ class AplicacionVisor {
             }
             await this.crearSecuencia(peticion.signal);
             if (peticion.signal.aborted || !this.secuencia) return;
-            if (medio.tipo === 'video') porId('inicio-video').max = Math.max(0, this.datos.duracionFuente - .05);
             this.mostrarVista('medio');
         } catch (error) {
             if (peticion.signal.aborted) return;
-            this.estado(error.name === 'TimeoutError'
-                ? 'La conversión tardó demasiado. Prueba una variante MP4/WebM más pequeña.'
-                : error.message, true);
+            this.estado(error.name === 'TimeoutError' ? 'La imagen tardó demasiado en abrir.' : error.message, true);
             this.progreso(null);
-            porId('cargar-original').hidden = !elegido.url;
-            porId('sonido-estado').textContent = 'No se pudo abrir la descarga original. Selecciona otra variante o carga el archivo descargado desde tu equipo.';
+            porId('sonido-estado').textContent = 'Abre otra imagen o carga una desde tu equipo.';
             this.mostrarVista('medio');
         }
     }
 
     clave(tipo) {
-        return `${tipo}:${this.paquete?.id}:${this.medio?.id}${tipo === 'marcas' ? ':' + porId('recorrido').value + ':' + porId('cuadricula').value + ':' + porId('inicio-video').value + ':' + porId('duracion').value + ':' + porId('velocidad-recorrido').value + ':' + (this.opcion || 0) : ''}`;
+        return `${tipo}:${this.paquete?.id}:${this.medio?.id}${tipo === 'marcas' ? ':' + porId('recorrido').value + ':' + porId('cuadricula').value + ':0' + ':' + porId('duracion').value + ':' + porId('velocidad-recorrido').value + ':' + (this.opcion || 0) : ''}`;
     }
 
     deshabilitarControles() {
         botones.forEach(id => { porId(id).disabled = true; });
-        for (const id of ['play', 'mus-escuchar']) porId(id).setAttribute('aria-pressed', 'false');
+        porId('mus-escuchar').setAttribute('aria-pressed', 'false');
     }
 
     async crearSecuencia(signal) {
@@ -353,13 +290,13 @@ class AplicacionVisor {
         this.rocola.estado(false, false);
         this.daw.estado(false, false);
         porId('sonido-estado').textContent = 'Preparando el recorrido.';
+        const letra = porId('letra-sugerida');
+        letra.disabled = true;
         this.deshabilitarControles();
-        this.videoFuente.mover(0, false);
         const velocidad = Number(porId('velocidad-recorrido').value);
-        const duracion = (this.medio.tipo === 'imagen' ? Number(porId('duracion').value) : this.datos.duracion) / velocidad;
+        const duracion = Number(porId('duracion').value) / velocidad;
         const revision = this.revisionSecuencia = Symbol();
         const vigente = () => !signal?.aborted && revision === this.revisionSecuencia;
-        porId('herramientas').open = true;
         this.progreso(80, 'Calculando recorrido, máscara y zona sonora…');
         await new Promise(resolve => setTimeout(resolve, 0));
         if (!vigente()) return;
@@ -369,9 +306,8 @@ class AplicacionVisor {
             Number(porId('cuadricula').value), porId('recorrido').value, this.fondo,
             Number(porId('tamano-zona').value), porId('escala-frecuencia').value);
         const s = this.secuencia;
-        porId('ritmo-lectura').textContent = `${NOMBRES_RECORRIDO[s.recorrido]} · ${s.pixeles.toLocaleString('es-CO')} celdas · ${(1000 * s.segundos_por_pixel).toLocaleString('es-CO', {maximumFractionDigits: 2})} ms por celda`;
-        porId('regla-zona').textContent = s.tamanoZona === 1 ? '1 × 1 usa el RGB de la celda activa.'
-            : '70 % de la celda activa y 30 % del promedio de sus vecinos válidos.';
+        porId('regla-zona').textContent = s.tamanoZona === 1 ? 'El ritmo responde a los cambios de color durante el recorrido.'
+            : '70 % del píxel y 30 % de sus vecinos válidos. El contraste local cambia el ritmo de la guitarra.';
         this.paneles.cargar(this.secuencia);
         this.paneles.actualizarOcupacion(Number(porId('niveles').value), porId('ambito').value);
         this.indice = -1;
@@ -381,7 +317,9 @@ class AplicacionVisor {
         const arreglo = new ArregloMusical(this.secuencia, this.partitura.opciones, this.daw.mezcla);
         const dibujada = this.partitura.cargar(arreglo);
         this.transporte.cargar(this.secuencia, arreglo);
-        for (const id of ['descargar-wav', 'informe', 'descargar-datos', 'linea-tiempo']) porId(id).disabled = false;
+        this.vozGrabada.panel.hidden = false;
+        this.vozGrabada.refrescar();
+        for (const id of ['descargar-datos', 'linea-tiempo']) porId(id).disabled = false;
         this.rocola.estado(true, false);
         this.daw.estado(true, false);
         this.leerMascara();
@@ -393,8 +331,16 @@ class AplicacionVisor {
             this.marcas = [];
             this.pintarMarcas();
         }
-        const [marcas, mostrada] = await Promise.all([this.catalogo.ajuste(clave), dibujada]);
-        if (vigente()) this.informarPartitura(mostrada);
+        const [marcas, mostrada, letraGuardada] = await Promise.all([
+            this.catalogo.ajuste(clave), dibujada, this.catalogo.ajuste(this.clave('letra')),
+        ]);
+        if (vigente()) {
+            letra.value = typeof letraGuardada === 'string' ? letraGuardada : letraInicial(this.paquete, s);
+            letra.disabled = false;
+            porId('letra-cancion').hidden = false;
+            porId('informe').disabled = false;
+            this.informarPartitura(mostrada);
+        }
         if (vigente() && clave === this.clave('marcas') && this.secuencia === secuencia && this.claveMarcas !== clave) {
             this.claveMarcas = clave;
             this.marcas = marcas || [];
@@ -411,6 +357,7 @@ class AplicacionVisor {
             dibujada = this.partitura.cargar(arreglo, this.transporte.tiempo, true);
         }
         await this.transporte.configurar(mezcla, arreglo);
+        if (dibujada) this.vozGrabada.refrescar();
         if (dibujada) {
             const mostrada = await dibujada;
             if (this.secuencia && this.transporte.arreglo === arreglo) this.informarPartitura(mostrada);
@@ -447,6 +394,7 @@ class AplicacionVisor {
     }
 
     reproducir(modo = 'arreglo') {
+        this.interpretaciones.cerrar();
         this.daw.detenerMIDI();
         this.daw.detenerPrueba();
         return this.transporte.reproducir(modo).catch(e => this.errorAudio(e));
@@ -454,6 +402,7 @@ class AplicacionVisor {
 
     probarPista(canal) {
         this.transporte.pausar();
+        this.interpretaciones.cerrar();
         this.daw.detenerMIDI();
         return this.daw.escucharPista(canal);
     }
@@ -475,22 +424,19 @@ class AplicacionVisor {
         porId('linea-tiempo').value = tiempo;
         porId('tiempo-actual').textContent = tiempo.toFixed(3) + ' s';
         porId('pausa').disabled = !activo && !preparando;
-        porId('play').disabled = !esArreglo && (activo || preparando);
         porId('mus-escuchar').disabled = esArreglo && (activo || preparando);
-        porId('play').setAttribute('aria-pressed', String(!esArreglo && (activo || preparando)));
         porId('mus-escuchar').setAttribute('aria-pressed', String(esArreglo && (activo || preparando)));
-        const estado = `${esArreglo ? 'Arreglo para tocar' : 'Sonificación RGB'} · ${tipos[s.medio.tipo]} · ${s.lado} × ${s.lado}`;
+        const estado = `${esArreglo ? 'Arreglo para tocar' : 'Sonificación RGB'} · ${s.lado} × ${s.lado}`;
         if (porId('sonido-estado').textContent !== estado) porId('sonido-estado').textContent = estado;
         this.rocola.estado(true, activo, preparando);
         this.daw.estado(true, activo, preparando);
-        this.paneles.actualizar(indice, tiempoRGB, !activo);
+        this.paneles.actualizar(indice, !activo);
         this.partitura.actualizar(esArreglo ? tiempo : tiempoRGB, esArreglo || (!activo && !preparando));
-        this.videoFuente.mover(tiempoRGB, activo && tiempo < s.duracion_s, s.datos.velocidad);
+        this.mostrarNotasGuitarras(tiempo);
         if (this.indice !== indice) {
             this.indice = indice;
             this.gis.pintar(indice);
             const [x, y] = this.secuencia.coordenadas[indice];
-            this.videoFuente.marcar(x, y, this.secuencia.lado);
             const posicion = posicionGeografica(this.geo, x, y, this.secuencia.lado);
             porId('pixel-activo').textContent = `${indice + 1} / ${this.secuencia.pixeles} · columna ${x + 1}, fila ${y + 1}`
                 + (posicion ? ` · ${posicion.map(v => v.toFixed(5)).join(', ')}` : '')
@@ -503,6 +449,22 @@ class AplicacionVisor {
         if (!this.secuencia) return;
         const punto = Math.max(0, Math.min(this.secuencia.pixeles - 1, indice));
         this.transporte.buscar(tiempo ?? (punto + .5) * this.secuencia.segundos_por_pixel).catch(e => this.errorAudio(e));
+    }
+
+    mostrarNotasGuitarras(tiempo) {
+        const arreglo = this.transporte.arreglo;
+        if (!arreglo) return;
+        porId('guitarras-activas').hidden = false;
+        const unidad = tiempo / arreglo.unidad;
+        for (const pista of arreglo.pistas) {
+            const letra = 'RGB'[pista.canal];
+            const evento = pista.eventos.find(e => unidad >= e.inicio && unidad < e.inicio + e.duracion);
+            const salida = porId('nota-guitarra-' + letra.toLowerCase());
+            const nota = evento ? nombreAfinado(evento.nota, arreglo.fifths < 0) : 'Silencio';
+            const texto = `${pista.nombre} · ${nota}`;
+            if (salida.textContent !== texto) salida.textContent = texto;
+            salida.title = tonalidadNombre(arreglo.opciones);
+        }
     }
 
     mostrarVista(modo) {
@@ -569,22 +531,30 @@ class AplicacionVisor {
         this.catalogo.ajustar(this.claveMarcas, this.marcas).catch(() => this.estado('Las marcas se conservarán durante esta sesión.'));
     }
 
+    letraActual() {
+        return porId('letra-incluir').checked ? porId('letra-sugerida').value.trim() : '';
+    }
+
     informe() {
         return new Informe(this.secuencia, this.paquete, Number(porId('niveles').value), this.marcas, this.geo,
-            this.daw.mezcla, this.transporte.arreglo);
+            this.daw.mezcla, this.transporte.arreglo, this.letraActual(), porId('mus-parte').value, this.partitura.voz);
     }
 
     enlazar() {
         for (const [modo, id] of Object.entries(modoId)) porId(id).onclick = () => this.mostrarVista(modo);
-        porId('buscar-paquete').oninput = () => this.pintarPaquetes();
-        porId('buscar-medio').oninput = () => this.pintarMedios();
-        for (const id of ['abrir-interpretaciones','catalogo-interpretaciones']) {
-            porId(id).onclick = () => {
-                porId('catalogo-dialogo').close();
-                this.interpretaciones.abrir(this.paquete).catch(error => this.estado(error.message, true));
-            };
-        }
-        for (const id of ['nav-analisis','abrir-analisis']) porId(id).onclick = () => { porId('herramientas').open = true; };
+        for (const id of ['abrir-daw','partitura-daw']) porId(id).onclick = () => { porId('daw-panel').open = true; };
+        porId('abrir-importar').onclick = () => porId('archivos').click();
+        porId('archivos').onchange = () => this.importar();
+        porId('letra-incluir').onchange = e => {
+            porId('letra-sugerida').hidden = !e.target.checked;
+            this.partitura.mostrarCantante(e.target.checked);
+        };
+        porId('letra-sugerida').onchange = e => {
+            if (!this.secuencia) return;
+            this.catalogo.ajustar(this.clave('letra'), e.target.value).catch(() => {
+                this.estado('El navegador no pudo guardar el cambio de letra.');
+            });
+        };
         porId('herramientas').addEventListener('toggle', () => {
             if (!porId('herramientas').open) return;
             if (this.vista !== 'medio') this.mostrarVista(this.vista);
@@ -604,15 +574,10 @@ class AplicacionVisor {
         };
         porId('tolerancia-fondo').onchange = e => this.guardarFondo({...this.fondo, tolerancia: Number(e.target.value)});
         porId('quitar-mascara').onclick = () => this.guardarFondo({...this.fondo, modo: 'alfa', poligono: null});
-        document.querySelectorAll('[data-filtro]').forEach(boton => {
-            boton.onclick = () => { this.filtro = boton.dataset.filtro; this.marcarFiltro(); };
-        });
-        porId('cargar-original').onclick = () => this.seleccionarMedio(this.medio, this.opcion, false);
         porId('variante').onchange = evento => {
             const indice = Number(evento.target.value);
-            this.seleccionarMedio(this.medio, indice);
+            this.seleccionarMedio(this.medio, indice, true);
         };
-        porId('play').onclick = () => this.reproducir('rgb');
         porId('mus-escuchar').onclick = () => this.reproducir();
         porId('pausa').onclick = () => this.transporte.pausar();
         porId('linea-tiempo').oninput = e => this.transporte.buscar(Number(e.target.value)).catch(e => this.errorAudio(e));
@@ -621,26 +586,13 @@ class AplicacionVisor {
         porId('centrar').onclick = () => this.gis.centrar();
         porId('recorrido').replaceChildren(...Object.entries(NOMBRES_RECORRIDO).map(([valor, nombre]) =>
             new Option(nombre, valor, valor === 'filas', valor === 'filas')));
-        porId('tamano-zona').replaceChildren(...TAMANOS_ZONA.map(n => new Option(n + ' × ' + n, n, n === 1, n === 1)));
+        porId('tamano-zona').replaceChildren(...TAMANOS_ZONA.map(n => new Option(n + ' × ' + n, n, n === ZONA_INICIAL, n === ZONA_INICIAL)));
         for (const id of ['recorrido','duracion','tamano-zona','velocidad-recorrido','escala-frecuencia']) porId(id).onchange = () => this.crearSecuencia(this.peticionMedio?.signal).catch(e => this.estado(e.message, true));
-        porId('cuadricula').onchange = () => this.seleccionarMedio(this.medio, this.opcion, false);
-        porId('cambiar-tramo').onclick = () => {
-            if (this.medio?.tipo === 'video') this.seleccionarMedio(this.medio, this.opcion, false);
-        };
+        porId('cuadricula').onchange = () => this.seleccionarMedio(this.medio, this.opcion, true);
         for (const id of ['niveles', 'ambito']) porId(id).onchange = () => {
             this.paneles.actualizarOcupacion(Number(porId('niveles').value), porId('ambito').value);
-            if (this.transporte.secuencia) this.paneles.actualizar(this.indice, Math.min(this.transporte.tiempo, this.secuencia.duracion_s), true);
+            if (this.transporte.secuencia) this.paneles.actualizar(this.indice, true);
         };
-        porId('ventana-partitura').onchange = e => {
-            this.paneles.ventana = Number(e.target.value);
-            this.paneles.inicio = -1;
-            if (this.transporte.secuencia) this.paneles.partituras(this.indice, Math.min(this.transporte.tiempo, this.secuencia.duracion_s));
-        };
-        porId('partitura-tecnica').addEventListener('toggle', () => {
-            if (this.transporte.secuencia && porId('partitura-tecnica').open) {
-                this.paneles.partituras(this.indice, Math.min(this.transporte.tiempo, this.secuencia.duracion_s));
-            }
-        });
         porId('marcar').onclick = () => {
             if (!this.secuencia?.validez[this.indice]) return;
             const nota = porId('nota-marca').value.trim();
@@ -655,9 +607,7 @@ class AplicacionVisor {
         porId('informe').onclick = () => { this.transporte.pausar(); this.informe().mostrar(); };
         porId('descargar-datos').onclick = () => descargar(
             new Blob([JSON.stringify(this.informe().datos(), null, 2)], {type: 'application/json'}), 'orbita-analisis.json');
-        porId('abrir-importar').onclick = e => { e.preventDefault(); porId('importar').showModal(); };
         document.querySelectorAll('[data-cerrar]').forEach(b => { b.onclick = () => porId(b.dataset.cerrar).close(); });
-        porId('form-importar').onsubmit = e => this.importar(e);
         porId('abrir-geo').onclick = () => {
             if (!this.medio) return;
             porId('tipo-geo').value = this.geo?.tipo || 'punto';
@@ -677,24 +627,22 @@ class AplicacionVisor {
         porId('quitar-geo').onclick = () => { this.asignarGeo(null); porId('georreferencia').close(); };
     }
 
-    async importar(evento) {
-        evento.preventDefault();
-        const boton = porId('importar-enviar'), estado = porId('importar-estado');
-        boton.disabled = true;
-        estado.textContent = 'Leyendo las fuentes…';
+    async importar() {
+        const control = porId('archivos');
+        const archivo = control.files[0];
+        control.value = '';
+        if (!archivo) return;
+        if (!FORMATOS_LOCAL.has(extension(archivo.name))) {
+            this.estado('Carga una imagen JPG, PNG, WebP, AVIF, BMP o GIF.', true);
+            return;
+        }
         try {
-            const {paquete, fallos} = await this.catalogo.importar(
-                porId('titulo-nuevo').value.trim(), porId('urls').value.split(/\n+/),
-                [...porId('archivos').files], porId('portada-nueva').files[0],
-            );
+            const {paquete, fallos} = await this.catalogo.importar('', [], [archivo], null);
             this.entradas.push(paquete);
-            evento.target.reset();
-            porId('importar').close();
-            await this.seleccionarPaquete(paquete, paquete.medios.length === 1);
-            if (paquete.medios.length > 1) this.rocola.abrirCatalogo();
+            this.pintarPaquetes();
+            await this.seleccionarPaquete(paquete);
             if (fallos.length) this.estado(fallos.join(' · '), true);
-        } catch (error) { estado.textContent = error.message; }
-        finally { boton.disabled = false; }
+        } catch (error) { this.estado(error.message, true); }
     }
 }
 

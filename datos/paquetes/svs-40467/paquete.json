@@ -69,7 +69,8 @@
           "ancho": 7680,
           "alto": 2160
         }
-      ]
+      ],
+      "copia_local": "datos/paquetes/svs-40467/descargas/EIC_NASAandFire_Main_Image_4K.jpg"
     },
     {
       "id": "55c36edcfed43f3a",
@@ -9162,5 +9163,5 @@
     }
   ],
   "portada_local": "datos/paquetes/svs-40467/portada.jpg",
-  "medio_inicial": "3dd0b29955ab3403"
+  "medio_inicial": "3b5e2c854a42c6a4"
 }

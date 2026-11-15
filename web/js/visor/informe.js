@@ -1,4 +1,3 @@
-import {escapar} from '../notacion.js';
 import {calcularInforme} from '../estadisticas.js';
 import {lienzo} from './medios.js';
 import {BANDAS} from './sonificacion.js';
@@ -7,7 +6,13 @@ import {posicionGeografica} from './gis.js';
 import {tonalidadNombre} from './arreglo.js';
 import {PESO_PIXEL} from './estadistica-zonal.js';
 import {NOMBRES_RECORRIDO} from '../recorridos.js';
-import {partituraRGB} from './partitura-rgb.js';
+import {afinacionTexto, MusicXML, pistasDePartitura} from './musicxml.js';
+import {bibliotecaPartituras} from './visor-partituras.js';
+
+function escapar(valor) {
+    const caracteres = {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'};
+    return String(valor).replace(/[&<>"']/g, caracter => caracteres[caracter]);
+}
 
 export function descargar(contenido, nombre) {
     const url = URL.createObjectURL(contenido);
@@ -23,12 +28,15 @@ export function descargar(contenido, nombre) {
 const base64 = bytes => btoa(Array.from(bytes, n => String.fromCharCode(n)).join(''));
 
 export class Informe {
-    constructor(secuencia, paquete, niveles, marcas, geo, mezcla, arreglo) {
+    constructor(secuencia, paquete, niveles, marcas, geo, mezcla, arreglo, letra = '', canal = '1', voz = null) {
         this.secuencia = secuencia;
         this.paquete = paquete;
         this.niveles = niveles;
         this.geo = geo;
         this.arreglo = arreglo;
+        this.voz = voz;
+        this.letra = letra;
+        this.canal = voz && canal !== 'todos' ? 'guitarra-voz' : canal;
         this.mezcla = mezcla ? {...mezcla, pistas: mezcla.pistas.map(({muestra, ...pista}) => ({
             ...pista, archivoMuestra: muestra?.nombre || null,
         }))} : null;
@@ -40,10 +48,10 @@ export class Informe {
         }, niveles, marcas);
     }
 
-    datos() {
+    datos(incluirPartitura = true) {
         const s = this.secuencia;
         return {
-            version: 5, paquete: this.paquete.titulo, medio: s.medio.titulo,
+            version: 6, paquete: this.paquete.titulo, medio: s.medio.titulo,
             fuente: s.medio.url || s.medio.archivo?.name || null,
             tipo: s.medio.tipo, lado: s.lado, recorrido: s.recorrido, geografia: this.geo,
             duracion_s: s.duracion_s, inicio_fuente_s: s.datos.inicio, velocidad_recorrido: s.datos.velocidad ?? 1,
@@ -59,7 +67,9 @@ export class Informe {
                 return {indice, x, y, tiempo_s: indice * s.segundos_por_pixel, rgb: s.firma(indice), rgb_sonoro: s.firmaSonora(indice), motivos,
                     posicion: posicionGeografica(this.geo, x, y, s.lado)};
             }),
-            partitura: s.partituraDatos(),
+            letra: this.letra || null,
+            partitura_musicxml: incluirPartitura && this.arreglo
+                ? new MusicXML(this.arreglo, this.voz).exportar({canal: this.canal}) : null,
             arreglo_musical: this.arreglo ? {
                 ...this.arreglo.opciones, tonalidad: tonalidadNombre(this.arreglo.opciones),
                 compases: this.arreglo.compases, duracion_s: this.arreglo.duracion,
@@ -129,7 +139,7 @@ export class Informe {
     }
 
     html() {
-        const d = this.datos(), s = this.secuencia;
+        const d = this.datos(false);
         const numeros = x => x === null ? '–' : Number(x).toFixed(2);
         const estadisticas = Object.entries(d.estadisticas).map(([canal, e]) => [
             canal, e.minimo ?? '–', e.maximo ?? '–', numeros(e.media), numeros(e.mediana), numeros(e.desviacion_poblacional),
@@ -142,16 +152,22 @@ export class Informe {
         const imagenes = this.imagenes().map(([nombre, url]) =>
             `<figure><img src="${url}" alt="${nombre}"><figcaption>${nombre}</figcaption></figure>`).join('');
         const ocupacion = d.firmas.slice(0, 12).map(f => [f.firma.map(v => v + 1).join(' · '), f.veces, numeros(f.porcentaje) + '%']);
-        const partituras = Array.from({length: Math.ceil(s.duracion_s / 8)}, (_, i) =>
-            BANDAS.map((banda, canal) => partituraRGB(s, banda, canal, i * 8, Math.min(s.duracion_s, (i + 1) * 8), true)).join('')).join('');
+        const partes = this.arreglo ? pistasDePartitura(this.arreglo, this.canal, this.voz) : [];
+        const afinaciones = partes.filter(p => p.afinacion)
+            .map(p => `<p>${escapar(p.nombre)} · Cuerdas de grave a aguda ${escapar(afinacionTexto(p.afinacion))}</p>`).join('');
         return `<h1>Informe de sonificación y GIS</h1><p>Órbita Sonora · ORBIDATA ANALYTICS</p>
-            <h2>${escapar(d.paquete)} · ${escapar(d.medio)}</h2>
+            <h2>${escapar(d.paquete === d.medio ? d.paquete : d.paquete + ' · ' + d.medio)}</h2>
             <p>${d.lado} × ${d.lado} · ${escapar(NOMBRES_RECORRIDO[d.recorrido])} · ${d.duracion_s.toFixed(3)} s · ${d.niveles} niveles</p>
             <p>${d.validos} muestras válidas · ${d.excluidos} excluidas por máscara.</p>
             <p>Zona sonora ${d.zona_sonora.lado} × ${d.zona_sonora.lado} · ${100 * d.zona_sonora.peso_pixel} % de la celda activa.</p>
             <p>Fuente ${escapar(d.fuente || 'Archivo local')} · inicio en fuente ${d.inicio_fuente_s.toFixed(3)} s
             · velocidad ${d.velocidad_recorrido}×</p>
             <p>${d.geografia ? escapar(d.geografia.origen + ' · ' + JSON.stringify(d.geografia.coordenadas)) : 'Medio sin georreferencia asignada'}</p>
+            ${d.arreglo_musical ? `<section class="partitura-informe"><h2>Partitura musical</h2>
+            <p>${escapar(d.arreglo_musical.tonalidad)} · ${escapar(d.arreglo_musical.compas)} ·
+            ${d.arreglo_musical.bpm} por minuto · ${d.arreglo_musical.compases} compases</p>
+            ${afinaciones}<div id="informe-partitura" aria-label="Partitura completa del arreglo"></div></section>` : ''}
+            ${this.letra ? `<section class="letra-impresa"><h2>Letra para cantar</h2><p>${escapar(this.letra)}</p></section>` : ''}
             <div class="grilla-informe">${imagenes}</div>
             <h2>Estadísticas RGB de los píxeles muestreados</h2>
             ${this.tabla(['Canal','Mín.','Máx.','Media','Mediana','Desv. poblacional','P05','P95'], estadisticas)}
@@ -159,32 +175,69 @@ export class Informe {
             <h2>Ocupación de las firmas más frecuentes</h2>
             ${this.tabla(['Niveles R G B','Píxeles','Ocupación'], ocupacion)}
             <h2>Píxeles destacados</h2>
-            ${this.tabla(['Marca','Píxel','Col.','Fila','Tiempo s','RGB','Lon, lat','Motivo'], puntos)}
-            <h2>Arreglo musical</h2>
-            ${d.arreglo_musical ? `<p>${escapar(d.arreglo_musical.tonalidad)} · ${escapar(d.arreglo_musical.compas)} ·
-            ${d.arreglo_musical.bpm} por minuto · ${d.arreglo_musical.compases} compases · ${escapar(d.arreglo_musical.instrumentos.join(' / '))}</p>
-            <p>WAV, MIDI y MusicXML disponibles en Partitura del arreglo.</p>` : ''}
-            <h2>Partitura espectral RGB</h2><p>R 20–250 Hz · G 350–500 Hz · B 600–20 000 Hz. Conversión ${d.escala_frecuencia === 'lineal' ? 'lineal' : 'logarítmica'} de intensidad a frecuencia.</p>
-            ${partituras}`;
+            ${this.tabla(['Marca','Píxel','Col.','Fila','Tiempo s','RGB','Lon, lat','Motivo'], puntos)}`;
     }
 
-    mostrar() {
+    async dibujarPartitura(destino) {
+        const Visualizador = await bibliotecaPartituras();
+        const xml = new MusicXML(this.arreglo, this.voz);
+        for (let desde = 1; desde <= this.arreglo.compases; desde += 4) {
+            if (!destino.isConnected) return;
+            const hasta = Math.min(desde + 3, this.arreglo.compases);
+            const bloque = document.createElement('div');
+            bloque.className = 'bloque-partitura-informe';
+            const hoja = document.createElement('div');
+            hoja.style.width = `${Math.max(690, destino.clientWidth)}px`;
+            bloque.append(hoja);
+            destino.append(bloque);
+            const visor = new Visualizador(hoja, {
+                backend: 'svg', drawTitle: false, drawComposer: false, drawCredits: false, autoResize: false,
+            });
+            await visor.load(xml.exportar({canal: this.canal, desde, hasta, titulo: false, leyenda: false}));
+            visor.zoom = .80;
+            visor.render();
+            const svg = hoja.querySelector('svg');
+            if (!svg) throw new Error('No se pudo dibujar la partitura del informe.');
+            if (!svg.hasAttribute('viewBox')) {
+                svg.setAttribute('viewBox', `0 0 ${parseFloat(svg.getAttribute('width'))} ${parseFloat(svg.getAttribute('height'))}`);
+            }
+            bloque.replaceChildren(svg);
+        }
+    }
+
+    async mostrar() {
         const destino = document.getElementById('informe-salida');
-        const contenido = this.html();
         destino.innerHTML = `<article class="informe-hoja"><div class="controles">
-            <button id="informe-cerrar" type="button">Cerrar</button><button id="informe-imprimir" type="button">Imprimir / PDF</button>
-            <button id="informe-html" type="button">Descargar HTML</button></div>${contenido}</article>`;
+            <button id="informe-cerrar" type="button">Cerrar</button><button id="informe-imprimir" type="button" disabled>Imprimir / PDF</button>
+            <button id="informe-html" type="button" disabled>Descargar HTML</button></div>
+            <p class="estado-informe" role="status"></p><div class="contenido-informe">${this.html()}</div></article>`;
         destino.hidden = false;
-        document.getElementById('informe-cerrar').onclick = () => { destino.hidden = true; };
-        document.getElementById('informe-imprimir').onclick = () => window.print();
-        document.getElementById('informe-html').onclick = () => {
+        const cerrar = destino.querySelector('#informe-cerrar');
+        const imprimir = destino.querySelector('#informe-imprimir');
+        const exportar = destino.querySelector('#informe-html');
+        const contenido = destino.querySelector('.contenido-informe');
+        const estado = destino.querySelector('.estado-informe');
+        cerrar.onclick = () => { destino.hidden = true; document.getElementById('informe').focus(); };
+        imprimir.onclick = () => window.print();
+        exportar.onclick = () => {
             const html = `<!doctype html><html lang="es"><meta charset="utf-8"><title>Informe de Órbita Sonora</title><style>
             body{font:15px system-ui;margin:25px auto;padding:0 16px;max-width:1050px;color:#182621}
             img,svg{max-width:100%}figure{margin:0}table{border-collapse:collapse;width:100%;margin:1rem 0}
             th,td{padding:5px;text-align:left;border-bottom:1px solid #cbd5cc}.grilla-informe{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
-            @media print{figure,tr,svg{break-inside:avoid}}</style><body>${contenido}</body></html>`;
+            .letra-impresa p{white-space:pre-wrap}.bloque-partitura-informe svg{width:100%;height:auto;display:block}
+            @media print{figure,tr,svg,.bloque-partitura-informe{break-inside:avoid}}</style><body>${contenido.innerHTML}</body></html>`;
             descargar(new Blob([html], {type: 'text/html;charset=utf-8'}), 'orbita-informe.html');
         };
-        document.getElementById('informe-cerrar').focus();
+        cerrar.focus();
+        try {
+            if (this.arreglo) {
+                estado.textContent = 'Preparando la partitura completa…';
+                await this.dibujarPartitura(contenido.querySelector('#informe-partitura'));
+            }
+            estado.textContent = '';
+            imprimir.disabled = exportar.disabled = false;
+        } catch (error) {
+            estado.textContent = error.message;
+        }
     }
 }

@@ -1,5 +1,6 @@
 import {AFINACIONES, COMPASES, TONALIDADES, opcionesPartitura, tonalidadNombre} from './arreglo.js';
-import {afinacionTexto, MusicXML} from './musicxml.js';
+import {afinacionTexto, MusicXML, pistasDePartitura} from './musicxml.js';
+import {bibliotecaPartituras} from './visor-partituras.js';
 import {descargar} from './informe.js';
 import {NOMBRES_RECORRIDO} from '../recorridos.js';
 
@@ -8,22 +9,13 @@ const COMPASES_POR_VISTA = 4;
 const compasEn = (arreglo, tiempo) => Math.min(arreglo.compases,
     Math.floor(tiempo / (arreglo.unidad * arreglo.unidadesCompas) + 1e-8) + 1);
 
-function bibliotecaPartituras() {
-    if (window.opensheetmusicdisplay) return Promise.resolve(window.opensheetmusicdisplay.OpenSheetMusicDisplay);
-    return new Promise((resolver, rechazar) => {
-        const script = document.createElement('script');
-        script.src = new URL('../../vendor/opensheetmusicdisplay.min.js', import.meta.url).href;
-        script.onload = () => resolver(window.opensheetmusicdisplay.OpenSheetMusicDisplay);
-        script.onerror = () => { script.remove(); rechazar(new Error('El visor de partituras no pudo iniciar. Puedes descargar MusicXML.')); };
-        document.head.append(script);
-    });
-}
-
 export class PartituraMusical {
-    constructor(actualizarArreglo, buscar, pausar) {
+    constructor(actualizarArreglo, buscar, pausar, letra) {
         this.actualizarArreglo = actualizarArreglo;
         this.buscar = buscar;
         this.pausar = pausar;
+        this.letra = letra;
+        this.cantanteActiva = false;
         this.opciones = opcionesPartitura();
         this.inicio = 1;
         this.compas = 1;
@@ -41,15 +33,19 @@ export class PartituraMusical {
         ]) porId(id).replaceChildren(...valores.map(([k, v]) => new Option(v, k)));
         for (const [clave, valor] of Object.entries(this.opciones)) {
             const control = porId('mus-' + clave);
-            if (clave === 'alturas') control.replaceChildren(...Array.from({length: 6}, (_, i) => new Option(String(i + 7), String(i + 7))));
+            if (clave === 'alturas') control.replaceChildren(...Array.from({length: 10}, (_, i) => new Option(String(i + 3), String(i + 3))));
             control.value = valor;
             control.onchange = () => {
                 if (!control.checkValidity()) { control.reportValidity(); control.value = this.opciones[clave]; return; }
                 this.opciones[clave] = ['bpm', 'alturas'].includes(clave) ? Number(control.value) : control.value;
-                porId('mus-pulso').textContent = this.opciones.compas === '6/8' ? 'Negras con puntillo por minuto' : 'Negras por minuto';
+                if (clave === 'bpm') porId('mus-tempo-slider').value = control.value;
+                porId('mus-pulso').textContent = this.opciones.compas === '6/8' ? 'negras con puntillo/min' : 'negras/min';
                 this.actualizarArreglo();
             };
         }
+        const tempo = porId('mus-bpm'), deslizador = porId('mus-tempo-slider');
+        deslizador.oninput = () => { tempo.value = deslizador.value; };
+        deslizador.onchange = () => tempo.onchange();
         this.observarAncho();
         porId('mus-parte').onchange = () => this.dibujar();
         porId('mus-seguir').onchange = () => this.mover(this.compas);
@@ -82,17 +78,34 @@ export class PartituraMusical {
 
     cargar(arreglo, tiempo = 0, conservarVista = false) {
         this.arreglo = arreglo;
+        this.voz = this.cantanteActiva && arreglo ? arreglo.vozCantante() : null;
         const s = arreglo?.secuencia;
-        porId('mus-origen').textContent = s ? `${arreglo.titulo} · ${NOMBRES_RECORRIDO[s.recorrido]} · ${s.lado} × ${s.lado} · ${s.datos.velocidad ?? 1}× · ${s.escala === 'lineal' ? 'Escala lineal' : 'Escala logarítmica'}` : '';
+        porId('mus-origen').textContent = s ? `${arreglo.titulo} · ${NOMBRES_RECORRIDO[s.recorrido]} · ${s.lado} × ${s.lado}` : '';
         if (arreglo) {
             const opciones = porId('mus-parte').options;
-            for (const [i, pista] of arreglo.pistas.entries()) opciones[i + 1].textContent = `${'RGB'[i]} · ${pista.nombre}`;
+            for (const [i, pista] of arreglo.pistas.entries()) {
+                const opcion = Array.from(opciones).find(entrada => entrada.value === String(i));
+                opcion.textContent = `${'RGB'[i]} · ${pista.nombre}`;
+            }
         }
         this.tiempo = tiempo;
         this.compas = arreglo ? compasEn(arreglo, tiempo) : 1;
         this.inicio = conservarVista && arreglo && !porId('mus-seguir').checked
             ? Math.min(this.inicio, this.inicioCompas(arreglo.compases)) : this.inicioCompas(this.compas);
-        for (const id of ['ajustes-partitura', 'mus-parte', 'mus-exportar', 'mus-imprimir', 'mus-saltar']) porId(id).disabled = !arreglo;
+        for (const id of ['ajustes-partitura', 'mus-bpm', 'mus-tempo-slider', 'mus-tonica', 'mus-parte', 'mus-exportar', 'mus-imprimir', 'mus-saltar']) {
+            porId(id).disabled = !arreglo;
+        }
+        return this.dibujar();
+    }
+
+    mostrarCantante(activa) {
+        this.cantanteActiva = activa;
+        this.voz = activa && this.arreglo ? this.arreglo.vozCantante() : null;
+        const opcion = porId('mus-opcion-voz'), vista = porId('mus-parte');
+        opcion.disabled = opcion.hidden = !activa;
+        if (activa) vista.value = 'guitarra-voz';
+        else if (vista.value === 'guitarra-voz' || !vista.value) vista.value = '1';
+        this.vistaActual = null;
         return this.dibujar();
     }
 
@@ -177,11 +190,6 @@ export class PartituraMusical {
         return hasta;
     }
 
-    abrirBiblioteca() {
-        this.biblioteca ??= bibliotecaPartituras().catch(error => { this.biblioteca = null; throw error; });
-        return this.biblioteca;
-    }
-
     dibujar() {
         const hasta = this.rotulo();
         const estado = porId('mus-estado');
@@ -204,16 +212,16 @@ export class PartituraMusical {
         if (this.vistaActual?.arreglo === this.arreglo && this.vistaActual.vista === vista) return this.pendiente;
         this.vistaActual = {arreglo: this.arreglo, vista};
         const revision = ++this.revision;
-        const xml = new MusicXML(this.arreglo).exportar({canal, desde: this.inicio, hasta, titulo: false, leyenda: !compacto});
+        const xml = new MusicXML(this.arreglo, this.voz).exportar({canal, desde: this.inicio, hasta, titulo: false, leyenda: false});
         const afinaciones = porId('mus-afinaciones');
-        afinaciones.hidden = !compacto;
-        afinaciones.textContent = compacto ? this.pistasVisibles(canal).filter(p => p.afinacion)
-            .map(p => `${'RGB'[p.canal]} grave a aguda ${afinacionTexto(p.afinacion)}`).join(' / ') : '';
+        afinaciones.textContent = this.pistasVisibles(canal).filter(p => p.afinacion)
+            .map(p => `${'RGB'[p.canal]} · Cuerdas de grave a aguda ${afinacionTexto(p.afinacion)}`).join(' / ');
+        afinaciones.hidden = !afinaciones.textContent;
         estado.textContent = 'Preparando pentagramas…';
         porId('mus-reintentar').hidden = true;
         this.pendiente = this.pendiente.then(async () => {
             if (revision !== this.revision) return;
-            const Visualizador = await this.abrirBiblioteca();
+            const Visualizador = await bibliotecaPartituras();
             if (revision !== this.revision) return;
             this.renderer ??= new Visualizador(this.visor, {
                 backend: 'svg', drawTitle: false, drawComposer: false, drawCredits: false, autoResize: false,
@@ -245,30 +253,30 @@ export class PartituraMusical {
     }
 
     pistasVisibles(canal) {
-        return canal === 'todos' ? this.arreglo.pistas : [this.arreglo.pistas[Number(canal)]];
+        return pistasDePartitura(this.arreglo, canal, this.voz);
     }
 
     resumen(canal) {
         const a = this.arreglo;
-        const pistas = this.pistasVisibles(canal).map(p => p.nombre + (p.percusion ? '' : ` (${p.alturas.length} alturas)`));
+        const pistas = this.pistasVisibles(canal).map(p => p.nombre);
         return `${tonalidadNombre(a.opciones)} · ${a.opciones.compas} · ${a.opciones.bpm} por minuto · ${pistas.join(' / ')}`;
     }
 
     exportar() {
         const canal = porId('mus-parte').value;
-        const contenido = new MusicXML(this.arreglo).exportar({canal});
-        const parte = canal === 'todos' ? 'general' : 'rgb'[Number(canal)];
+        const contenido = new MusicXML(this.arreglo, this.voz).exportar({canal});
+        const parte = canal === 'todos' ? 'general' : canal === 'guitarra-voz' ? canal : 'rgb'[Number(canal)];
         descargar(new Blob([contenido], {type: 'application/vnd.recordare.musicxml+xml'}), `orbita-partitura-${parte}.musicxml`);
     }
 
     async imprimir() {
         const boton = porId('mus-imprimir'), salida = porId('partitura-impresion');
-        const arreglo = this.arreglo, canal = porId('mus-parte').value;
+        const arreglo = this.arreglo, canal = porId('mus-parte').value, voz = this.voz;
         const resumen = this.resumen(canal);
         this.pausar();
         boton.disabled = true;
         try {
-            const Visualizador = await this.abrirBiblioteca();
+            const Visualizador = await bibliotecaPartituras();
             const cabecera = document.createElement('header');
             const titulo = document.createElement('h1');
             titulo.textContent = arreglo.titulo;
@@ -286,9 +294,16 @@ export class PartituraMusical {
             const renderer = new Visualizador(hoja, {
                 backend: 'svg', pageFormat: 'A4_P', drawTitle: false, drawComposer: false, drawCredits: false, autoResize: false,
             });
-            await renderer.load(new MusicXML(arreglo).exportar({canal, titulo: false}));
+            await renderer.load(new MusicXML(arreglo, voz).exportar({canal, titulo: false, leyenda: false}));
             if (this.arreglo !== arreglo) return;
             renderer.render();
+            const letra = this.letra();
+            if (voz && letra) {
+                const texto = document.createElement('p');
+                texto.className = 'letra-impresa';
+                texto.textContent = letra;
+                salida.append(texto);
+            }
             document.body.classList.add('imprimir-partitura');
             window.print();
         } catch (error) { porId('mus-estado').textContent = error.message; }

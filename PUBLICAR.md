@@ -1,28 +1,37 @@
-# Publicar Órbita Sonora en GitHub Desktop
+# Publicar Órbita Sonora en GitHub
 
-1. En GitHub Desktop abre `orbidataanalytics/OrbitaSonora`. Si ya lo clonaste, pulsa **Fetch origin** y después **Pull origin** si aparece. Si falta el clon, elige **File → Clone repository → URL**, pega `https://github.com/orbidataanalytics/OrbitaSonora.git` y elige una carpeta nueva o vacía que termine en `OrbitaSonora`.
-2. En GitHub Desktop abre **Repository → Show in Explorer**. Esa es la ruta que se sincroniza. Descomprime el ZIP en otra carpeta. Abre `OrbitaSonora_GIS` dentro del ZIP y copia **su contenido** a la carpeta que abrió GitHub Desktop. Acepta reemplazar los archivos con el mismo nombre. En esa carpeta deben verse directamente `index.html`, `main.py`, `api/`, `web/`, `datos/` y `videos/`. Incluye `.nojekyll`. Si el repositorio contiene la antigua carpeta `audio/` de la demostración, retírala en el commit de actualización. La rocola de esta versión genera su audio a partir de imágenes y videos.
-3. Regresa a GitHub Desktop. En **Changes** verás los archivos copiados. Escribe `Actualizar Órbita Sonora`, verifica que se incluyan las carpetas de descargas originales, pulsa **Commit to main** y después **Push origin**. Si la rama activa tiene otro nombre, cambia a **main** antes de copiar.
+## 1. Enviar la entrega
 
-Si **Changes** está vacío tras copiar, vuelve a **Repository → Show in Explorer** y comprueba que el `index.html` nuevo esté en esa carpeta y que exista allí `videos/`. Evita copiar una carpeta adicional `OrbitaSonora_GIS` dentro del repositorio.
+Descomprime el ZIP. En Windows, abre `OrbitaSonora_GIS` y haz doble clic en `PUBLICAR_EN_GITHUB.bat`. Para usar una terminal, ejecuta este comando desde esa misma carpeta.
 
-## GitHub Pages y Render
+```bash
+python3 scripts/preparar_github.py --publicar
+```
 
-| Servicio | Configuración |
+El script prepara la entrega en la carpeta vecina `OrbitaSonora_GitHub_5_7`. Cuando GitHub lo solicite, inicia sesión en el navegador con la cuenta que tiene permiso de escritura. El script guarda el commit y lo envía a `main`. Tus carpetas de trabajo anteriores se conservan. Para publicar, el equipo debe tener [Python 3.9 o posterior](https://www.python.org/downloads/), [Git](https://git-scm.com/downloads) y [GitHub CLI](https://cli.github.com/).
+
+Para revisar los cambios antes del push, ejecuta `python3 scripts/preparar_github.py`. Verás el resumen del commit y los comandos para publicarlo. Puedes indicar la ruta de un clon existente en `main`.
+
+## 2. Comprobar la publicación
+
+Abre la ejecución más reciente de **pages build and deployment** en la pestaña [Actions](https://github.com/orbidataanalytics/OrbitaSonora/actions). Cuando termine en verde, comprueba que el pie de la [página pública](https://orbidataanalytics.github.io/OrbitaSonora/) muestre **v5.7.0**. La galería muestra nueve imágenes. Prueba una y pulsa **Tocar arreglo**.
+
+En [Settings → Pages](https://github.com/orbidataanalytics/OrbitaSonora/settings/pages), el origen adecuado es **Deploy from a branch → main → /(root)**. En esa raíz quedan `index.html`, `.nojekyll`, `web/`, `datos/` y `videos/`.
+
+## 3. Publicar un video interpretado
+
+1. Elige la imagen y copia la ruta que aparece debajo de GOES. Para aerosoles GEOS, guarda `videos/svs_5669/interpretacion.mp4` dentro del clon. Usa video H.264 con audio AAC.
+2. Para publicar varias grabaciones, ponles nombres como `ensayo_01.mp4` y ejecuta `python3 -m scripts.indexar_videos` en el clon. Añade los MP4 y el índice `videos/catalogo.json` al commit. [Rutas de los nueve discos](videos/README.md)
+3. Haz commit y push. Pulsa **Ver interpretación** debajo de GOES. Para probar un MP4 que tienes en tu equipo, usa **Abrir MP4**.
+
+## 4. Render
+
+Configura el repositorio `orbidataanalytics/OrbitaSonora`, rama `main`, con la raíz del repositorio como carpeta de trabajo.
+
+| Opción | Valor |
 | --- | --- |
-| GitHub Pages | **Settings → Pages → Deploy from a branch → main → /(root)** |
-| Render | Repositorio `orbidataanalytics/OrbitaSonora`, rama `main`, raíz del repositorio |
 | Build Command | `pip install -r requirements.txt` |
 | Start Command | `uvicorn main:app --host 0.0.0.0 --port $PORT` |
+| Health Check Path | `/health` |
 
-Si Render tiene despliegue automático, toma el commit de `main`. Si está desactivado, usa **Manual Deploy → Deploy latest commit**. Abre **GEOS Aerosols (2025)** o **GEDI Forest Height** en la rocola y selecciona **Descarga incluida**. Pulsa **Tocar arreglo** y cambia la pista verde de guitarra a piano en el **DAW**. Comprueba el audio, el pentagrama y el WAV del arreglo. Después prueba **Curva de Hilbert** con **Sonificar píxeles RGB**. [GitHub Pages](https://orbidataanalytics.github.io/OrbitaSonora/) · [Rutas en Render](https://orbitasonora.onrender.com/docs)
-
-## Agregar o quitar fuentes del catálogo
-
-Para páginas NASA, edita `datos/fuentes-svs.json` y ejecuta `python -m scripts.actualizar_catalogo --vistas` desde la carpeta que contiene `main.py`. Para ocultar solo un medio, quita su entrada del `paquete.json` y corrige el recuento del catálogo si procede. Si solo quieres probar algo en tu navegador, usa **Agregar paquete**.
-
-## Publicar un video interpretado
-
-La ventana **Interpretaciones** muestra la ruta exacta que corresponde a tu disco. Por ejemplo, coloca `interpretacion.mp4` en `videos/svs_5313/`. Para varios videos usa nombres como `ensayo_01.mp4` y `concierto_itm_01.mp4` y ejecuta `python -m scripts.indexar_videos` para incluirlos en el índice estático. Luego haz commit y push. La mezcla devuelve un MP4 listo para que lo revises antes de copiarlo al repositorio.
-
-Para quitar un video, borra ese MP4 de la carpeta, actualiza el índice y vuelve a hacer commit y push. El historial de Git permite recuperar ediciones anteriores.
+Después del despliegue, [la raíz abre el visor](https://orbitasonora.onrender.com/) y [`/docs` documenta la API](https://orbitasonora.onrender.com/docs). Si Render usa despliegue manual, selecciona **Deploy latest commit**.
