@@ -1,526 +1,615 @@
-# Órbita Sonora
+<div align="center">
 
-**Del análisis espectral de imágenes a la música: sonificación RGB, arreglo para guitarra y partitura en el navegador.**
+<img src="docs/informe/banner.png" alt="Órbita Sonora: convierte imágenes de la Tierra en música y partitura" width="100%">
 
-Proyecto de **Orbidata Analytics** y el **Semillero de Astronomía, Instrumentación y Ciencias Espaciales del ITM** (Medellín, Colombia) · versión **5.8.0** · código bajo **Apache-2.0**.
+<br>
 
-[▶ Abrir el visor en línea](https://orbidataanalytics.github.io/Orbita_Sonora/) · [Documentación de la API](https://orbitasonora.onrender.com/docs) · [Mapa de módulos](ARQUITECTURA.md) · [Guía de publicación](PUBLICAR.md) · [Leer primero](LEER_PRIMERO.md)
+[![Abrir el visor](https://img.shields.io/badge/▶_Abrir_el_visor-en_línea-1baf7a?style=for-the-badge)](https://orbidataanalytics.github.io/Orbita_Sonora/)
+[![API](https://img.shields.io/badge/API-FastAPI-2a78d6?style=for-the-badge)](https://orbitasonora.onrender.com/docs)
 
-![Catálogo de imágenes incluido](docs/informe/fig01_catalogo.png)
-*Figura 1. Las nueve visualizaciones de NASA SVS que trae el catálogo [34]. Cada una se puede escuchar, leer como partitura y exportar.*
+![Versión](https://img.shields.io/badge/versión-5.8.0-6250d6)
+![Licencia](https://img.shields.io/badge/licencia-Apache--2.0-2a78d6)
+![Web Audio](https://img.shields.io/badge/audio-Web_Audio_+_Tone.js-eb6834)
+![Partituras](https://img.shields.io/badge/partitura-MusicXML_·_MIDI_·_PDF-1baf7a)
+![Imágenes](https://img.shields.io/badge/imágenes-NASA_SVS_·_NOAA_GOES--19-0b1020)
 
----
+**Elige una imagen de la Tierra, escúchala y llévate su partitura para guitarra.**
+Rojo = graves · Verde = medios · Azul = agudos
 
-## Contenido
+<br>
 
-1. [Resumen](#1-resumen)
-2. [Inicio rápido (para cualquier persona)](#2-inicio-rápido-para-cualquier-persona)
-3. [Marco conceptual: de la luz al sonido](#3-marco-conceptual-de-la-luz-al-sonido)
-4. [Trabajos relacionados y referentes](#4-trabajos-relacionados-y-referentes)
-5. [Arquitectura del sistema](#5-arquitectura-del-sistema)
-6. [Metodología](#6-metodología)
-7. [Implementación del frontend](#7-implementación-del-frontend)
-8. [Implementación del backend](#8-implementación-del-backend)
-9. [Resultados I: cómo se usa y qué funcionalidades hay](#9-resultados-i-cómo-se-usa-y-qué-funcionalidades-hay)
-10. [Resultados II: evaluación cuantitativa](#10-resultados-ii-evaluación-cuantitativa)
-11. [Comparación con herramientas similares](#11-comparación-con-herramientas-similares)
-12. [Discusión](#12-discusión)
-13. [Conclusiones](#13-conclusiones)
-14. [Ejecutar, probar y publicar](#14-ejecutar-probar-y-publicar)
-15. [Licencias y créditos](#15-licencias-y-créditos)
-16. [Referencias (IEEE)](#16-referencias-ieee)
+<table>
+<tr>
+<td align="center" width="50%">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/informe/marca/logo-orbidata-analytics-blanco.png">
+  <img src="docs/informe/marca/logo-orbidata-analytics-negro.png" alt="Orbidata Analytics" height="120">
+</picture>
+<br><sub><b>Orbidata Analytics</b></sub>
+</td>
+<td align="center" width="50%">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/informe/marca/logo-semillero-itm-blanco.png">
+  <img src="docs/informe/marca/logo-semillero-itm-negro.png" alt="Semillero de Astronomía ITM" height="120">
+</picture>
+<br><sub><b>Semillero de Astronomía, Instrumentación y Ciencias Espaciales del ITM</b><br>Medellín, Colombia</sub>
+</td>
+</tr>
+</table>
 
----
-
-## 1. Resumen
-
-Órbita Sonora es una aplicación web que **escucha imágenes**. Toma una imagen (o un tramo de video), la reduce a una cuadrícula de *N × N* celdas, separa cada celda en sus tres bandas de color —rojo (R), verde (G) y azul (B)— y recorre la cuadrícula en un orden elegido (filas, serpentina, curva de Hilbert, radial o zigzag). Cada banda se convierte en una voz: **R suena en el registro grave, G en el medio y B en el agudo**, igual que en el espectro electromagnético el rojo tiene menor frecuencia que el azul. Sobre esa lectura “espectral” el sistema compone un **arreglo tonal para tres guitarras** (bajos, pulgar‑melodía y agudos), con armonía elegida por el color de cada zona, ritmo guiado por el contraste local, digitación tocable (trastes ≤ 7) y partitura con tablatura exportable a **MusicXML, MIDI, WAV y PDF**.
-
-En la evaluación de este informe, sobre las 9 imágenes del catálogo con la configuración por defecto (32 × 32, zona 5 × 5, 24 s, Do mayor, 68 negras/min):
-
-| Indicador | Valor medido |
-| --- | --- |
-| Compases generados por imagen | **7** (24,706 s) |
-| Notas por arreglo (3 pistas) | **107 – 135** (media 123,4) |
-| Notas que pertenecen al acorde de su zona | **100 %** |
-| Traste máximo usado | **7** (nivel intermedio) |
-| Reducción del salto de brillo con Hilbert frente a filas | **−15,4 %** (7,85 vs 9,28 niveles) |
-| Tiempo de análisis + composición (32 × 32) | **≈ 2 ms** |
-| Tiempo de síntesis del WAV de 24,7 s | **165 – 301 ms** (≈ 80–150 × más rápido que tiempo real) |
-
-Las cifras, el método de medición y su reproducción se detallan en la [sección 10](#10-resultados-ii-evaluación-cuantitativa).
+</div>
 
 ---
 
-## 2. Inicio rápido (para cualquier persona)
+## 🧭 Contenido
 
-No necesitas instalar nada: abre **[el visor](https://orbidataanalytics.github.io/Orbita_Sonora/)** en Chrome, Edge, Firefox o Safari recientes.
-
-1. **Elige una imagen** en *Imágenes para escuchar* (o pulsa **Cargar imagen** para usar la tuya).
-2. Deja **Cuadrícula = 32 × 32** y **Recorrido = Líneas por filas**.
-3. Pulsa **▶ Tocar arreglo** (o el botón verde de la rocola). Verás avanzar el cursor sobre la imagen y sobre la partitura.
-4. Cambia el **Recorrido** a **Curva de Hilbert** y vuelve a tocar: son los mismos píxeles en otro orden, y la música cambia.
-5. En **Partitura musical** navega por compases y descarga **MusicXML**, **MIDI**, **WAV** o imprime a **PDF**.
-6. **Informe con partitura** reúne la imagen original, sus canales, el análisis y todos los compases en un HTML imprimible.
-
-Dos ejemplos guiados:
-
-| Imagen | Qué probar |
-| --- | --- |
-| **Luces nocturnas 2012–2023** (SVS 5313) | 32 × 32, empieza con *Líneas por filas* y cambia a *Curva de Hilbert*. La lectura y la partitura se recalculan. |
-| **Aerosoles GEOS** (SVS 5669) | Compara *Zona sonora* 5 × 5 con 9 × 9. El recuadro verde del *Recorrido RGB* marca los vecinos. En los tramos de más contraste la guitarra subdivide el pulso. |
-
-Para usarlo en tu equipo: en Windows abre `ABRIR_ORBITA.bat`; en cualquier sistema ejecuta `python3 scripts/abrir_local.py` y entra a <http://127.0.0.1:8000/>.
+| | Para usar la web | | Para entender por dentro |
+| --- | --- | --- | --- |
+| 1 | [¿Qué es Órbita Sonora?](#1--qué-es-órbita-sonora) | 7 | [Metodología paso a paso](#7--metodología-paso-a-paso) |
+| 2 | [Pruébalo en un minuto](#2--pruébalo-en-un-minuto) | 8 | [Cómo está hecho el frontend](#8--cómo-está-hecho-el-frontend) |
+| 3 | [¿Cómo funciona? Explicado para niños](#3--cómo-funciona-explicado-para-niños) | 9 | [Cómo está hecho el backend](#9--cómo-está-hecho-el-backend) |
+| 4 | [Todo lo que puedes hacer](#4--todo-lo-que-puedes-hacer) | 10 | [Resultados medidos](#10--resultados-medidos) |
+| 5 | [De la luz al sonido: la idea](#5--de-la-luz-al-sonido-la-idea) | 11 | [Comparación con otras herramientas](#11--comparación-con-otras-herramientas) |
+| 6 | [Trabajos relacionados y referentes](#6--trabajos-relacionados-y-referentes) | 12 | [Discusión](#12--discusión) · [Conclusiones](#13--conclusiones) |
+| | | 14 | [Instalar, probar y publicar](#14--instalar-probar-y-publicar) |
+| | | 15 | [Uso de inteligencia artificial y ética](#15--uso-de-inteligencia-artificial-y-ética) |
+| | | 16 | [Licencias y créditos](#16--licencias-y-créditos) · [Referencias](#17--referencias-ieee) |
 
 ---
 
-## 3. Marco conceptual: de la luz al sonido
+## 1. 🌍 ¿Qué es Órbita Sonora?
 
-**Sonificación** es usar sonido no verbal para representar datos [1], [2]. La técnica más extendida es el **mapeo de parámetros** (*parameter mapping*): cada variable de los datos controla un atributo del sonido, y la altura tonal (*pitch*) es con mucha diferencia el atributo más usado [3]. Una imagen, a diferencia de una serie de tiempo, **no tiene tiempo propio**: hay que decidir *en qué orden* se recorre. Yeo y Berger distinguen el **barrido** (*scanning*, un recorrido fijo que cubre la imagen) del **sondeo** (*probing*, el usuario elige qué zona escuchar) [4], [5], y mostraron que el barrido tipo *raster* es un puente natural entre una y dos dimensiones [6].
+Órbita Sonora es una página web que **escucha imágenes**. Toma una foto satelital, la divide en cuadritos y convierte el color de cada cuadrito en sonido. Con esos sonidos compone una **canción para tres guitarras** y escribe su **partitura con tablatura**, lista para tocar o imprimir.
 
-En Órbita Sonora la palabra **“espectral”** tiene un sentido doble:
+* 🔴 La **guitarra roja** toca los bajos.
+* 🟢 La **guitarra verde** alterna el bajo con la melodía.
+* 🔵 La **guitarra azul** toca las notas agudas.
 
-* **Espectro de la imagen.** Cada píxel es una muestra del espectro visible en tres bandas (R, G, B). En productos satelitales como GeoColor de GOES, esas bandas son a su vez combinaciones de canales del instrumento ABI [24], [25]; en las luces nocturnas, provienen de la radiancia nocturna de VIIRS [26].
-* **Espectro del sonido.** Cada banda de color se asigna a una **banda de frecuencias audibles** ordenada como en la luz: el rojo (menor frecuencia óptica) va a los graves y el azul (mayor frecuencia óptica) a los agudos. Así, “escuchar” el canal R es escuchar la parte baja del espectro de la imagen.
+Funciona completamente en el navegador y no hay que instalar nada. Está pensada para **aulas, divulgación científica y creación musical**.
 
-El proyecto añade una capa que los sonificadores científicos suelen evitar: **musicalizar** la señal (tonalidad, acordes, compás, digitación de guitarra). Es una decisión de diseño orientada a divulgación y educación musical, y su efecto sobre la fidelidad del dato se discute en la [sección 12](#12-discusión).
+**En números** (las 9 imágenes del catálogo, con los ajustes que trae la web):
+
+<div align="center">
+
+| 🎼 Compases por imagen | 🎵 Notas por canción | ✅ Notas dentro del acorde | 🎸 Traste máximo | ⚡ Análisis + composición | 🔊 Audio de 24,7 s listo en |
+| :---: | :---: | :---: | :---: | :---: | :---: |
+| **7** | **107 – 135** | **100 %** | **7** | **≈ 2 ms** | **0,17 – 0,30 s** |
+
+</div>
 
 ---
 
-## 4. Trabajos relacionados y referentes
+## 2. ▶️ Pruébalo en un minuto
 
-### 4.1 Sonificación de imágenes
+1. Abre **[el visor en línea](https://orbidataanalytics.github.io/Orbita_Sonora/)** en Chrome, Edge, Firefox o Safari.
+2. En **Imágenes para escuchar**, toca una imagen. También puedes usar la tuya con **Cargar imagen**.
+3. Pulsa **▶ Tocar arreglo** o el botón verde de la rocola. Un cursor recorre la imagen y la partitura mientras suena.
+4. Cambia **Recorrido** a **Curva de Hilbert** y vuelve a tocar. Son los mismos colores en otro orden, y la canción cambia.
+5. En **Partitura musical** descarga **MusicXML**, **MIDI** o **WAV**, o imprime en **PDF**.
 
-| Referente | Idea clave | Relación con Órbita Sonora |
+### Dos imágenes para empezar
+
+<table>
+<tr>
+<td width="50%" valign="top">
+
+**🌃 Luces nocturnas 2012–2023** (NASA SVS 5313)
+
+<img src="datos/paquetes/svs-5313/descargas/nightlights_flat_series_and_change_wZooms_13_EIC.02599_print.jpg" alt="Luces nocturnas de la Tierra" width="100%">
+
+Deja la cuadrícula en **32 × 32**, empieza con **Líneas por filas** y luego cambia a **Curva de Hilbert**. Oirás los mismos píxeles en otro orden. [Fuente NASA SVS](https://svs.gsfc.nasa.gov/5313/)
+
+</td>
+<td width="50%" valign="top">
+
+**🌫️ Aerosoles GEOS 2025** (NASA SVS 5669)
+
+<img src="datos/paquetes/svs-5669/descargas/Aerosols_2025-08-19T20_00_00_1920x1080.png" alt="Aerosoles GEOS" width="100%">
+
+Compara la **Zona sonora** de 5 × 5 con la de 9 × 9. En los tramos de más contraste, la guitarra divide el pulso en notas más cortas. [Fuente NASA SVS](https://svs.gsfc.nasa.gov/5669/)
+
+</td>
+</tr>
+</table>
+
+> [!TIP]
+> ¿Quieres usarla sin internet? En Windows abre `ABRIR_ORBITA.bat`. En cualquier sistema ejecuta `python3 scripts/abrir_local.py` y entra a <http://127.0.0.1:8000/>.
+
+---
+
+## 3. 🧒 ¿Cómo funciona? Explicado para niños
+
+<img src="docs/informe/fig_a_paso_a_paso.png" alt="Los seis pasos de Órbita Sonora" width="100%">
+
+| Paso | Explicado para un niño | Lo que pasa por dentro |
+| :---: | --- | --- |
+| **1** 🖼️ | Escogemos un dibujo de la Tierra tomado desde el espacio. | Se abre la imagen (JPG, PNG, video, FITS, RAW o GeoTIFF) y se convierte a colores RGBA. |
+| **2** 🔲 | Lo cortamos en muchos cuadritos, como un rompecabezas de 32 por 32 piezas. | La imagen se reduce a una cuadrícula *N × N* (de 8 a 128) y cada cuadrito guarda su rojo, verde y azul. |
+| **3** ✏️ | Un lápiz pasa por todos los cuadritos, uno detrás de otro, sin saltarse ninguno. El camino puede ser en filas, en zigzag, en espiral o en forma de laberinto (Hilbert). | Un **recorrido** decide el orden en que se escuchan las celdas. Ese orden se vuelve el tiempo de la canción. |
+| **4** 👂 | Cada cuadrito escucha a sus vecinos para no gritar solo: se queda con 70 % de su color y toma 30 % de los vecinos. | **Media zonal 70/30** y medida del **contraste**. Mucho contraste hace que la guitarra toque notas más rápidas. |
+| **5** 🎨➡️🎵 | Cada color tiene su voz: el rojo canta grueso (grave), el verde en el medio y el azul finito (agudo). Más color es una nota más alta. | Cada banda de color se convierte en una **frecuencia** (en Hz) y luego en una nota musical. |
+| **6** 🎸 | Tres guitarras tocan juntas y la computadora escribe la partitura para que tú también la toques. | Se eligen acordes por color, ritmo por contraste y posición en el diapasón; luego se crean el audio, el MIDI y la partitura. |
+
+### Un cuadrito de verdad, de principio a fin
+
+Este es un cuadrito real de la imagen de aerosoles (columna 21, fila 15), con los números que calcula el programa:
+
+<img src="docs/informe/fig_b_pixel_a_nota.png" alt="Cómo un píxel se convierte en tres notas" width="100%">
+
+> [!NOTE]
+> Este es el **modo píxeles RGB**: cada color suena con su frecuencia exacta. En el **modo arreglo**, que viene por defecto, esas mismas medidas se ajustan a los acordes y al diapasón de la guitarra, para que la música sea tocable.
+
+---
+
+## 4. 🎛️ Todo lo que puedes hacer
+
+| Zona de la página | Botones y controles | ¿Para qué sirve? |
 | --- | --- | --- |
-| **The vOICe** — Meijer, 1992 [7] | Convierte imágenes de cámara en sonido con un mapeo invertible: barrido por columnas, altura según la posición vertical y volumen según el brillo, hasta 64 × 64 píxeles y 16 tonos de gris. | Mismo principio de barrido temporal; Órbita Sonora usa el **color** para la altura y añade recorridos no lineales. |
-| **Yeo y Berger** — 2005–2006 [4]–[6] | Marco *scanning/probing* y barrido *raster* para sonificar texturas. | Los cinco recorridos implementan variantes de *scanning*; marcar píxeles y la vista por cursor son una forma de *probing*. |
-| **Chandra “A Universe of Sound”** — NASA/CXC [9], [10] | Sonificaciones curadas de imágenes astronómicas: barridos izquierda‑derecha, radiales o tipo radar; brillo → volumen, posición vertical o color → altura. Estudio con 3 184 participantes [9]. | Inspiración directa para usar imágenes científicas de NASA y mapear color a altura. Diferencia: allí el resultado es un video producido; aquí el usuario controla el mapeo y obtiene la partitura. |
-| **Sonificación en astronomía** — Zanella et al., 2022 [8] | Revisión de casi 100 proyectos; el mapeo de parámetros es el método más común y hace falta más evaluación. | Marco de referencia para la [discusión](#12-discusión). |
-| **Mapeos de magnitudes físicas** — Dubus y Bresin, 2013 [3] | 179 publicaciones revisadas: el *pitch* domina; pocas evalúan la eficacia del mapeo. | Justifica el mapeo intensidad → frecuencia y señala la necesidad de pruebas con oyentes. |
+| 🎶 **Rocola** | Vinilo · ▶ verde · Ⅱ rojo | Tocar o pausar rápido |
+| 🛰️ **Imagen destacada** | GOES‑19 GeoColor · **Abrir MP4** | Ver la imagen satelital de hoy sobre Colombia o abrir un video |
+| 🖼️ **Imágenes para escuchar** | 9 paquetes de NASA | Elegir qué escuchar |
+| ⏯️ **Reproducción** | Tocar arreglo · Pausa · **Informe con partitura** · Tempo (40–168) · Tónica · Volumen | Controlar la música |
+| ✏️ **Recorrido** | Recorrido (5) · Cuadrícula (8–128) · Velocidad (0,5–2×) · Zona sonora (1–21) | Decidir cómo se lee la imagen |
+| 🎼 **Partitura musical** | Vista · ‹ › · Ir al compás · Seguir reproducción · WAV · MIDI · MusicXML · Imprimir/PDF | Leer, seguir y descargar la partitura |
+| 🎹 **Ajustes de composición** | Mayor/menor · Alturas por acorde · Dificultad inicial/intermedia · Compás 4/4, 3/4 o 6/8 · Ritmo · Afinación | Cambiar las reglas de la canción |
+| 🎤 **Voz** | Activar voz y letra · Añadir una voz grabada | Añadir una parte cantada y una letra editable |
+| 🎚️ **DAW · Instrumentos** | Instrumento, volumen, panorama, Solo, Mute, Probar · Reverb en el borde · Panorama según X · Filtro según Y | Mezclar como en un estudio |
+| 🔬 **Análisis de la imagen** | Duración 12/24/48 s · Escala log/lineal · Firmas 4/8/16 · Ocupación | Ajustar el análisis |
+| 🗺️ **Vista geográfica** | Píxel activo · Mapa 2D · Globo 3D · Georreferenciar | Ubicar la imagen sobre la Tierra |
+| 🧹 **Fondo y área** | Quitar fondo uniforme · Solo área seleccionada · Delimitar área | Elegir qué cuadritos suenan |
+| 📊 **Firmas RGB** | Firma del píxel · Ocupación · Marcar píxel · Exportar marcas SIG · Descargar datos | Estudiar la imagen con números |
 
-### 4.2 Síntesis espectral a partir de imágenes
+**Ideas de uso**
 
-* **ANS de Evgeny Murzin (1938–1958)** y su simulador **Virtual ANS** [33]: la imagen se lee como un **sonograma** (eje vertical = frecuencia), con generadores de tonos puros.
-* **Photosounder** [32]: editor que trata la imagen como espectrograma; permite ajustar el rango y la escala de frecuencias y guardar WAV.
+* 🏫 **En clase de música**: pon la dificultad en *Inicial* (trastes hasta el 5) e imprime la partitura con tablatura.
+* 🔭 **En divulgación**: escucha cómo cambian las luces nocturnas o los aerosoles. El recorrido *radial* va del centro hacia los bordes.
+* 🧪 **Para explorar datos**: marca píxeles interesantes y expórtalos como **GeoJSON** con fila, columna, segundo de la canción y coordenadas.
+* 🎧 **Para producir**: lleva el MIDI a tu DAW o el MusicXML a MuseScore, Finale o Sibelius.
 
-Estas herramientas sintetizan el sonido **directamente del espectro** (cada fila es una frecuencia). Órbita Sonora, en cambio, **resume** cada celda en tres números y los convierte en notas musicales.
+---
 
-### 4.3 Sonificación de datos en la web y en Python
+## 5. 💡 De la luz al sonido: la idea
 
-* **TwoTone** (Sonify / Google News Initiative) [31]: datos tabulares a música, todo en el navegador; desarrollo pausado desde 2023.
-* **Highcharts Sonification Studio** [27]: hoja de cálculo + gráfica + sonido, con énfasis en accesibilidad.
-* **STRAUSS** [28], **Astronify** [30] y **SonoUno** [29]: paquetes científicos (Python) para series, espectros y cubos de datos.
+**Sonificación** es usar sonidos que no son palabras para representar datos [1], [2]. La técnica más común es el **mapeo de parámetros**: cada dato controla algo del sonido, y lo que más se usa es la altura de la nota [3]. Una imagen no tiene tiempo propio, así que hay que decidir **en qué orden** se recorre. Yeo y Berger llaman *barrido* (*scanning*) a recorrer toda la imagen con un camino fijo y *sondeo* (*probing*) a que la persona elija qué zona escuchar [4], [5]. También mostraron que el barrido línea a línea (*raster*) une de forma natural el mundo 2D de la imagen con el 1D del sonido [6].
 
-### 4.4 Fundamentos técnicos usados
+En Órbita Sonora la palabra **“espectral”** tiene dos sentidos:
+
+* 🌈 **Espectro de la imagen.** Cada píxel es una muestra de la luz en tres bandas: rojo, verde y azul. En GeoColor de GOES‑19 esas bandas combinan canales del instrumento ABI [24], [25]. En las luces nocturnas vienen de la radiancia de VIIRS [26].
+* 🔊 **Espectro del sonido.** Cada banda de color va a una banda de frecuencias audibles **en el mismo orden que la luz**: el rojo (menor frecuencia de luz) a los graves y el azul (mayor frecuencia de luz) a los agudos.
+
+Encima de la sonificación, el proyecto añade **música**: tonalidad, acordes, compás y digitación de guitarra. Es una decisión pensada para educar y divulgar, y su efecto sobre la fidelidad del dato se discute en la [sección 12](#12--discusión).
+
+---
+
+## 6. 📚 Trabajos relacionados y referentes
+
+### Sonificación de imágenes
+
+| Referente | Idea clave | Qué toma Órbita Sonora |
+| --- | --- | --- |
+| **The vOICe**, Meijer 1992 [7] | Pasa imágenes de cámara a sonido de forma invertible: columnas de izquierda a derecha, altura según la posición vertical y volumen según el brillo, hasta 64 × 64 píxeles y 16 grises. | El barrido temporal. Aquí la altura depende del **color** y hay recorridos no lineales. |
+| **Yeo y Berger**, 2005–2006 [4]–[6] | Marco de *scanning* y *probing*; barrido *raster* para escuchar texturas. | Los cinco recorridos son *scanning*. Marcar píxeles y la vista hasta el cursor son *probing*. |
+| **Chandra, “A Universe of Sound”**, NASA [9], [10] | Sonificaciones curadas de imágenes del espacio: barridos lineales, radiales o tipo radar. Brillo = volumen; posición vertical o color = altura. Estudio con 3 184 participantes [9]. | Usar imágenes científicas de NASA y pasar color a altura. La diferencia: allí el resultado es un video; aquí el usuario controla todo y obtiene la partitura. |
+| **Revisión en astronomía**, Zanella et al. 2022 [8] | Casi 100 proyectos revisados; el mapeo de parámetros domina y falta evaluar con oyentes. | Marco para la discusión. |
+| **Mapeos de magnitudes físicas**, Dubus y Bresin 2013 [3] | 179 publicaciones: la altura es el recurso más usado y pocas evalúan su eficacia. | Justifica pasar intensidad a frecuencia y la necesidad de pruebas con personas. |
+
+### Síntesis a partir de imágenes
+
+* **ANS de Evgeny Murzin (1938–1958)** y su simulador **Virtual ANS** [33]: la imagen se lee como un sonograma, donde el eje vertical es la frecuencia.
+* **Photosounder** [32]: editor que trata la imagen como espectrograma y guarda WAV.
+
+Estas herramientas crean el sonido **directamente del espectro**: cada fila es una frecuencia. Órbita Sonora **resume** cada cuadrito en tres números y los vuelve notas musicales.
+
+### Sonificación de datos en la web y en Python
+
+* **TwoTone** [31]: tablas a música en el navegador; su desarrollo está pausado desde 2023.
+* **Highcharts Sonification Studio** [27]: hoja de cálculo, gráfica y sonido, con foco en accesibilidad.
+* **STRAUSS** [28], **Astronify** [30] y **SonoUno** [29]: paquetes científicos en Python.
+
+### Bases técnicas usadas
 
 | Tema | Fuente | Dónde se usa |
 | --- | --- | --- |
-| Curva de Hilbert y su preservación de localidad | Hilbert [12]; Moon et al. [11] | `web/js/recorridos.js` |
-| Tablas de áreas sumadas (imagen integral) | Crow [13]; Viola y Jones [14] | `web/js/visor/estadistica-zonal.js` |
-| Percepción logarítmica de la altura | Stevens et al. [15]; Walker [16] | Escala de frecuencia por defecto |
-| Web Audio y Tone.js | W3C [18]; Mann [17] | Síntesis, mezcla y afinación |
-| MusicXML y MIDI | Good [19]; MMA [20] | Exportación de partituras |
-| MobileNet cuantizado a 8 bits | Howard et al. [21]; Jacob et al. [22]; ImageNet [23] | Letra opcional (`modelo-imagen.js`) |
+| Curva de Hilbert y localidad | [11], [12] | `web/js/recorridos.js` |
+| Tablas de áreas sumadas (imagen integral) | [13], [14] | `web/js/visor/estadistica-zonal.js` |
+| Percepción de la altura | [15], [16] | Escala logarítmica por defecto |
+| Web Audio y Tone.js | [17], [18] | Síntesis y afinación |
+| MusicXML y MIDI | [19], [20] | Partituras |
+| MobileNet cuantizado a 8 bits | [21]–[23] | Letra opcional |
 
 ---
 
-## 5. Arquitectura del sistema
+## 7. 🔬 Metodología paso a paso
 
-El sistema tiene dos mitades independientes:
-
-* **Frontend estático** (HTML + CSS + módulos ES de JavaScript, ~5 060 líneas propias). Hace **todo** el análisis, la composición y la síntesis en el navegador. Se publica en GitHub Pages.
-* **Backend FastAPI** (Python, ~1 120 líneas en `api/`). Solo se usa para lo que el navegador no puede hacer bien: decodificar formatos científicos o RAW, normalizar videos, leer páginas de NASA sin problemas de CORS, mezclar MP4 con FFmpeg y retransmitir eventos MIDI/RGB por WebSocket. Se despliega en Render.
+La cadena es **determinista**: la misma imagen con los mismos ajustes da siempre la misma partitura y el mismo audio.
 
 ```mermaid
 flowchart LR
-    subgraph Navegador["Navegador (GitHub Pages)"]
-        UI["index.html<br/>controles y paneles"] --> APP["app.js<br/>AplicacionVisor"]
-        APP --> MED["medios.js<br/>muestreo N×N"]
-        MED --> SEC["sonificacion.js<br/>SecuenciaSonora"]
-        REC["recorridos.js"] --> SEC
-        ZON["estadistica-zonal.js<br/>media 70/30 + contraste"] --> SEC
-        MAS["mascara.js<br/>fondo y polígono"] --> SEC
-        SEC --> ARR["arreglo.js<br/>ArregloMusical"]
-        ARR --> AUD["audio-pistas.js + muestras.js<br/>Worker de mezcla"]
-        SEC --> RGB["sintesis-rgb.js<br/>OfflineAudioContext"]
-        AUD --> TR["Transporte<br/>Web Audio"]
-        RGB --> TR
-        ARR --> XML["musicxml.js → OSMD"]
-        ARR --> MIDI["midi.js → @tonejs/midi"]
-        SEC --> EST["estadisticas.js / paneles.js / informe.js"]
-        SEC --> GIS["gis.js (MapLibre) / globo.js / marcas-sig.js"]
-    end
-    subgraph API["FastAPI (Render)"]
-        V["/api/visor/*<br/>importar, imagen, video, archivo"]
-        I["/api/interpretaciones/*<br/>listar y mezclar MP4"]
-        D["WS /api/daw/vivo/{sesion}"]
-        S["/health, /api/goes, /api/datos"]
-    end
-    NASA[("NASA SVS")] --> V
-    NOAA[("NOAA GOES-19")] --> S
-    MED -- "formatos que el navegador no abre" --> V
-    UI -- "catálogo y MP4" --> I
+    A["🖼️ 1. Imagen"] --> B["🔲 2. Cuadritos"]
+    B --> C["🧹 3. Qué cuadritos suenan"]
+    C --> D["✏️ 4. Orden de lectura"]
+    D --> E["👂 5. Escuchar a los vecinos"]
+    E --> F["🎨 6. Color a frecuencia"]
+    F --> G["🎸 7. Componer la canción"]
+    G --> H["🔊 8. Sonar y mezclar"]
+    H --> I["📄 9. Descargar"]
+    classDef paso fill:#eef4fc,stroke:#2a78d6,color:#0b0b0b
+    class A,B,C,D,E,F,G,H,I paso
 ```
 
-*Figura 2. Arquitectura. Las flechas internas del navegador siguen el flujo de datos de una reproducción.*
-
-### 5.1 Estructura del repositorio
-
-```text
-Orbita_Sonora/
-├── index.html              # Página única del visor (310 líneas de marcado)
-├── main.py                 # Entrada de Render: app = crear_app()
-├── api/                    # Backend FastAPI
-│   ├── aplicacion.py       #   crea la app, CORS, GZip, rutas y archivos estáticos
-│   ├── rutas/              #   sistema.py, visor.py, daw.py, interpretaciones.py
-│   └── visor/              #   catalogo.py, imagenes.py, videos.py, red.py, tipos.py, interpretaciones.py
-├── web/
-│   ├── js/                 # Frontend: recorridos, estadísticas y 28 módulos en js/visor/
-│   ├── css/                # 5 hojas de estilo
-│   ├── muestras/           # Bancos de notas grabadas (guitarras, piano) CC0
-│   ├── modelo/             # MobileNet V1 0,25 cuantizado int8 (493 488 bytes)
-│   ├── geo/                # Teselas Blue Marble, GeoJSON de tierra, respaldo GOES
-│   ├── vendor/             # Tone.js, @tonejs/midi, OpenSheetMusicDisplay, MapLibre
-│   └── fonts/              # DM Sans, Space Grotesk (OFL)
-├── datos/                  # fuentes-svs.json y 9 paquetes con manifiesto, portada y original
-├── videos/                 # Carpeta de interpretaciones MP4 por paquete
-├── scripts/                # servir, abrir_local, actualizar_catalogo, indexar_videos, preparar_github…
-├── pruebas/                # sonificacion.mjs (Node) y verificar.py (FastAPI)
-└── docs/                   # logos, huellas SHA-256 y este informe (docs/informe/)
-```
-
-### 5.2 Tecnologías
-
-| Capa | Tecnología (versión incluida) | Papel |
+| Caja del diagrama | En palabras sencillas | Detalle técnico |
 | --- | --- | --- |
-| Interfaz | HTML5, CSS, módulos ES nativos (sin empaquetador) | Página única, sin dependencias de compilación |
-| Audio | Web Audio API [18], **Tone.js 15.1.22** [17] | Reproducción, `OfflineAudioContext`, cálculo de intervalos de afinación |
-| Partitura | **OpenSheetMusicDisplay 1.9.8** | Render de MusicXML con tablatura |
-| MIDI | **@tonejs/midi 2.0.28** | Lectura y escritura de archivos `.mid` |
-| Mapas | **MapLibre GL JS 5.6.0** + globo propio en canvas | Georreferenciación 2D/3D |
-| IA ligera | MobileNet V1 (ancho 0,25, 128 px) cuantizado int8 [21], [22] | Tema visual para la letra (opcional, en Worker) |
-| API | **FastAPI** ≥ 0.115, Uvicorn | Endpoints REST y WebSocket |
-| Imágenes | Pillow, pillow‑heif, **rasterio** (GeoTIFF/JP2), **rawpy** (RAW), **astropy** (FITS) [36] | Normalización a PNG RGBA |
-| Video | **PyAV** (FFmpeg), imageio‑ffmpeg | Recorte y normalización H.264; mezcla de MP4 |
-| Red segura | httpx, lxml | Descarga controlada y lectura de páginas SVS |
+| 🖼️ **1. Imagen** | Abrimos el dibujo. | Navegador o API, salida RGBA de máximo 1 600 px (§ 7.1) |
+| 🔲 **2. Cuadritos** | Lo partimos en un rompecabezas. | Canvas *N × N*; cada celda dura *T/N²* segundos (§ 7.2) |
+| 🧹 **3. Qué cuadritos suenan** | Lo transparente o el fondo se queda callado. | Alfa, fondo uniforme o polígono (§ 7.3) |
+| ✏️ **4. Orden de lectura** | Elegimos el camino del lápiz. | Filas, serpentina, Hilbert, radial o zigzag (§ 7.4) |
+| 👂 **5. Escuchar a los vecinos** | Cada cuadrito suaviza su color con los de al lado. | Media 70/30 y contraste con imagen integral (§ 7.5) |
+| 🎨 **6. Color a frecuencia** | Rojo grave, verde medio, azul agudo. | Tablas logarítmicas o lineales de 256 valores (§ 7.6) |
+| 🎸 **7. Componer la canción** | Escogemos acordes, ritmo y dónde poner los dedos. | `ArregloMusical` (§ 7.7) |
+| 🔊 **8. Sonar y mezclar** | Las tres guitarras tocan; el sonido va a la izquierda o la derecha según dónde está el color. | Muestras CC0, envolvente RGB, panorama, eco y filtro (§ 7.8) |
+| 📄 **9. Descargar** | Te llevas la canción y la partitura. | WAV, MIDI, MusicXML, PDF, HTML, GeoJSON y datos |
 
----
+<img src="docs/informe/fig02_descomposicion_rgb.png" alt="Descomposición RGB de la imagen de luces nocturnas" width="100%">
 
-## 6. Metodología
+*Figura 1. Las luces nocturnas (SVS 5313) en cada etapa: (a) original, (b) cuadrícula 32 × 32, (c–e) canales rojo, verde y azul, (f) color después de escuchar a los vecinos y (g) contraste local.*
 
-La cadena completa es determinista: la misma imagen con los mismos ajustes produce siempre la misma partitura y el mismo audio (las semillas de ruido son fijas).
+### 7.1 Abrir la imagen
 
-```mermaid
-flowchart TD
-    A["Imagen o video"] --> B["1 · Adquisición y normalización<br/>(navegador o API → RGBA ≤ 1600 px)"]
-    B --> C["2 · Remuestreo a N × N<br/>N ∈ {8, 16, 32, 64, 128}"]
-    C --> D["3 · Máscara<br/>alfa · fondo uniforme · polígono"]
-    D --> E["4 · Recorrido<br/>filas · serpentina · Hilbert · radial · zigzag"]
-    E --> F["5 · Zona sonora<br/>70 % celda + 30 % vecinos · contraste"]
-    F --> G["6 · Mapeo espectral<br/>R→20–250 Hz · G→350–500 Hz · B→600–20 000 Hz"]
-    G --> H1["7a · Modo píxeles RGB<br/>3 osciladores continuos"]
-    G --> H2["7b · Modo arreglo<br/>armonía, ritmo, alturas, digitación"]
-    H2 --> I["8 · Síntesis y mezcla<br/>muestras CC0 + envolvente RGB + espacio X/Y"]
-    H1 --> J["9 · Salidas"]
-    I --> J
-    J --> K["Audio · MusicXML · MIDI · WAV · PDF · informe HTML · GeoJSON · CSV/JSON"]
-```
+> [!TIP]
+> **Para niños:** la computadora entiende muchos tipos de fotos. Si no conoce alguno, se lo pide a un ayudante en internet (la API) que se lo traduce.
 
-*Figura 3. Flujo metodológico.*
+* Los **formatos web** (JPG, PNG, WebP, GIF, AVIF…) se abren directamente en el navegador.
+* Los **formatos científicos o de cámara** se envían a `POST /api/visor/archivo` o `GET /api/visor/imagen`. `LectorImagen` (`api/visor/imagenes.py`) los reconoce por su extensión y por sus primeros bytes:
+  * **RAW** (DNG, CR2, NEF, ARW… 22 tipos) con `rawpy`, usando el balance de blancos de la cámara.
+  * **FITS** con `astropy` [36], tomando el primer plano de imagen válido.
+  * **GeoTIFF y JPEG 2000** con `rasterio`. Respeta las bandas R, G, B y alfa, las paletas indexadas y, si hay sistema de coordenadas, calcula las **cuatro esquinas en WGS84** para ubicar la imagen en el mapa.
+  * Los datos de 16 bits o decimales se ajustan con los **percentiles 2 y 98** de cada banda, para que unos pocos puntos extremos no apaguen el resto.
+* Todo sale como **PNG RGBA** de máximo 1 600 px de lado. Los límites son 40 MiB por imagen y 90 millones de píxeles.
+* **Video**: se toman hasta **120 fotogramas** (6 por segundo) de un tramo de hasta **60 s**. Si el navegador no puede abrirlo, `LectorVideo` (PyAV) lo recorta y lo pasa a H.264.
 
-![Descomposición RGB](docs/informe/fig02_descomposicion_rgb.png)
-*Figura 4. Pasos 2 a 5 sobre las luces nocturnas (SVS 5313): (a) original, (b) cuadrícula 32 × 32, (c–e) canales R, G y B (escalados a su máximo), (f) señal después de la zona 5 × 5 y (g) mapa de contraste local.*
+### 7.2 Partir en cuadritos
 
-### 6.1 Adquisición y normalización
+> [!TIP]
+> **Para niños:** más cuadritos dan más detalle y la canción va más rápido. Menos cuadritos dan notas más largas.
 
-* **Formatos web** (JPG, PNG, WebP, GIF, AVIF…) se decodifican en el navegador.
-* **Formatos científicos o de cámara** viajan a `POST /api/visor/archivo` o `GET /api/visor/imagen`. `LectorImagen` (`api/visor/imagenes.py`) decide por extensión y por *firma de bytes*:
-  * **RAW** (DNG, CR2, NEF, ARW… 22 extensiones) → `rawpy`, revelado con balance de blancos de cámara.
-  * **FITS** → `astropy`, primer plano 2D/3D válido.
-  * **GeoTIFF / JPEG 2000** → `rasterio`; se respetan las bandas R, G, B y alfa declaradas, la paleta indexada y, si hay CRS, se calculan las **cuatro esquinas en WGS84** para georreferenciar.
-  * Datos de 16 bits o flotantes se escalan por **percentiles 2–98** por banda, que evita que unos pocos píxeles extremos aplasten el contraste.
-* Todo sale como **PNG RGBA** con lado máximo de 1 600 px (Lanczos) y metadatos en la cabecera `X-Orbita-Imagen`. Límites: 40 MiB por imagen, 90 millones de píxeles.
-* **Video**: el navegador toma hasta **120 fotogramas** (6 por segundo) de un tramo de hasta **60 s**. Si el códec no es reproducible, `LectorVideo` (PyAV) recorta y recodifica a H.264 (≤ 960 px, ≤ 30 fps, CRF 24). El fotograma usado en cada celda depende del instante de lectura, de modo que el video “avanza” con la música.
+`LectorMedios.muestrear()` dibuja la imagen en un lienzo de *N × N* y lee sus colores. La imagen **se estira hasta volverse cuadrada**, porque la curva de Hilbert necesita un cuadrado cuyo lado sea potencia de dos. Cada cuadrito suena el mismo tiempo:
 
-### 6.2 Remuestreo a la cuadrícula
+$$\Delta t = \frac{T}{N^2}, \qquad T = \frac{\mathrm{duracion}}{\mathrm{velocidad}}$$
 
-`LectorMedios.muestrear()` dibuja la imagen en un canvas de *N × N* (`drawImage`) y lee sus valores RGBA. La relación de aspecto **no se conserva**: la imagen se estira a un cuadrado, porque los recorridos (en especial Hilbert) necesitan una cuadrícula cuadrada con lado potencia de dos.
+Con 24 s y 32 × 32, cada cuadrito dura **23,4 ms**. Con 128 × 128 dura **1,46 ms**.
 
-Cada celda recibe un intervalo de tiempo fijo:
+### 7.3 Decidir qué cuadritos suenan
 
-$$\Delta t = \frac{T}{N^2}, \qquad T = \frac{\text{duración elegida}}{\text{velocidad de lectura}}$$
+> [!TIP]
+> **Para niños:** si la imagen tiene un fondo vacío, ese fondo no debe hacer ruido. Los cuadritos del fondo se quedan en silencio.
 
-Con 24 s y 32 × 32, cada celda dura **23,4 ms**; con 128 × 128, **1,46 ms**.
+`MascaraMedio` (`mascara.js`) tiene tres modos:
 
-### 6.3 Máscara: qué píxeles cuentan
+1. **Transparencia original**: un cuadrito transparente (alfa 0) no suena.
+2. **Quitar fondo uniforme**: mira los bordes, busca el color que más se repite (más de la mitad del borde) y lo borra **solo si está conectado con el borde**, como un balde de pintura que entra desde afuera. Así no borra zonas del mismo color que estén adentro.
+3. **Solo área seleccionada**: tú dibujas un polígono de al menos 3 puntos y solo suena lo de adentro.
 
-`MascaraMedio` (`mascara.js`) ofrece tres modos:
+<img src="docs/informe/fig_e_mascara.png" alt="Máscara de la esfera de calidad del aire" width="100%">
 
-1. **Transparencia original**: un píxel con alfa 0 se marca como *no válido* y suena en silencio.
-2. **Quitar fondo uniforme**: se muestrea el perímetro, se agrupan colores en cubos de 24 niveles, se elige un candidato que cubra ≥ 52 % del borde (≥ 62 % si el color es saturado) y se elimina por **inundación desde el borde** (búsqueda en anchura) todo lo que esté a una distancia euclidiana RGB ≤ tolerancia × 1,35. Así no se borran zonas interiores del mismo color.
-3. **Solo área seleccionada**: polígono de ≥ 3 puntos; la pertenencia se calcula con el algoritmo de cruce de rayos (*ray casting*). En video, el mismo polígono aplica a todos los fotogramas.
+*Figura 2. La esfera de calidad del aire (SVS 5533) tiene fondo transparente: solo suenan 436 de 1 024 cuadritos (42,6 %). La cuadrícula también muestra que la imagen se estira hasta volverse cuadrada.*
 
-### 6.4 Recorridos (de 2D a 1D)
+### 7.4 Elegir el orden de lectura
 
-`coordenadasRecorrido(lado, recorrido)` devuelve una permutación de las *N²* celdas. La prueba automática exige que **cada celda aparezca exactamente una vez** y que en Hilbert cada paso sea a un vecino (distancia Manhattan 1).
+> [!TIP]
+> **Para niños:** es como leer un libro. Puedes leer renglón por renglón, ir y volver como una serpiente, dar vueltas desde el centro o seguir un laberinto que nunca da saltos grandes (Hilbert).
 
-| Recorrido | Construcción | Propiedad |
+`coordenadasRecorrido(lado, recorrido)` devuelve el orden de las *N²* celdas. Las pruebas exigen que **cada celda aparezca una sola vez**.
+
+| Recorrido | Cómo se construye | Propiedad |
 | --- | --- | --- |
-| Líneas por filas | Raster clásico izquierda → derecha, arriba → abajo [6] | Salto de *N − 1* celdas al cambiar de fila |
-| Serpentina | Filas alternando sentido (*boustrophedon*) | Siempre pasos unitarios |
-| **Curva de Hilbert** | Conversión índice → (x, y) por cuadrantes con rotación/reflexión [12] | Mejor preservación de localidad entre curvas de llenado [11] |
-| Radial | Celdas ordenadas por distancia al centro y luego por ángulo | Escucha “de adentro hacia afuera”, como algunas sonificaciones de Chandra [10] |
-| Zigzag diagonal | Antidiagonales alternas (como el orden JPEG) | Pasos diagonales |
+| Líneas por filas | De izquierda a derecha y de arriba abajo [6] | Salta de un borde al otro al cambiar de fila |
+| Serpentina | Filas que alternan el sentido | Siempre pasa a un vecino |
+| **Curva de Hilbert** | Se divide en cuadrantes que se rotan y reflejan [12] | La que mejor mantiene juntos los puntos cercanos [11] |
+| Radial | Por distancia al centro y luego por ángulo | Del centro hacia afuera, como algunas piezas de Chandra [10] |
+| Zigzag diagonal | Por diagonales alternas, como en JPEG | Pasos en diagonal |
 
-![Recorridos](docs/informe/fig03_recorridos.png)
-*Figura 5. Los cinco recorridos sobre 16 × 16. El color va del morado (inicio) al amarillo (final).*
+<img src="docs/informe/fig_c_recorridos_sobre_imagen.png" alt="Tres recorridos sobre la imagen de aerosoles" width="100%">
 
-### 6.5 Zona sonora: media espacial 70/30 y contraste
+*Figura 3. Tres caminos del lápiz sobre la imagen de aerosoles (16 × 16).*
 
-Para que una celda aislada no domine la melodía, cada celda se mezcla con su vecindario cuadrado de lado *k* ∈ {1, 3, 5, 7, 9, 15, 21} (por defecto 5):
+<img src="docs/informe/fig03_recorridos.png" alt="Los cinco recorridos" width="100%">
 
-$$\mathbf{c}_{\text{sonoro}} = 0{,}7\,\mathbf{c}_{p} + 0{,}3\,\overline{\mathbf{c}}_{\text{vecinos válidos}}$$
+*Figura 4. Los cinco recorridos, con su paso medio y el porcentaje de pasos a un vecino directo.*
 
-donde **c** = (R, G, B) premultiplicado por alfa. El brillo se define con más peso para el verde, que es el canal al que el ojo es más sensible:
+### 7.5 Escuchar a los vecinos y medir el contraste
+
+> [!TIP]
+> **Para niños:** si un cuadrito es muy distinto a sus vecinos, hay **contraste**, y la guitarra toca más rápido. Si todos se parecen, la guitarra toca tranquila.
+
+Cada cuadrito mezcla su color con el de su vecindario de lado *k* ∈ {1, 3, 5, 7, 9, 15, 21} (por defecto 5):
+
+$$\mathbf{c}_{\mathrm{sonoro}} = 0{,}7 \cdot \mathbf{c}_{\mathrm{propio}} + 0{,}3 \cdot \overline{\mathbf{c}}_{\mathrm{vecinos}}$$
+
+El brillo da más peso al verde, que es el color al que el ojo es más sensible:
 
 $$Y = \frac{R + 2G + B}{4}$$
 
-El **contraste local** combina la dispersión del brillo en la zona y la diferencia entre la celda y sus vecinos:
+El contraste combina cuánto varía el brillo en la zona (σ) y cuánto se diferencia el cuadrito de sus vecinos:
 
-$$\kappa = \min\!\left(255,\ \operatorname{round}\big(0{,}66\,\sigma_Y + 0{,}34\,|Y_p - \overline{Y}_{\text{vec}}|\big)\right)$$
+$$\kappa = \min\left(255,\ 0{,}66 \cdot \sigma_Y + 0{,}34 \cdot \left| Y_{\mathrm{propio}} - \overline{Y}_{\mathrm{vecinos}} \right| \right)$$
 
-Para que el costo no crezca con *k*, `MediaZonal` construye **cuatro tablas de áreas sumadas** (R, G, B y número de celdas válidas) más una de *Y²* [13], [14]. Cada consulta cuesta 4 lecturas por tabla, sin importar el tamaño de la zona: el análisis completo es **O(N²)**. La prueba incluida verifica el caso exacto: una celda (100, 50, 20) rodeada de negro da (70, 35, 14).
+Para que sea rápido con zonas grandes, `MediaZonal` usa **tablas de áreas sumadas** [13], [14]: cada promedio se calcula con 4 lecturas, sin importar el tamaño de la zona. Todo el análisis crece en proporción al número de cuadritos.
 
-### 6.6 Mapeo espectral: intensidad → frecuencia
+<img src="docs/informe/fig_d_zonas_sobre_imagen.png" alt="Efecto de la zona sonora" width="100%">
 
-Cada canal tiene su banda audible (`BANDAS` en `sonificacion.js`) y se precalculan tablas de 256 valores. El nivel 0 es **silencio**; los niveles 1–255 se reparten así:
+*Figura 5. Con zonas más grandes el color se suaviza (arriba) y el contraste, que guía el ritmo, se vuelve más amplio (abajo).*
 
-$$f_c(v) = \begin{cases} f_{\min}\left(\dfrac{f_{\max}}{f_{\min}}\right)^{\frac{v-1}{254}} & \text{logarítmica (por defecto)}\\[2mm] f_{\min} + (f_{\max}-f_{\min})\,\dfrac{v-1}{254} & \text{lineal}\end{cases}$$
+### 7.6 Pasar el color a frecuencia
 
-| Canal | Clave | Banda | Extensión | Paso por nivel (escala log) |
+> [!TIP]
+> **Para niños:** cuanto más fuerte es un color, más aguda suena su nota. El cero es silencio.
+
+Cada canal tiene su banda de frecuencias:
+
+| Canal | Clave | Banda | Extensión | Cambio por cada nivel |
 | --- | --- | --- | --- | --- |
-| R | Fa | 20 – 250 Hz | 43,7 semitonos (3,6 octavas) | 0,17 semitonos |
-| G | Sol | 350 – 500 Hz | 6,2 semitonos | 0,024 semitonos (≈ 2,4 cents) |
-| B | Sol | 600 – 20 000 Hz | 60,7 semitonos (5,1 octavas) | 0,24 semitonos |
+| 🔴 R | Fa | 20 – 250 Hz | 43,7 semitonos | 0,17 semitonos |
+| 🟢 G | Sol | 350 – 500 Hz | 6,2 semitonos | 0,024 semitonos (≈ 2,4 cents) |
+| 🔵 B | Sol | 600 – 20 000 Hz | 60,7 semitonos | 0,24 semitonos |
 
-La escala logarítmica hace que pasos iguales de intensidad suenen como intervalos musicales iguales, en línea con la percepción de la altura [15]; la polaridad “más intenso = más agudo” coincide con la que la mayoría de oyentes espera para magnitudes [16]. La conversión a nota MIDI es la estándar:
+Para un nivel *v* entre 1 y 255 (el 0 es silencio), la escala **logarítmica**, que viene por defecto, es:
 
-$$m = \operatorname{round}\!\left(69 + 12\log_2\frac{f}{440}\right)$$
+$$f(v) = f_{\min} \cdot \left(\frac{f_{\max}}{f_{\min}}\right)^{(v-1)/254}$$
 
-![Mapeo de frecuencia](docs/informe/fig05_mapeo_frecuencia.png)
-*Figura 6. Curvas intensidad → frecuencia de las tres bandas en escala logarítmica y lineal.*
+y la **lineal**:
 
-### 6.7 Del mapeo a la música: `ArregloMusical`
+$$f(v) = f_{\min} + \left(f_{\max} - f_{\min}\right) \cdot \frac{v-1}{254}$$
 
-El **modo píxeles RGB** (`sintesis-rgb.js`) es la sonificación “pura”: tres osciladores sinusoidales cuya frecuencia salta celda a celda según la tabla anterior y cuya amplitud es 0,30 · volumen · *v*/255, con rampas de 0,65 ms para evitar clics.
+La escala logarítmica hace que pasos iguales de color suenen como intervalos musicales iguales, que es como percibimos la altura [15]. Además, “más intenso = más agudo” es la dirección que la mayoría de las personas espera [16]. La nota MIDI se obtiene así:
 
-El **modo arreglo** (por defecto) convierte la misma lectura en música tocable:
+$$m = \mathrm{redondear}\left(69 + 12 \cdot \log_2 \frac{f}{440}\right)$$
 
-1. **Tiempo musical.** Con tempo *b* (negras/min) y compás *p/q*, la unidad mínima es una semicorchea de 60/(*b* · 4) s. El número de compases es ⌈*T* / duración del compás⌉. A 68 negras/min en 4/4, 24 s dan **7 compases** (24,706 s).
-2. **Armonía por zona de color.** Cada medio compás se resume en una intensidad media por canal. Su brillo relativo y el balance de color eligen un grado de la tonalidad (`gradoPorColor`):
-   * rojo dominante (R − B > umbral) → **V** o **IV**, azul dominante → **ii** o **iii**, verde dominante → **I** o **vi**;
-   * sin color dominante, el brillo relativo recorre **I → ii → V → IV**.
-   En modo menor se usan los acordes equivalentes. Las 12 tónicas y los modos mayor/menor están disponibles.
-3. **Ritmo según el contraste.** Para cada pulso se mide la **textura** = contraste ponderado + cambios entre celdas consecutivas. Si supera 18 en tiempo fuerte (10 en débil), el pulso se divide en dos corcheas; por encima de 28, en nivel intermedio, se divide en tres. También hay ritmos fijos: pulso, corcheas y semicorcheas.
-4. **Alturas.** Cada pista usa solo notas del acorde vigente dentro de su registro. La melodía se reescala entre los percentiles 10 y 88 de la propia imagen, para que una imagen oscura también use todo el diapasón; se limita el salto melódico (5 semitonos en nivel inicial, 7–12 en intermedio).
-5. **Papel de cada guitarra.** R toca los **bajos** (fundamental o quinta del acorde según la tendencia), G **alterna pulgar y melodía** (bajo en tiempos fuertes, melodía en los demás) y B las **notas agudas**.
-6. **Digitación.** Para cada nota se buscan todas las posiciones (cuerda, traste) con traste ≤ 5 (inicial) o ≤ 7 (intermedio), restringiendo cuerdas graves a los bajos y agudas a la melodía, y se escoge la de menor costo:
-   $$\text{costo} = 0{,}18\,\text{traste} + 0{,}45\,|\Delta\text{traste}| + 0{,}36\,|\Delta\text{cuerda}|$$
+<img src="docs/informe/fig05_mapeo_frecuencia.png" alt="Curvas de intensidad a frecuencia" width="100%">
+
+*Figura 6. Curvas de intensidad a frecuencia de las tres bandas.*
+
+### 7.7 Componer la canción (`ArregloMusical`)
+
+> [!TIP]
+> **Para niños:** la computadora actúa como un profesor de guitarra. Mira el color de cada parte de la imagen y escoge un acorde. Si hay mucho contraste toca más notas. Al final busca dónde poner los dedos para que sea fácil de tocar.
+
+Hay dos modos:
+
+* **Modo píxeles RGB** (`sintesis-rgb.js`): tres osciladores cuya frecuencia cambia cuadrito a cuadrito. Es la sonificación pura.
+* **Modo arreglo** (por defecto): convierte la misma lectura en música tocable.
+
+Así funciona el modo arreglo:
+
+1. **Tiempo musical.** A 68 negras por minuto en 4/4, 24 s dan **7 compases** (24,706 s).
+2. **Acorde según el color.** Cada medio compás se resume en un color medio que elige un acorde de la tonalidad:
+   * 🔴 si domina el rojo: **V** o **IV**;
+   * 🔵 si domina el azul: **ii** o **iii**;
+   * 🟢 si domina el verde: **I** o **vi**;
+   * si no domina ninguno, el brillo recorre **I → ii → V → IV**.
+
+   Hay 12 tónicas y modo mayor o menor.
+3. **Ritmo según el contraste.** Si la textura de un pulso pasa de 18 en tiempo fuerte (10 en tiempo débil), el pulso se divide en dos. Si pasa de 28, en nivel intermedio, se divide en tres. También hay ritmos fijos.
+4. **Alturas.** Solo se usan notas del acorde. La melodía se reparte entre los percentiles 10 y 88 de la propia imagen, para que una imagen oscura también use todo el diapasón. Los saltos tienen límite: 5 semitonos en nivel inicial y de 7 a 12 en intermedio.
+5. **Papel de cada guitarra.** 🔴 R hace los **bajos**, 🟢 G **alterna pulgar y melodía** y 🔵 B toca las **notas agudas**.
+6. **Digitación.** Se buscan todas las posiciones posibles (cuerda, traste), con traste ≤ 5 en inicial y ≤ 7 en intermedio, y se elige la más cómoda:
+
+   $$\mathrm{costo} = 0{,}18 \cdot \mathrm{traste} + 0{,}45 \cdot \left|\Delta \mathrm{traste}\right| + 0{,}36 \cdot \left|\Delta \mathrm{cuerda}\right|$$
+
    Hay cinco afinaciones: guitarra estándar, requinto, tiple requinto en Do y en Si♭, y bajo de cuatro cuerdas.
-7. **Dinámica y acentos.** Velocidad = max(0,12, (*I*/255)^0,63); cada compás recibe *p*, *mp*, *mf* o *f* según su media; se acentúan los tiempos fuertes intensos.
-8. **Voz opcional.** `vozCantante()` genera una cuarta parte en el rango La3–Do5, con notas del acorde cercanas a un centro que depende del brillo global. La letra se compone a partir del tema de la imagen (catálogo NASA) o de lo que reconoce MobileNet (fotos propias).
+7. **Dinámica.** Cada nota recibe una fuerza de max(0,12; (*I*/255)^0,63). Cada compás se marca *p*, *mp*, *mf* o *f*.
+8. **Voz opcional.** Una cuarta parte cantada entre La3 y Do5, con una letra compuesta a partir del tema de la imagen.
 
-![Piano roll](docs/informe/fig06_piano_roll.png)
-*Figura 7. Arreglo generado para SVS 5313. Cada barra es una nota; su opacidad es la intensidad. Las franjas superiores muestran el acorde elegido por el color de cada zona.*
+<img src="docs/informe/fig06_piano_roll.png" alt="Canción generada para las luces nocturnas" width="100%">
 
-### 6.8 Síntesis, mezcla y espacio
+*Figura 7. Canción generada para SVS 5313. Cada barra es una nota y su transparencia indica la fuerza. Arriba aparece el acorde elegido para cada zona.*
 
-* **Muestras grabadas.** Cuatro bancos MP3 mono a 24 kHz (guitarra de nailon, de acero, eléctrica limpia y piano) con notas aisladas de 1,5 s. Para cada nota se toma la muestra grabada más cercana y se transpone con la razón `Tone.intervalToFrequencyRatio(semitonos)`, con interpolación lineal.
-* **Timbres sintéticos** de respaldo (aditivos y de ruido para percusión) en `Voz`.
-* **Envolvente RGB.** Mientras una nota suena, su volumen sigue la intensidad de la banda celda a celda (suavizado de 3 ms): en guitarra 0,62 √(*I*/255) + 0,38 (*I*/*I*ₘₐₓ)^2,3.
-* **Espacio según la posición del píxel** (`espacioPixel`):
-  * panorama = pan de la pista + (2*x* − 1) · espacio (por defecto 65 %), con ley de potencia constante;
-  * reverberación = reverb · (0,08 + 0,92 · distancia al centro), es decir, más eco en los bordes;
-  * filtro opcional según *Y*: corte = 600 + 10 500 (1 − *y*)² Hz (arriba = brillante, abajo = opaco).
-* La mezcla se calcula en un **Web Worker** (sin bloquear la interfaz), a 48 kHz estéreo; si el navegador no tiene Workers, se calcula en el hilo principal.
+### 7.8 Sonar y mezclar
+
+> [!TIP]
+> **Para niños:** si el color está a la izquierda de la imagen, el sonido sale más por el parlante izquierdo. Si está en el borde, suena con más eco, como en una cueva.
+
+* 🎸 **Guitarras grabadas de verdad** (nailon, acero, eléctrica) y piano, con licencia CC0. Para cada nota se toma la grabación más cercana y se afina con `Tone.intervalToFrequencyRatio`.
+* 🌊 **Volumen que sigue al color**: mientras la nota suena, su volumen cambia según la intensidad de la banda.
+* 🎧 **Espacio**:
+  * panorama = pan de la pista + (2*x* − 1) · 65 %;
+  * eco = reverb · (0,08 + 0,92 · distancia al centro);
+  * filtro opcional según la altura en la imagen: corte = 600 + 10 500 · (1 − *y*)² Hz.
+* ⚙️ La mezcla se calcula en un **Web Worker** a 48 kHz en estéreo, sin congelar la página.
 
 ---
 
-## 7. Implementación del frontend
+## 8. 🖥️ Cómo está hecho el frontend
 
-### 7.1 Módulos principales
+```mermaid
+flowchart TB
+    subgraph NAV["🌐 Navegador (GitHub Pages)"]
+        UI["🖱️ index.html<br/>botones y paneles"] --> APP["🧠 app.js<br/>el director"]
+        APP --> MED["📷 medios.js<br/>lee la imagen"]
+        MED --> SEC["🔢 sonificacion.js<br/>colores en orden"]
+        SEC --> ARR["🎼 arreglo.js<br/>compone"]
+        ARR --> AUD["🔊 audio-pistas.js<br/>mezcla en segundo plano"]
+        AUD --> TR["⏯️ Transporte<br/>reproduce"]
+        ARR --> PAR["📄 musicxml.js + midi.js<br/>partitura"]
+        SEC --> EST["📊 estadísticas<br/>e informe"]
+        SEC --> GIS["🗺️ mapa y globo"]
+    end
+    classDef caja fill:#f3f2ef,stroke:#52514e,color:#0b0b0b
+    class UI,APP,MED,SEC,ARR,AUD,TR,PAR,EST,GIS caja
+```
 
-| Módulo | Clase o función | Responsabilidad |
+| Caja | En palabras sencillas | Archivos y clases |
 | --- | --- | --- |
-| `visor/app.js` (700 líneas) | `AplicacionVisor` | Estado del medio, enlace de controles, recalcula secuencia y arreglo al cambiar un ajuste |
-| `visor/medios.js` | `LectorMedios` | Abrir imagen/video, muestrear *N × N*, fotogramas de video |
-| `recorridos.js` | `coordenadasRecorrido`, `puntoHilbert` | Orden de lectura |
-| `visor/estadistica-zonal.js` | `MediaZonal` | Imagen integral, media 70/30, contraste |
-| `visor/mascara.js` | `MascaraMedio` | Alfa, fondo uniforme, polígono |
-| `visor/sonificacion.js` | `SecuenciaSonora`, `Transporte` | Tablas de frecuencia, reloj de reproducción, caché de audio por modo, cancelación con `AbortController` |
-| `visor/arreglo.js` (385 líneas) | `ArregloMusical` | Armonía, ritmo, alturas, digitación, voz |
-| `visor/audio-pistas.js`, `audio-worker.js` | `renderizarArreglo`, `Voz` | Mezcla en Worker y codificación WAV |
-| `visor/muestras.js` | `prepararMuestras` | Bancos CC0, recorte y transposición con Tone.js |
-| `visor/musicxml.js`, `partitura-musical.js`, `visor-partituras.js` | `MusicXML` | Escritura MusicXML 4 partes, pentagrama + tablatura con OSMD, cursor sincronizado |
-| `visor/midi.js` | `ArchivosMIDI` | Exportar/importar `.mid` (corrige la armadura que desplaza @tonejs/midi 2.0.28) |
-| `visor/daw.js`, `audio-vivo.js` | `EstudioDAW`, `AudioVivo` | Mezclador de 3 pistas, solo/mute, instrumento, reproducción de MIDI local |
-| `estadisticas.js`, `visor/paneles.js`, `visor/informe.js` | `calcularInforme` | Firmas RGB, histogramas, píxeles destacados, informe HTML |
-| `visor/gis.js`, `globo.js`, `marcas-sig.js` | — | Georreferencia (punto o 4 esquinas), mapa MapLibre, globo en canvas, exportación GeoJSON |
-| `visor/modelo-imagen.js`, `letra.js`, `voz-grabada.js` | `clasificar` | Inferencia MobileNet int8 en Worker, letra, toma vocal del usuario |
+| 🖱️ **index.html** | La cara de la página: botones, listas y paneles. | `index.html`, `web/css/*.css` |
+| 🧠 **app.js** | El director de orquesta: cuando cambias algo, avisa a los demás. | `AplicacionVisor` (700 líneas) |
+| 📷 **medios.js** | Abre la imagen o el video y la corta en cuadritos. | `LectorMedios`, `mascara.js` |
+| 🔢 **sonificacion.js** | Pone los colores en fila según el camino del lápiz. | `SecuenciaSonora`, `recorridos.js`, `estadistica-zonal.js` |
+| 🎼 **arreglo.js** | El compositor: acordes, ritmo y dedos. | `ArregloMusical` (385 líneas) |
+| 🔊 **audio-pistas.js** | Prepara el sonido sin trabar la página. | `renderizarArreglo`, `audio-worker.js`, `muestras.js`, `sintesis-rgb.js` |
+| ⏯️ **Transporte** | El botón de play: arranca, pausa y mueve el cursor. | `Transporte` (Web Audio) |
+| 📄 **Partitura** | Escribe la partitura y el archivo MIDI. | `musicxml.js`, `partitura-musical.js` (OpenSheetMusicDisplay), `midi.js` |
+| 📊 **Estadísticas** | Cuenta colores y señala los puntos más interesantes. | `estadisticas.js`, `paneles.js`, `informe.js` |
+| 🗺️ **Mapa** | Ubica la imagen en la Tierra. | `gis.js` (MapLibre), `globo.js`, `marcas-sig.js` |
 
-### 7.2 Reproducción sin cortes
+**Detalles importantes**
 
-`Transporte` guarda un búfer de audio por modo (*arreglo* o *píxeles RGB*). Solo invalida el búfer afectado: cambiar el volumen de una pista rehace la mezcla pero no la partitura; cambiar el recorrido rehace ambas. Al pausar aplica una rampa de 8 ms a cero para evitar clics, y el cursor se sincroniza con `AudioContext.currentTime` mediante `requestAnimationFrame`. Un contador de *generación* descarta resultados de reproducciones que ya fueron reemplazadas.
-
-### 7.3 Análisis de firmas RGB
-
-`calcularInforme()` cuantiza cada celda en *L* ∈ {4, 8, 16} niveles por canal (“firma”), cuenta su frecuencia y produce:
-
-* el **mapa de ocupación** de firmas con un semáforo de colores (frecuentes vs. raras);
-* estadísticas por canal (mínimo, máximo, media, mediana, desviación poblacional, P5, P95) e histogramas de 16 intervalos;
-* **píxeles destacados automáticos**: máximo de cada canal, máxima intensidad conjunta, mayor cambio de firma entre celdas consecutivas y primera aparición de la firma más frecuente, más las marcas manuales del usuario.
+* ⏱️ **Sin cortes ni clics.** `Transporte` guarda un audio por modo y solo rehace lo que cambió. Al pausar baja el volumen en 8 ms y sincroniza el cursor con el reloj de audio.
+* 📊 **Firmas RGB.** `calcularInforme()` agrupa cada color en 4, 8 o 16 niveles por canal. Con eso calcula qué combinaciones se repiten, estadísticas por canal (mínimo, máximo, media, mediana, desviación, P5 y P95), histogramas y los **píxeles destacados**: el máximo de cada canal, el más brillante, el mayor cambio entre vecinos en el camino y la primera aparición del color más frecuente.
+* 🤖 **IA local opcional.** Para la letra se usa MobileNet V1 cuantizado a 8 bits (493 488 bytes), que corre en el propio navegador dentro de un Worker. La imagen no sale del equipo.
 
 ---
 
-## 8. Implementación del backend
+## 9. ⚙️ Cómo está hecho el backend
 
-### 8.1 Endpoints
+```mermaid
+flowchart LR
+    W["🌐 Navegador"] -- "formatos difíciles" --> V["🖼️ /api/visor<br/>abre y traduce imágenes y videos"]
+    W -- "videos publicados" --> I["🎬 /api/interpretaciones<br/>lista y mezcla MP4"]
+    X["🎹 Controlador externo"] -- "notas y colores en vivo" --> D["📡 WebSocket /api/daw/vivo"]
+    W --> S["🛰️ /api/goes y /health<br/>imagen del día y estado"]
+    NASA[("🚀 NASA SVS")] --> V
+    NOAA[("🛰️ NOAA GOES-19")] --> S
+    classDef api fill:#eaf7f1,stroke:#1baf7a,color:#0b0b0b
+    class V,I,D,S api
+```
+
+| Caja | En palabras sencillas | Detalle técnico |
+| --- | --- | --- |
+| 🖼️ **/api/visor** | Un traductor: abre fotos de cámara, de telescopio o con coordenadas, y videos raros. | `importar`, `imagen`, `video` (con `Range`), `archivo`. Usa Pillow, pillow‑heif, rasterio, rawpy, astropy y PyAV |
+| 🎬 **/api/interpretaciones** | Une un video con tres grabaciones (rojo, verde y azul). | FFmpeg `amix` + `alimiter`, H.264 + AAC, hasta 5 minutos y 4K |
+| 📡 **WebSocket** | Un canal para que otros aparatos envíen notas o colores en vivo. | Mensajes `note` y `rgb` validados con Pydantic, máximo 45 por segundo |
+| 🛰️ **/api/goes** | Entrega la foto satelital del día sobre Colombia. | GeoColor GOES‑19, sector norte de Suramérica; se renueva cada 10 min |
+
+### Endpoints
 
 | Método | Ruta | Uso |
 | --- | --- | --- |
 | GET | `/health` | Estado y versión |
-| GET | `/api/goes` | URL de la imagen GeoColor GOES‑19 del sector norte de Suramérica (se renueva cada 10 min) |
-| GET | `/api/datos` | Metadatos de la rocola |
-| GET | `/api/visor/importar?url=` | Lee una página de NASA SVS (o una URL directa) y devuelve un paquete con sus imágenes y videos |
+| GET | `/api/goes` · `/api/datos` | Imagen GOES‑19 del día · datos de la rocola |
+| GET | `/api/visor/importar?url=` | Lee una página de NASA SVS y arma un paquete con sus medios |
 | GET | `/api/visor/imagen?url=` | Descarga y normaliza una imagen remota a PNG |
-| GET | `/api/visor/video?url=&convertir=&inicio=` | Transmite un video con soporte de `Range`, o lo recorta y normaliza (≤ 60 s) |
-| POST | `/api/visor/archivo` | Normaliza una imagen o video subidos (40 / 80 MiB) |
-| GET | `/api/interpretaciones/{carpeta}` | Lista los MP4 publicados de un paquete |
-| POST | `/api/interpretaciones/mezclar` | Une un video con tres audios (R, G, B) con ganancia y desfase por pista usando FFmpeg (`amix` + `alimiter`) |
-| WS | `/api/daw/vivo/{sesion}` | Sala para retransmitir eventos `note` (pista, nota, velocidad) y `rgb` (tripleta + x, y) validados con Pydantic |
-| GET | `/`, `/web`, `/datos`, `/docs`, `/videos` | La misma página del visor y sus archivos estáticos |
+| GET | `/api/visor/video?url=&convertir=&inicio=` | Transmite un video o lo recorta (≤ 60 s) |
+| POST | `/api/visor/archivo` | Normaliza un archivo subido (imágenes hasta 40 MiB, videos hasta 80 MiB) |
+| GET · POST | `/api/interpretaciones/{carpeta}` · `/api/interpretaciones/mezclar` | Lista los MP4 de un paquete · mezcla un video con tres audios |
+| WS | `/api/daw/vivo/{sesion}` | Sala de eventos en vivo |
 
-### 8.2 Seguridad y robustez
+### 🛡️ Seguridad
 
-* **Protección SSRF** (`ClientePublico`): solo HTTP/HTTPS en puertos estándar, sin credenciales en la URL; el nombre se resuelve y **todas** las IP deben ser públicas (`ip.is_global`) antes de conectar; la conexión se hace a la IP resuelta con el `Host` y SNI originales (evita *DNS rebinding*); máximo 6 redirecciones, cada una revalidada.
-* **Límites de tamaño** comprobados por `Content-Length` y durante la lectura en bloques de 64 KiB.
-* **WebSocket**: identificador de sesión hexadecimal de 32 caracteres, máximo 200 salas y 12 clientes por sala, mensajes ≤ 1 000 bytes y ≤ 45 por segundo; esquemas Pydantic con `extra="forbid"`.
-* **FFmpeg** con listas blancas de formato y protocolo (`file` únicamente), un solo trabajo de mezcla a la vez (`BoundedSemaphore(1)`) y tiempo máximo de 210 s.
-* Cabeceras `X-Content-Type-Options: nosniff`, compresión GZip y CORS configurable con `CORS_ORIGINS`.
+* **Solo internet público.** Antes de descargar algo se revisa que la dirección sea pública, para que nadie use la API contra redes internas (protección SSRF). Se conecta a la IP ya revisada y se vuelve a revisar en cada redirección, hasta un máximo de 6.
+* **Límites de tamaño** comprobados mientras se descarga, en bloques de 64 KiB.
+* **WebSocket con límites**: máximo 200 salas, 12 personas por sala, mensajes de hasta 1 000 bytes y 45 por segundo.
+* **FFmpeg encerrado**: solo lee archivos locales, procesa una mezcla a la vez y se detiene a los 210 s.
+* Cabecera `nosniff`, compresión GZip y CORS configurable con `CORS_ORIGINS`.
 
-### 8.3 Catálogo
+### Estructura del repositorio
 
-`scripts/actualizar_catalogo.py` lee `datos/fuentes-svs.json`, usa `Catalogador` para extraer de cada página de NASA SVS los medios, títulos, descripciones y variantes, descarga una copia local del medio inicial y escribe `datos/paquetes/<id>/paquete.json`. Las huellas SHA‑256 de los originales quedan en `docs/ARCHIVOS_NASA_SHA256.txt`.
+```text
+Orbita_Sonora/
+├── index.html · main.py · package.json
+├── api/            🐍 FastAPI: rutas/ y visor/ (imágenes, videos, red segura, catálogo)
+├── web/
+│   ├── js/         🧠 recorridos.js, estadisticas.js y 28 módulos en visor/
+│   ├── css/        🎨 5 hojas de estilo
+│   ├── muestras/   🎸 guitarras y piano CC0
+│   ├── modelo/     🤖 MobileNet int8
+│   ├── geo/        🗺️ teselas Blue Marble y GeoJSON
+│   ├── vendor/     📦 Tone.js, @tonejs/midi, OpenSheetMusicDisplay, MapLibre
+│   └── fonts/      🔤 DM Sans y Space Grotesk
+├── datos/          🚀 9 paquetes NASA SVS (manifiesto, portada y original)
+├── videos/         🎬 interpretaciones MP4
+├── scripts/        🛠️ servir, abrir_local, actualizar_catalogo, preparar_github…
+├── pruebas/        ✅ sonificacion.mjs y verificar.py
+└── docs/           📘 logos, huellas SHA-256 e informe (figuras, datos y scripts)
+```
 
----
-
-## 9. Resultados I: cómo se usa y qué funcionalidades hay
-
-### 9.1 Recorrido por la interfaz
-
-| Zona de la página | Controles | Qué hace |
-| --- | --- | --- |
-| **Encabezado** | Imágenes · Partituras · DAW · **Cargar imagen** | Navegación y carga de archivos o URL |
-| **Rocola** | Vinilo, ▶ verde, Ⅱ rojo, *Elige una imagen* | Reproducción rápida del arreglo |
-| **Imagen destacada** | GOES‑19 GeoColor en vivo · **Abrir MP4** | Imagen satelital del día sobre Colombia; reproduce un video propio o publicado |
-| **Imágenes para escuchar** | Catálogo de 9 paquetes | Selección del medio |
-| **Reproducción** | ▶ Tocar arreglo · Pausa · **Informe con partitura** · Tempo (40–168) · Tónica · Volumen · línea de tiempo | Control del transporte |
-| **Recorrido** | Recorrido (5) · Cuadrícula (8–128) · Velocidad (0,5–2×) · Zona sonora (1–21) | Cómo se lee la imagen; vista del original, el trazado RGB y los tres canales |
-| **Partitura musical** | Vista (G, general, guitarra + voz) · ‹ › · Ir al compás · Seguir reproducción · WAV · MIDI · MusicXML · Imprimir/PDF | Pentagrama + tablatura y exportación |
-| **Ajustes de composición** | Modo · Alturas por acorde · Dificultad · Compás (4/4, 3/4, 6/8) · Ritmo · Afinación | Reglas del arreglo |
-| **Voz** | Activar voz y letra · Añadir una voz grabada | Cuarta parte vocal y letra editable |
-| **DAW · Instrumentos** | Instrumento, volumen, panorama, Solo, Mute, Probar por pista · Reverb en el borde · Panorama según X · Filtro según Y · Restaurar mezcla · Archivo MIDI local | Mezcla |
-| **Análisis de la imagen** | Duración (12/24/48 s) · Intensidad a frecuencia (log/lineal) · Agrupar firmas (4/8/16) · Ocupación (completa/hasta el cursor) | Parámetros del análisis |
-| **Vista geográfica** | Píxel activo · Mapa 2D · Globo 3D · Georreferenciar · Centrar capa | Ubicar la imagen en la Tierra |
-| **Fondo y área** | Transparencia original · Quitar fondo uniforme (tolerancia) · Solo área seleccionada · Delimitar área | Qué píxeles suenan |
-| **Firmas RGB** | Firma del píxel · Ocupación de firmas · Marcar píxel · Exportar marcas SIG · Descargar datos | Análisis cuantitativo |
-
-### 9.2 Casos de uso
-
-* **Aula de música**: el docente elige una imagen, baja la dificultad a *Inicial* (trastes ≤ 5) y entrega la partitura en PDF con tablatura para que los estudiantes la toquen.
-* **Divulgación científica**: se compara cómo “suena” la diferencia de luces nocturnas o de aerosoles; el recorrido radial permite escuchar del centro hacia los bordes.
-* **Análisis exploratorio**: con *Ocupación hasta el cursor* y *Marcar píxel* se registran puntos de interés y se exportan como **GeoJSON** georreferenciado (incluye fila, columna, segundo del recorrido y segundo del video original).
-* **Producción**: exportar el MIDI a un DAW externo, o el MusicXML a MuseScore/Finale/Sibelius, para orquestar la idea.
+| Capa | Tecnología (versión incluida) |
+| --- | --- |
+| Interfaz | HTML5, CSS y módulos ES nativos, sin empaquetador |
+| Audio | Web Audio API [18] · **Tone.js 15.1.22** [17] |
+| Partitura y MIDI | **OpenSheetMusicDisplay 1.9.8** · **@tonejs/midi 2.0.28** |
+| Mapas | **MapLibre GL JS 5.6.0** y globo propio en canvas |
+| API | **FastAPI** ≥ 0.115 · Uvicorn · httpx · lxml |
+| Imágenes y video | Pillow · pillow‑heif · rasterio · rawpy · astropy · PyAV · imageio‑ffmpeg |
 
 ---
 
-## 10. Resultados II: evaluación cuantitativa
+## 10. 📈 Resultados medidos
 
-### 10.1 Protocolo
+### 10.1 Cómo se midió
 
-Las métricas se obtuvieron **ejecutando los propios módulos del proyecto** (`sonificacion.js`, `arreglo.js`, `audio-pistas.js`, `estadisticas.js`, `musicxml.js`) en **Node.js 22** sobre las 9 imágenes del catálogo:
+Las cifras salen de **ejecutar los propios módulos del proyecto** (`sonificacion.js`, `arreglo.js`, `audio-pistas.js`, `estadisticas.js` y `musicxml.js`) en **Node.js 22** sobre las 9 imágenes del catálogo, con los ajustes que trae la web: 32 × 32, zona 5 × 5, 24 s, escala logarítmica, Do mayor, 68 negras por minuto, 4/4, ritmo según el contraste, nivel intermedio y tres guitarras de nailon.
 
-* Remuestreo a *N × N* con Pillow (bilineal), como aproximación al `drawImage` del navegador.
-* Configuración por defecto de la web: 32 × 32, zona 5 × 5, 24 s, velocidad 1×, escala logarítmica, Do mayor, 68 negras/min, 4/4, ritmo *según el contraste*, nivel intermedio, afinación estándar, tres guitarras de nailon.
-* El audio se sintetizó con los **timbres de respaldo** (en Node no se decodifican los MP3); la estructura de notas es idéntica a la del navegador.
-* Tiempos: mediana de 15 ejecuciones para análisis y composición y de 3 para la síntesis, en un contenedor Linux; son indicativos y dependen del equipo.
+* El paso a cuadrícula se hizo con Pillow (bilineal), como aproximación al `drawImage` del navegador.
+* El audio usó los **timbres sintéticos de respaldo**, porque Node no decodifica los MP3. Las notas son idénticas a las del navegador.
+* Los tiempos son la mediana de 15 ejecuciones para el análisis y la composición, y de 3 para el audio, en un contenedor Linux. Son orientativos.
 
-Los scripts y datos crudos están en [`docs/informe/reproducir/`](docs/informe/reproducir/) y [`docs/informe/resultados.json`](docs/informe/resultados.json).
+Los scripts y los datos crudos están en [`docs/informe/reproducir/`](docs/informe/reproducir/) y [`docs/informe/resultados.json`](docs/informe/resultados.json).
+
+<img src="docs/informe/fig01_catalogo.png" alt="Catálogo de nueve imágenes" width="100%">
+
+*Figura 8. Las nueve imágenes evaluadas [34].*
 
 ### 10.2 Resultados por imagen
 
-| SVS | Tema | Celdas válidas | Notas R / G / B | Total | Acordes distintos | Firmas (8 niv.) | Firma dominante | Contraste medio |
+| SVS | Tema | Cuadritos que suenan | Notas R / G / B | Total | Acordes distintos | Firmas (8 niveles) | Firma más común | Contraste medio |
 | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| 40467 | Tierra desde el espacio (EIC) | 1024 | 28 / 53 / 54 | 135 | 3 | 36 | 19,5 % | 12,2 |
-| 5313 | Luces nocturnas 2012–2023 | 1024 | 28 / 43 / 43 | 114 | 4 | 10 | 71,8 % | 10,3 |
-| 3912 | Corrientes y temperatura oceánica | 1024 | 28 / 40 / 39 | 107 | 5 | 28 | 37,7 % | 8,3 |
-| 5669 | Aerosoles GEOS 2025 | 1024 | 28 / 50 / 50 | 128 | 4 | 46 | 19,5 % | 13,6 |
-| 5533 | Calidad del aire (esfera) | **436** | 26 / 50 / 50 | 126 | 4 | **86** | 13,8 % | 16,9 |
+| 40467 | Tierra desde el espacio | 1024 | 28 / 53 / 54 | 135 | 3 | 36 | 19,5 % | 12,2 |
+| 5313 | Luces nocturnas | 1024 | 28 / 43 / 43 | 114 | 4 | 10 | 71,8 % | 10,3 |
+| 3912 | Corrientes oceánicas | 1024 | 28 / 40 / 39 | 107 | 5 | 28 | 37,7 % | 8,3 |
+| 5669 | Aerosoles GEOS | 1024 | 28 / 50 / 50 | 128 | 4 | 46 | 19,5 % | 13,6 |
+| 5533 | Calidad del aire | **436** | 26 / 50 / 50 | 126 | 4 | **86** | 13,8 % | 16,9 |
 | 5425 | Perpetual Ocean 2 | 1024 | 27 / 54 / 54 | 135 | 2 | 41 | 13,6 % | 17,0 |
 | 5011 | Relámpagos desde la ISS | 1024 | 28 / 44 / 44 | 116 | 4 | 16 | 36,8 % | 9,7 |
 | 4960 | Río atmosférico | 1024 | 28 / 47 / 47 | 122 | 5 | 32 | 63,2 % | 11,2 |
 | 4950 | Altura de bosques GEDI | 1024 | 27 / 51 / 50 | 128 | 5 | 32 | 17,2 % | 13,3 |
 
-Observaciones:
+* 🎼 Todas producen **7 compases (24,706 s)** y entre **107 y 135 notas** (media 123,4).
+* ✅ El **100 %** de las notas pertenece al acorde de su zona y **ninguna pasa del traste 7**.
+* 🔴 La pista roja es la más estable (26–28 notas, cerca de una por pulso); la verde y la azul concentran el ritmo.
+* 🌐 La esfera 5533 solo hace sonar el 42,6 % de los cuadritos, pero es la de más variedad de color (86 firmas).
+* 🌑 Las imágenes oscuras y parejas (5313, 4960) tienen una firma dominante del 63–72 %, menos acordes y casi todos sus compases en *p*.
 
-* Todas las imágenes producen **7 compases (24,706 s)** y entre **107 y 135 notas** (media 123,4; DE ≈ 10).
-* **El 100 % de las notas pertenece al acorde de su zona** y **ninguna supera el traste 7**: las restricciones de diseño se cumplen en todos los casos.
-* La pista R es la más estable (26–28 notas, aproximadamente una por pulso) porque nunca se subdivide; G y B concentran la variación rítmica.
-* SVS 5533 es una esfera sobre fondo transparente: solo 436 de 1 024 celdas (42,6 %) suenan, pero es la de mayor diversidad cromática (86 firmas).
-* Las imágenes oscuras y homogéneas (5313, 4960) tienen una firma dominante de 63–72 % y menos acordes; sus compases quedan mayoritariamente en dinámica *p* (7 de 7 en SVS 5313 y 6 de 7 en SVS 4960).
+<img src="docs/informe/fig10_acordes_notas.png" alt="Acordes y notas" width="100%">
 
-![Acordes y notas](docs/informe/fig10_acordes_notas.png)
-*Figura 8. Izquierda: acordes elegidos en las 126 zonas armónicas (14 por imagen). Sol (V) aparece en el 25,4 %. Derecha: notas por pista.*
+*Figura 9. Izquierda: acordes elegidos en 126 zonas; Sol (V) es el más frecuente (25,4 %). Derecha: notas por pista.*
 
-### 10.3 Efecto del recorrido
+### 10.3 El orden de lectura cambia la música
 
-Para cada recorrido se midió, con zona 1 × 1 (sin suavizar) sobre las 9 imágenes: el paso geométrico medio, la diferencia absoluta media de brillo entre celdas consecutivas |Δ*Y*|, la autocorrelación de brillo con retardo 1, ρ(1), y, con zona 5 × 5, el salto melódico medio y el número de notas de la pista G.
+Se midió, sobre las 9 imágenes: el paso medio del lápiz, el **salto de brillo** |Δ*Y*| entre cuadritos seguidos, la **autocorrelación** ρ(1) (qué tanto se parece un cuadrito al siguiente), el salto melódico y el número de notas de la guitarra verde.
 
-| Recorrido | Paso medio (celdas) | Pasos unitarios | \|Δ*Y*\| (media ± DE) | ρ(1) | Salto melódico G (semitonos) | Notas G |
+| Recorrido | Paso medio | Pasos a un vecino | \|Δ*Y*\| (media ± DE) | ρ(1) | Salto melódico (semitonos) | Notas G |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
 | Líneas por filas | 1,91 | 97,0 % | 9,28 ± 2,56 | 0,885 | 11,40 | 48,0 |
 | Serpentina | 1,00 | 100 % | 8,80 ± 2,66 | **0,902** | 11,24 | 47,1 |
 | **Curva de Hilbert** | 1,00 | 100 % | **7,85 ± 1,81** | 0,901 | 10,72 | **41,7** |
 | Radial | 7,77 | 4,7 % | 21,59 ± 5,01 | 0,526 | **9,57** | 50,2 |
-| Zigzag diagonal | 1,39 | 6,1 % (resto diagonales) | 10,87 ± 2,37 | 0,838 | 10,52 | 47,9 |
+| Zigzag diagonal | 1,39 | 6,1 % (el resto en diagonal) | 10,87 ± 2,37 | 0,838 | 10,52 | 47,9 |
 
-![Localidad de los recorridos](docs/informe/fig04_localidad_recorridos.png)
-*Figura 9. Suavidad (izquierda) y coherencia (derecha) de la señal de brillo según el recorrido.*
+<img src="docs/informe/fig04_localidad_recorridos.png" alt="Suavidad de cada recorrido" width="100%">
 
-* **Hilbert da la lectura más suave**: |Δ*Y*| es 15,4 % menor que en filas y su dispersión entre imágenes es la menor (DE 1,81). Esto concuerda con su conocida preservación de localidad [11]. Musicalmente produce **13 % menos notas** en la pista G: como el contraste entre celdas sucesivas es menor, se subdividen menos pulsos y se sostienen más las notas.
-* **Radial es el recorrido más “nervioso”**: sus pasos son largos (7,8 celdas en promedio) y ρ(1) cae a 0,53. Aun así, su salto melódico es el menor, porque el arreglo limita los saltos y acerca la nota al acorde; la variabilidad se traslada al ritmo (más notas).
-* Serpentina y Hilbert tienen ρ(1) casi idéntica (0,902 vs. 0,901); la diferencia está en la escala de bloques: Hilbert recorre zonas compactas, mientras la serpentina recorre bandas horizontales.
+*Figura 10. Suavidad (izquierda) y coherencia (derecha) de cada recorrido.*
 
-![Espectrogramas](docs/informe/fig07_espectrogramas.png)
-*Figura 10. Espectrogramas del audio renderizado para SVS 5313 con filas (izquierda) y Hilbert (derecha). La línea blanca es el centroide espectral. El contenido armónico es el mismo; cambia el orden y la densidad de los ataques.*
+* 🧩 **Hilbert es el más suave**: su salto de brillo es un **15,4 % menor** que el de filas, y es el que menos varía entre imágenes. Esto coincide con la teoría de curvas de llenado [11]. Como hay menos contraste entre pasos, la guitarra verde toca un **13 % menos de notas** y sostiene más cada nota.
+* 🌀 **Radial es el más inquieto**: da pasos largos (7,8 cuadritos de media) y ρ(1) baja a 0,53. Su salto melódico es el menor porque el arreglo limita los saltos; la inquietud pasa al ritmo.
 
-### 10.4 Efecto de la zona sonora
+<img src="docs/informe/fig07_espectrogramas.png" alt="Espectrogramas filas frente a Hilbert" width="100%">
+
+*Figura 11. Espectrogramas del audio de SVS 5313 leído por filas y con Hilbert. La línea blanca es el centroide espectral, el “centro de gravedad” del sonido. Los acordes son los mismos; cambian el orden y la cantidad de ataques.*
+
+### 10.4 La zona sonora controla el ritmo
 
 | Zona | 1 × 1 | 3 × 3 | 5 × 5 | 7 × 7 | 9 × 9 | 15 × 15 | 21 × 21 |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| Contraste local medio | 0,0 | 8,3 | 12,5 | 15,5 | 17,9 | 23,6 | 27,6 |
-| Notas totales (media) | 96,6 | 116,8 | 123,4 | 127,9 | 131,0 | 133,2 | 134,0 |
-| Pulsos subdivididos en G | 38,0 % | 75,6 % | 84,7 % | 89,9 % | 92,5 % | 96,2 % | 96,9 % |
+| Contraste medio | 0,0 | 8,3 | 12,5 | 15,5 | 17,9 | 23,6 | 27,6 |
+| Notas totales | 96,6 | 116,8 | 123,4 | 127,9 | 131,0 | 133,2 | 134,0 |
+| Pulsos divididos (G) | 38,0 % | 75,6 % | 84,7 % | 89,9 % | 92,5 % | 96,2 % | 96,9 % |
 
-![Zona sonora](docs/informe/fig08_zona_sonora.png)
-*Figura 11. El tamaño de la zona controla la densidad rítmica.*
+<img src="docs/informe/fig08_zona_sonora.png" alt="Efecto del tamaño de zona" width="100%">
 
-La zona actúa como un **control de densidad**: pasar de 1 × 1 a 5 × 5 añade un 27,7 % de notas y más que duplica los pulsos subdivididos. Más allá de 9 × 9 el efecto se satura (> 92 %).
+*Figura 12. Al pasar de 1 × 1 a 5 × 5 aparecen un 27,7 % más de notas. Desde 9 × 9 el efecto casi se estabiliza.*
 
-### 10.5 Rendimiento
+### 10.5 Velocidad
 
-| Cuadrícula | Celdas | Duración por celda | `SecuenciaSonora` | `ArregloMusical` | Síntesis WAV (24,7 s, 48 kHz, estéreo) |
+| Cuadrícula | Cuadritos | Duración de cada uno | Análisis | Composición | Audio de 24,7 s |
 | --- | ---: | ---: | ---: | ---: | ---: |
 | 8 × 8 | 64 | 375 ms | 0,08 ms | 0,40 ms | 175 ms |
 | 16 × 16 | 256 | 93,8 ms | 0,34 ms | 0,59 ms | 171 ms |
@@ -528,144 +617,179 @@ La zona actúa como un **control de densidad**: pasar de 1 × 1 a 5 × 5 añade 
 | 64 × 64 | 4 096 | 5,9 ms | 3,63 ms | 2,86 ms | 243 ms |
 | 128 × 128 | 16 384 | 1,5 ms | 13,72 ms | 10,16 ms | 224 ms |
 
-![Rendimiento](docs/informe/fig09_rendimiento.png)
-*Figura 12. El análisis crece linealmente con el número de celdas (×256 celdas → ×170 tiempo); la síntesis depende de la duración y del número de notas, no de la cuadrícula.*
+<img src="docs/informe/fig09_rendimiento.png" alt="Rendimiento" width="100%">
 
-Otros datos: el MusicXML de la partitura general pesa en promedio **28,2 KB**; el modelo de imagen pesa **493 488 bytes**; los bancos de muestras ocupan 9,9 MB.
+*Figura 13. El análisis crece en proporción a los cuadritos (256 veces más cuadritos, unas 170 veces más tiempo). El audio depende de la duración, no de la cuadrícula, y se genera de 80 a 150 veces más rápido que el tiempo real.*
 
 ### 10.6 Pruebas automáticas
 
-`node pruebas/sonificacion.mjs` **pasa** en esta revisión. Verifica, entre otros: que los cinco recorridos sean permutaciones; continuidad de Hilbert de 8 a 128; tablas de frecuencia monótonas con extremos exactos; el caso exacto 70/30; trastes ≤ 7 (≤ 5 en inicial) para **las 12 tónicas × 2 modos × 4 afinaciones de guitarra**; que cada nota pertenezca a su acorde y no cruce su límite; que cada compás sume exactamente su duración; que cambiar recorrido, zona o escala cambie el audio (huella SHA‑256); exportación GeoJSON y suma de ocupación = 100 %. `python pruebas/verificar.py` comprueba la API (rutas, versión, 9 paquetes, respuestas parciales 206 y normalización de PNG); requiere instalar `requirements-dev.txt` y no se ejecutó en el entorno de este informe.
+✅ `node pruebas/sonificacion.mjs` **pasa** en esta versión. Comprueba, entre otras cosas:
+
+* que los cinco recorridos visiten cada cuadrito una vez y que Hilbert sea continuo de 8 a 128;
+* que las tablas de frecuencia sean crecientes y tengan los extremos exactos;
+* el caso exacto 70/30: una celda (100, 50, 20) rodeada de negro da (70, 35, 14);
+* trastes ≤ 7 (≤ 5 en inicial) en **12 tónicas × 2 modos × 4 afinaciones**;
+* que cada nota esté en su acorde y que cada compás sume su duración exacta;
+* que cambiar el recorrido, la zona o la escala cambie el audio;
+* el GeoJSON y que la ocupación de firmas sume 100 %.
+
+`python pruebas/verificar.py` prueba la API. Necesita `requirements-dev.txt` y no se ejecutó en el entorno donde se preparó este informe.
 
 ---
 
-## 11. Comparación con herramientas similares
+## 11. ⚖️ Comparación con otras herramientas
 
 | Funcionalidad | **Órbita Sonora** | Chandra *Universe of Sound* [9], [10] | The vOICe [7] | Photosounder [32] / Virtual ANS [33] | TwoTone [31] | Highcharts Sonification Studio [27] | STRAUSS / Astronify / SonoUno [28]–[30] |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| Entrada principal | Imagen, video, URL NASA, RAW, FITS, GeoTIFF | Imágenes astronómicas (curadas) | Cámara / imagen | Imagen como espectrograma | Tabla (CSV/hoja) | Tabla | Series, espectros, catálogos |
-| Interacción del usuario con el mapeo | Total (recorrido, zona, escala, armonía, mezcla) | No (resultado producido) | Parcial | Total (espectral) | Alta | Alta | Programática |
-| Recorridos de lectura | 5 (incl. Hilbert y radial) | Lineal, radial o radar según la pieza | Columnas izquierda → derecha | Eje temporal fijo | Eje de la tabla | Eje X | Según el código |
-| Uso de las tres bandas de color | Sí, una voz por banda | Color → altura en algunas piezas | No (gris) | No (intensidad) | — | — | — |
-| Arreglo tonal y digitación tocable | **Sí** (acordes, compás, trastes ≤ 7) | Compuesto por músicos | No | No | Escalas musicales | No | No |
-| Partitura MusicXML + tablatura | **Sí** | No | No | No | No | No | No |
-| Exportación MIDI | Sí | No | No | Entrada MIDI (Virtual ANS) | Salida MIDI en beta | — | Según el paquete |
-| Georreferenciación y GeoJSON | **Sí** | No | No | No | No | No | No |
-| Análisis estadístico de la imagen | Firmas, histogramas, píxeles destacados | No | No | Espectral | Resumen de datos | Gráfica | Sí (científico) |
-| Funciona en el navegador sin instalar | Sí | Sí (videos) | Apps y web | No / app nativa | Sí | Sí | No (Python), SonoUno tiene versión web |
-| Licencia | Apache‑2.0 | Contenido NASA | Ver sitio del autor | Comercial / descarga gratuita | Código abierto | Gratuita; licencia para uso comercial | Código abierto |
+| --- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| Entrada | Imagen, video, URL NASA, RAW, FITS, GeoTIFF | Imágenes curadas | Cámara o imagen | Imagen como espectrograma | Tabla | Tabla | Series y espectros |
+| El usuario controla el mapeo | ✅ total | ❌ | ◐ | ✅ | ✅ | ✅ | ✅ con código |
+| Recorridos de lectura | ✅ 5 | ◐ según la pieza | ◐ columnas | ◐ eje fijo | ◐ | ◐ | ◐ |
+| Una voz por banda de color | ✅ | ◐ | ❌ | ❌ | — | — | — |
+| Acordes y digitación tocable | ✅ | ◐ compuesto a mano | ❌ | ❌ | ◐ escalas | ❌ | ❌ |
+| Partitura MusicXML con tablatura | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| MIDI | ✅ | ❌ | ❌ | ◐ entrada (Virtual ANS) | ◐ beta | — | ◐ |
+| Mapa y GeoJSON | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| Estadística de la imagen | ✅ | ❌ | ❌ | ◐ espectral | ◐ | ◐ | ✅ |
+| Funciona en el navegador | ✅ | ✅ (videos) | ◐ | ❌ | ✅ | ✅ | ◐ SonoUno web |
+| Licencia | Apache‑2.0 | Contenido NASA | Ver sitio del autor | Comercial / gratuita | Abierta | Gratuita; comercial con licencia | Abiertas |
 
-En síntesis, Órbita Sonora ocupa un lugar intermedio: **más controlable que una sonificación curada** como las de Chandra, **más musical que un sonificador científico** como Astronify y **más ligado a la imagen que los sonificadores de tablas** como TwoTone o Highcharts. Lo que no tiene equivalente directo en las herramientas revisadas es la combinación de **lectura por bandas RGB + partitura para guitarra con tablatura + georreferenciación**.
+✅ sí · ◐ parcial · ❌ no · — no aplica
 
----
+Órbita Sonora queda en un punto intermedio:
 
-## 12. Discusión
+* es **más controlable** que una sonificación curada como las de Chandra;
+* es **más musical** que un sonificador científico como Astronify;
+* está **más ligada a la imagen** que los sonificadores de tablas como TwoTone o Highcharts.
 
-**Fidelidad frente a musicalidad.** El modo *píxeles RGB* conserva la señal (cada nivel de intensidad es una frecuencia distinta), mientras el modo *arreglo* la cuantiza: limita a 7 alturas por acorde, a notas del acorde y a saltos acotados. Las pruebas muestran que esta capa **sí conserva información de la imagen** —el número de notas, los acordes y la dinámica cambian entre imágenes y entre recorridos, y el audio cambia de huella con cada ajuste—, pero no es invertible como lo es el sistema de Meijer [7]. Es una sonificación orientada a la **comprensión cualitativa y a la creación**, no a la lectura exacta de valores.
-
-**Diseño de las bandas.** Las bandas tienen extensiones muy distintas: G abarca solo 6,2 semitonos, de modo que un nivel de intensidad equivale a unos 2,4 cents, por debajo de lo que un oyente distingue con facilidad. R (43,7 semitonos) y B (60,7 semitonos) tienen una resolución unas 7–10 veces mayor. En el modo *arreglo* esto se compensa porque la melodía se reescala a los percentiles de cada imagen, pero en el modo *píxeles* el canal verde transmite poca variación tonal. Ampliar la banda G o asignarle otro atributo (timbre, volumen) sería una mejora directa. Además, la banda B llega a 20 kHz, que muchos adultos no oyen y que algunos altavoces no reproducen.
-
-**El recorrido importa.** Los resultados confirman lo que la teoría de curvas de llenado predice: Hilbert reduce los saltos de brillo y produce una música con menos ataques. Las filas introducen 31 saltos largos por imagen (uno por fila), y el radial mezcla zonas alejadas. Esto da al usuario una herramienta pedagógica clara: **el mismo dato, ordenado distinto, suena distinto**.
-
-**Limitaciones.**
-
-1. **Sin evaluación con oyentes.** Como advierten las revisiones del campo [3], [8], falta medir si las personas identifican rasgos de la imagen al escuchar. El estudio de Arcand et al. [9] es un modelo a seguir.
-2. **Remuestreo y aspecto.** El canvas estira la imagen a un cuadrado y, al reducir mucho, puede perder detalle fino (*aliasing*). En imágenes panorámicas como 5313 (1024 × 288) la deformación horizontal es de 3,6 ×.
-3. **Brillo aproximado.** *Y* = (R + 2G + B)/4 es rápido pero no es la luminancia colorimétrica (por ejemplo, Rec. 709); y los valores no se linealizan desde sRGB.
-4. **El WebSocket de la API** está implementado y validado, pero en esta versión el frontend no lo consume; está disponible para clientes externos (controladores MIDI o sensores).
-5. **Dependencia del servidor** para formatos científicos y video: si la API en Render está detenida, esas funciones esperan a que despierte, mientras que el resto de la web sigue funcionando.
-6. **Medición del rendimiento** en un solo entorno y con timbres sintéticos.
-
-**Trabajo futuro.** Pruebas de percepción con estudiantes y personas ciegas o con baja visión; modo de *sondeo* interactivo (hacer clic y oír una zona) [4]; uso directo de bandas multiespectrales (por ejemplo, canales ABI individuales) en lugar de RGB compuesto; y luminancia perceptual.
+Ninguna de las herramientas revisadas reúne en un solo lugar **bandas RGB + partitura para guitarra con tablatura + mapa**.
 
 ---
 
-## 13. Conclusiones
+## 12. 💬 Discusión
 
-1. Órbita Sonora implementa una cadena completa y reproducible **imagen → bandas RGB → recorrido → zona 70/30 → frecuencia → arreglo → audio y partitura**, distribuida en ~5 060 líneas de JavaScript (cliente) y ~1 120 de Python (API), y funciona sin instalar nada.
-2. En las 9 imágenes del catálogo, el sistema generó arreglos de **7 compases y 107–135 notas** en los que el **100 %** de las notas respeta la armonía de su zona y **ninguna supera el traste 7**: las partituras son tocables por guitarristas de nivel inicial‑intermedio.
-3. El **orden de lectura es un parámetro musical medible**: la curva de Hilbert reduce un **15,4 %** el salto de brillo entre celdas y un **13 %** las notas de la melodía frente a la lectura por filas; el recorrido radial casi duplica la variación (|Δ*Y*| = 21,6; ρ(1) = 0,53).
-4. La **zona sonora** controla la densidad rítmica de forma monótona: de 1 × 1 a 21 × 21 los pulsos subdivididos pasan de **38 % a 97 %**.
-5. Gracias a las tablas de áreas sumadas y al uso de Workers, el análisis y la composición tardan **≈ 2 ms** en 32 × 32 y **≈ 24 ms** en 128 × 128, y la síntesis de 24,7 s de audio estéreo tarda **0,17–0,30 s**, lo que permite recalcular la música en cada cambio de ajuste.
-6. Frente a herramientas similares, su aporte distintivo es unir **análisis espectral RGB, partitura con tablatura (MusicXML/MIDI) y georreferenciación** en una sola aplicación web abierta. Su principal deuda es la **evaluación perceptiva con usuarios** y el rebalanceo de la banda verde.
+**Fidelidad frente a música.** El modo píxeles RGB conserva la señal: cada nivel de color es una frecuencia distinta. El modo arreglo la simplifica, porque usa solo notas del acorde y limita los saltos. Aun así **conserva información de la imagen**: el número de notas, los acordes y la dinámica cambian entre imágenes y recorridos, y el audio cambia con cada ajuste. A diferencia del sistema de Meijer [7], no se puede reconstruir la imagen a partir del sonido. Es una sonificación para **comprender y crear**, no para leer valores exactos.
+
+**Las bandas no son iguales.** La banda verde solo abarca 6,2 semitonos, así que un nivel de color equivale a unos 2,4 cents, un cambio difícil de oír. Las bandas roja y azul tienen entre 7 y 10 veces más resolución. En el modo arreglo esto se compensa al repartir la melodía según cada imagen, pero en el modo píxeles el verde varía poco. Además, la banda azul llega a 20 kHz, que muchos adultos ya no oyen.
+
+**El orden importa.** Hilbert reduce los saltos de brillo y da música con menos ataques. Las filas meten 31 saltos largos por imagen, uno por fila. El radial mezcla zonas lejanas. Esto deja una lección clara: **el mismo dato, ordenado distinto, suena distinto**.
+
+**Limitaciones**
+
+1. 👂 **Falta probar con personas.** Las revisiones del campo lo piden [3], [8] y el estudio de Arcand et al. [9] es un buen modelo.
+2. 🔲 **La imagen se estira a un cuadrado** (figura 2). En 5313 (1024 × 288) el estiramiento es de 3,6 veces, y al reducir mucho se puede perder detalle fino.
+3. 💡 **El brillo es una aproximación.** (R + 2G + B)/4 no es la luminancia colorimétrica y no se corrige la curva sRGB.
+4. 📡 **El WebSocket existe en la API**, pero la web todavía no lo usa.
+5. ☁️ **Los formatos científicos y los videos dependen del servidor.** Si la API está dormida, esas funciones esperan; el resto de la web sigue funcionando.
+6. ⏱️ **Los tiempos se midieron en un solo equipo** y con timbres sintéticos.
+
+**Próximos pasos**
+
+* Pruebas con estudiantes y con personas ciegas o con baja visión.
+* Modo de **sondeo**: tocar una zona y oírla [4].
+* Usar canales satelitales individuales en lugar del RGB combinado.
+* Ampliar la banda verde.
+* Usar luminancia perceptual.
 
 ---
 
-## 14. Ejecutar, probar y publicar
+## 13. ✅ Conclusiones
 
-### Visor local (solo archivos estáticos)
+1. Órbita Sonora implementa una cadena completa y reproducible: **imagen → bandas RGB → recorrido → zona 70/30 → frecuencia → canción → audio y partitura**. Son unas 5 060 líneas de JavaScript y 1 120 de Python, y funciona sin instalar nada.
+2. En las 9 imágenes generó canciones de **7 compases y 107–135 notas**. El **100 %** de las notas respeta la armonía y **ninguna supera el traste 7**: son partituras tocables.
+3. **El orden de lectura se puede medir y se oye.** Hilbert reduce un **15,4 %** el salto de brillo y un **13 %** las notas de la melodía frente a las filas. El radial casi duplica la variación (|Δ*Y*| = 21,6; ρ(1) = 0,53).
+4. **La zona sonora regula el ritmo.** De 1 × 1 a 21 × 21, los pulsos divididos pasan del **38 % al 97 %**.
+5. **Es rápida.** Análisis y composición tardan **≈ 2 ms** en 32 × 32 y **≈ 24 ms** en 128 × 128; el audio de 24,7 s está listo en **0,17–0,30 s**.
+6. **Lo que la hace distinta** es unir análisis RGB, partitura con tablatura (MusicXML/MIDI) y mapa en una web abierta. **Lo que falta**: evaluar con oyentes y equilibrar la banda verde.
+
+---
+
+## 14. 🛠️ Instalar, probar y publicar
+
+**Solo la web**
 
 ```bash
 python3 scripts/abrir_local.py          # abre http://127.0.0.1:8000/
 ```
 
-### Visor + API local
+**Web + API**
 
 ```bash
 python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -r requirements-dev.txt
-python -m scripts.servir                             # http://127.0.0.1:8000/  ·  /docs para la API
+python -m scripts.servir                             # http://127.0.0.1:8000/  ·  /docs = API
 ```
 
-### Pruebas
+**Pruebas**
 
 ```bash
-node pruebas/sonificacion.mjs      # motor de sonificación, arreglo, MusicXML, audio y GeoJSON
-python pruebas/verificar.py        # API FastAPI
+node pruebas/sonificacion.mjs
+python pruebas/verificar.py
 ```
 
-### Reproducir las métricas de este informe
+**Repetir las mediciones y figuras de este informe** (Node ≥ 18 y Python con Pillow, NumPy, SciPy y Matplotlib)
 
 ```bash
 cd docs/informe/reproducir
-python3 prep.py ../../..                      # remuestrea las 9 imágenes → imagenes.json
-node experimento.mjs ../../..                 # ejecuta los módulos del proyecto → resultados.json
-python3 figuras.py ../../..                   # regenera las figuras en docs/informe/
+python3 prep.py ../../..             # cuadrículas de las 9 imágenes
+node experimento.mjs ../../..        # métricas → resultados.json
+node notas5669.mjs ../../..          # datos de las figuras ilustrativas
+python3 figuras.py ../../..          # figuras de resultados
+python3 figuras2.py ../../..         # banner, logos y figuras explicativas
 ```
 
-(Requiere Node ≥ 18 y Python con Pillow, NumPy, SciPy y Matplotlib.)
-
-### Mantenimiento del catálogo
+**Catálogo**
 
 ```bash
-python -m scripts.actualizar_catalogo --vistas   # tras editar datos/fuentes-svs.json
-python -m scripts.indexar_videos                 # tras añadir MP4 con nombres distintos de interpretacion.mp4
+python -m scripts.actualizar_catalogo --vistas   # después de editar datos/fuentes-svs.json
+python -m scripts.indexar_videos                 # para MP4 con otro nombre que interpretacion.mp4
 ```
 
-### Publicación
-
-`PUBLICAR_EN_GITHUB.bat` o `python3 scripts/preparar_github.py --publicar` publica en GitHub Pages; Render ejecuta `uvicorn main:app --host 0.0.0.0 --port $PORT`. Detalles en [PUBLICAR.md](PUBLICAR.md).
+**Publicación**: `PUBLICAR_EN_GITHUB.bat` o `python3 scripts/preparar_github.py --publicar` para GitHub Pages. Render ejecuta `uvicorn main:app --host 0.0.0.0 --port $PORT`. Más detalles en [PUBLICAR.md](PUBLICAR.md), [ARQUITECTURA.md](ARQUITECTURA.md) y [LEER_PRIMERO.md](LEER_PRIMERO.md).
 
 ---
 
-## 15. Licencias y créditos
+## 15. 🤝 Uso de inteligencia artificial y ética
 
-| Componente | Licencia / condición | Archivo |
+> [!IMPORTANT]
+> **Esta documentación se elaboró con ayuda de inteligencia artificial.** El texto de este README, el análisis cuantitativo, las figuras de `docs/informe/` y los scripts de `docs/informe/reproducir/` se prepararon con el asistente **Claude (Anthropic)**, a partir de la lectura del código fuente del repositorio y de la ejecución de sus propios módulos.
+
+Para que el trabajo sea transparente y verificable:
+
+* 🔍 **Trazabilidad.** Cada cifra del informe sale de ejecutar el código del proyecto, y los datos crudos están en `docs/informe/resultados.json`. Cualquier persona puede repetir las mediciones con los comandos de la sección 14.
+* 📚 **Fuentes reales.** Las referencias se contrastaron con sus publicaciones y sitios oficiales. Si encuentras un error, abre un *issue*.
+* 👥 **Responsabilidad humana.** El equipo de Orbidata Analytics y del Semillero de Astronomía ITM revisa y responde por lo publicado. La IA fue una herramienta de apoyo, no la autora del proyecto.
+* 🖼️ **Respeto a los autores.** Las imágenes conservan sus créditos (NASA, NOAA) y las grabaciones y librerías mantienen sus licencias (sección 16).
+* 🔒 **Privacidad.** La IA de la página (MobileNet para la letra) corre en el navegador: las fotos de los usuarios no se envían a ningún servicio de IA.
+* 🎵 **Música generada por algoritmo.** Las canciones las produce un algoritmo determinista a partir de los datos. Si las publicas, indica que provienen de Órbita Sonora y de la imagen original.
+
+Esta declaración se refiere a la documentación. El uso de herramientas de IA en el desarrollo del código, si lo hubo, lo declara el equipo por separado.
+
+---
+
+## 16. 📜 Licencias y créditos
+
+| Componente | Licencia o condición | Dónde está |
 | --- | --- | --- |
 | Código de Órbita Sonora | **Apache License 2.0** | [LICENSE](LICENSE), [NOTICE](NOTICE) |
-| Tone.js 15.1.22 | MIT | `web/vendor/LICENSE-tone.txt` |
-| @tonejs/midi 2.0.28 | MIT | `web/vendor/LICENSE-tonejs-midi.txt` |
-| OpenSheetMusicDisplay 1.9.8 | BSD‑3‑Clause | `web/vendor/LICENSE-osmd.txt` |
-| MapLibre GL JS 5.6.0 | BSD‑3‑Clause | `web/vendor/LICENSE-maplibre.txt` |
-| DM Sans, Space Grotesk | SIL Open Font License 1.1 | `web/fonts/*.txt` |
-| MobileNet V1 (Keras Applications) | Apache 2.0 | `web/modelo/LICENSE.txt`, [FUENTE.md](web/modelo/FUENTE.md) |
-| Guitarras de nailon y acero, piano — Meta Open Sound | CC0 1.0 | `web/muestras/LICENSE-CC0.txt`, [FUENTES.md](web/muestras/FUENTES.md) |
-| Guitarra eléctrica limpia FSBS — FreePats | CC0 1.0 | ídem |
+| Tone.js 15.1.22 · @tonejs/midi 2.0.28 | MIT | `web/vendor/` |
+| OpenSheetMusicDisplay 1.9.8 · MapLibre GL JS 5.6.0 | BSD‑3‑Clause | `web/vendor/` |
+| DM Sans · Space Grotesk | SIL Open Font License 1.1 | `web/fonts/` |
+| MobileNet V1 (Keras Applications) | Apache 2.0 | `web/modelo/` · [FUENTE.md](web/modelo/FUENTE.md) |
+| Guitarras de nailon y acero y piano (Meta Open Sound) · guitarra eléctrica (FreePats) | CC0 1.0 | `web/muestras/` · [FUENTES.md](web/muestras/FUENTES.md) |
 | Visualizaciones NASA SVS | Créditos de NASA en cada `paquete.json`; huellas en `docs/ARCHIVOS_NASA_SHA256.txt` | `datos/paquetes/` |
-| Imagen GeoColor GOES‑19 | NOAA / NESDIS / STAR | `web/geo/goes19-nsa-respaldo.jpg` |
+| Imagen GeoColor GOES‑19 | NOAA / NESDIS / STAR | `web/geo/` |
 | Mapa base Blue Marble Next Generation | NASA Earth Observatory (2004) | `web/geo/` |
 | Geometrías terrestres | Natural Earth, dominio público | `web/geo/tierra.geojson` |
-| Dependencias Python (FastAPI, Uvicorn, httpx, Pillow, NumPy, rasterio, rawpy, astropy, PyAV, lxml…) | Licencias permisivas de cada proyecto; FFmpeg, LibRaw y libheif tienen licencias propias (LGPL/GPL según la compilación) | `requirements.txt` |
+| Dependencias Python | Licencias permisivas de cada proyecto; FFmpeg, LibRaw y libheif tienen licencias propias (LGPL/GPL según la compilación) | `requirements.txt` |
+| Logos | Originales del equipo | `docs/img/` · `docs/LOGOS_SHA256.txt` |
 
-**Autoría.** Orbidata Analytics y Semillero de Astronomía, Instrumentación y Ciencias Espaciales del ITM, Medellín, Colombia. Los logos en `docs/img/` son originales del equipo (huellas en `docs/LOGOS_SHA256.txt`).
-
-**Cómo citar este software**
+**Cómo citar**
 
 > Orbidata Analytics y Semillero de Astronomía ITM, “Órbita Sonora: sonificación espectral de imágenes y arreglo musical en el navegador,” versión 5.8.0, 2026. [En línea]. Disponible: https://github.com/orbidataanalytics/Orbita_Sonora
 
 ---
 
-## 16. Referencias (IEEE)
+## 17. 📖 Referencias (IEEE)
 
 [1] T. Hermann, A. Hunt y J. G. Neuhoff, Eds., *The Sonification Handbook*. Berlín, Alemania: Logos, 2011.
 
@@ -735,7 +859,7 @@ python -m scripts.indexar_videos                 # tras añadir MP4 con nombres 
 
 [34] NASA Scientific Visualization Studio, visualizaciones 3912, 4950, 4960, 5011, 5313, 5425, 5533, 5669 y 40467. [En línea]. Disponible: https://svs.gsfc.nasa.gov/
 
-[35] NOAA/NESDIS Center for Satellite Applications and Research, “GOES-19 ABI GeoColor, sector norte de Suramérica.” [En línea]. Disponible: https://www.star.nesdis.noaa.gov/GOES/
+[35] NOAA/NESDIS Center for Satellite Applications and Research, “GOES-19 ABI GeoColor.” [En línea]. Disponible: https://www.star.nesdis.noaa.gov/GOES/
 
 [36] Astropy Collaboration *et al.*, “The Astropy Project: Sustaining and growing a community-oriented open-source project and the latest major release (v5.0) of the core package,” *Astrophys. J.*, vol. 935, no. 2, art. 167, 2022.
 
@@ -746,3 +870,19 @@ python -m scripts.indexar_videos                 # tras añadir MP4 con nombres 
 [39] PhonicScore, “OpenSheetMusicDisplay,” software. [En línea]. Disponible: https://opensheetmusicdisplay.org
 
 [40] MapLibre contributors, “MapLibre GL JS,” software. [En línea]. Disponible: https://maplibre.org
+
+---
+
+<div align="center">
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/informe/marca/logo-orbita-sonora-blanco.png">
+  <img src="docs/informe/marca/logo-orbita-sonora-negro.png" alt="Órbita Sonora" height="80">
+</picture>
+
+**Hecho con 🎸 y 🛰️ en Medellín, Colombia**
+Orbidata Analytics · Semillero de Astronomía, Instrumentación y Ciencias Espaciales del ITM
+
+[Abrir el visor](https://orbidataanalytics.github.io/Orbita_Sonora/) · [API](https://orbitasonora.onrender.com/docs) · [Licencia Apache‑2.0](LICENSE)
+
+</div>
