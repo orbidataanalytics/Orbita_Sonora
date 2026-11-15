@@ -447,8 +447,7 @@ flowchart TB
 | 🔊 **audio-pistas.js** | Prepara el sonido sin trabar la página. | `renderizarArreglo`, `audio-worker.js`, `muestras.js`, `sintesis-rgb.js` |
 | ⏯️ **Transporte** | El botón de play: arranca, pausa y mueve el cursor. | `Transporte` (Web Audio) |
 | 📄 **Partitura** | Escribe la partitura y el archivo MIDI. | `musicxml.js`, `partitura-musical.js` (OpenSheetMusicDisplay), `midi.js` |
-| 📊 **Estadísticas** | Cuenta colores y señala los puntos más interesantes. | `estadisticas.js`, `paneles.js`, `informe.js` |
-| 🗺️ **Mapa** | Ubica la imagen en la Tierra. | `gis.js` (MapLibre), `globo.js`, `marcas-sig.js` |
+| 📊 **Estadísticas** | Cuenta colores y señala los puntos más interesantes. | `estadisticas.js`, `paneles.js`, `informe.js` ||
 
 **Detalles importantes**
 
