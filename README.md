@@ -2,7 +2,7 @@
 
 Órbita Sonora convierte imágenes en música y partituras. Selecciona una imagen, elige cómo recorrer sus píxeles y toca un arreglo para guitarra. Tres guitarras de nailon tocan las bandas roja, verde y azul. `Tone.Sampler` reproduce muestras de notas aisladas según los valores de la imagen.
 
-Proyecto de **Orbidata Analytics** y el **Semillero de Astronomía, Instrumentación y Ciencias Espaciales del ITM**. [Abrir el visor](https://orbidataanalytics.github.io/OrbitaSonora/) · [Publicar en GitHub](PUBLICAR.md)
+Proyecto de **Orbidata Analytics** y el **Semillero de Astronomía, Instrumentación y Ciencias Espaciales del ITM**. [Abrir el visor](https://orbidataanalytics.github.io/Orbita_Sonora/) · [Publicar en GitHub](PUBLICAR.md)
 
 ## 1. Dos imágenes para escuchar
 
