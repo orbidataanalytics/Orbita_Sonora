@@ -59,13 +59,13 @@ Rojo = graves · Verde = medios · Azul = agudos
 
 ## 1. 🌍 ¿Qué es Órbita Sonora?
 
-Órbita Sonora es una página web que **escucha imágenes**. Toma una foto satelital, la divide en cuadritos y convierte el color de cada cuadrito en sonido. Con esos sonidos compone una **canción para tres guitarras** y escribe su **partitura con tablatura**, lista para tocar o imprimir.
+Órbita Sonora es una página web que **lleva imágenes al campo de la música**, dividiéndola en recuadritos o pixeles y convierte el color de cada pixel en sonido. Con esos sonidos compone una **canción para tres instrumentos** y escribe su **partitura con tablatura**, lista para tocar o imprimir.
 
-* 🔴 La **guitarra roja** toca los bajos.
-* 🟢 La **guitarra verde** alterna el bajo con la melodía.
-* 🔵 La **guitarra azul** toca las notas agudas.
+* 🔴 El **instrumento rojo** toca los bajos.
+* 🟢 El **instrumento verde** alterna el bajo con la melodía.
+* 🔵 El **instrumento azul** toca las notas agudas.
 
-Funciona completamente en el navegador y no hay que instalar nada. Está pensada para **aulas, divulgación científica y creación musical**.
+Funciona completamente en el navegador y no hay que instalar nada. Está pensada para **aulas, divulgación científica, creación musical, aumentar capacidades e inclusión de personas con vista reducida que pueden escuchar las imagenes**.
 
 **En números** (las 9 imágenes del catálogo, con los ajustes que trae la web):
 
@@ -121,10 +121,10 @@ Compara la **Zona sonora** de 5 × 5 con la de 9 × 9. En los tramos de más con
 
 <img src="docs/informe/fig_a_paso_a_paso.png" alt="Los seis pasos de Órbita Sonora" width="100%">
 
-| Paso | Explicado para un niño | Lo que pasa por dentro |
+| Paso | Explicado| Lo que pasa por dentro |
 | :---: | --- | --- |
-| **1** 🖼️ | Escogemos un dibujo de la Tierra tomado desde el espacio. | Se abre la imagen (JPG, PNG, video, FITS, RAW o GeoTIFF) y se convierte a colores RGBA. |
-| **2** 🔲 | Lo cortamos en muchos cuadritos, como un rompecabezas de 32 por 32 piezas. | La imagen se reduce a una cuadrícula *N × N* (de 8 a 128) y cada cuadrito guarda su rojo, verde y azul. |
+| **1** 🖼️ | Escogemos una de la Tierra por ejemplo  del Centro de Información Terrestre (EIC). | Se abre la imagen (JPG, PNG, video, FITS, RAW o GeoTIFF) y se convierte a colores RGBA. |
+| **2** 🔲 | Lo cortamos en muchos pixeles, como un rompecabezas de 32 por 32 piezas. | La imagen se reduce a una cuadrícula *N × N* (de 8 a 128) y cada pixel guarda su rojo, verde y azul. |
 | **3** ✏️ | Un lápiz pasa por todos los cuadritos, uno detrás de otro, sin saltarse ninguno. El camino puede ser en filas, en zigzag, en espiral o en forma de laberinto (Hilbert). | Un **recorrido** decide el orden en que se escuchan las celdas. Ese orden se vuelve el tiempo de la canción. |
 | **4** 👂 | Cada cuadrito escucha a sus vecinos para no gritar solo: se queda con 70 % de su color y toma 30 % de los vecinos. | **Media zonal 70/30** y medida del **contraste**. Mucho contraste hace que la guitarra toque notas más rápidas. |
 | **5** 🎨➡️🎵 | Cada color tiene su voz: el rojo canta grueso (grave), el verde en el medio y el azul finito (agudo). Más color es una nota más alta. | Cada banda de color se convierte en una **frecuencia** (en Hz) y luego en una nota musical. |
