@@ -23,6 +23,7 @@ Imagen GeoColor de respaldo de GOES-19, NOAA NESDIS STAR, sector norte de Sudam�
 OpenSheetMusicDisplay 1.9.8, licencia BSD-3 en web/vendor/LICENSE-osmd.txt.
 @tonejs/midi 2.0.28, licencia MIT en web/vendor/LICENSE-tonejs-midi.txt.
 Tone.js 15.1.22, licencia MIT en web/vendor/LICENSE-tone.txt.
+MobileNet V1 de Keras Applications, créditos y licencia en web/modelo/.
 
 Guitarras de nailon y acero y piano grabados por Meta Open Sound, CC0 1.0 Universal.
 Guitarra eléctrica limpia FSBS de FreePats, CC0 1.0 Universal.

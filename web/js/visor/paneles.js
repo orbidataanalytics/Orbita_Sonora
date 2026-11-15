@@ -1,6 +1,6 @@
 import {lienzo} from './medios.js';
 import {PESO_PIXEL} from './estadistica-zonal.js';
-import {BANDAS} from './sonificacion.js';
+import {BANDAS} from './sonificacion.js?v=5.8.0';
 
 const porId = id => document.getElementById(id);
 export const CANALES = ['RGB', ...'RGB'];
@@ -168,11 +168,13 @@ export class Paneles {
     dibujarTramo(ctx, a, b) {
         const coordenadas = this.secuencia.coordenadas;
         const cantidad = Math.min(12, this.secuencia.lado);
+        const inicio = Math.max(0, this.indice - cantidad);
+        const fin = this.indice ? this.indice : Math.min(coordenadas.length - 1, 2 * this.secuencia.lado - 1);
         ctx.beginPath();
-        for (let i = Math.max(0, this.indice - cantidad); i <= this.indice; i++) {
+        for (let i = inicio; i <= fin; i++) {
             const [x, y] = coordenadas[i];
             const anterior = coordenadas[i - 1];
-            const contiguo = anterior && Math.abs(anterior[0] - x) + Math.abs(anterior[1] - y) <= 2;
+            const contiguo = i > inicio && Math.abs(anterior[0] - x) + Math.abs(anterior[1] - y) <= 2;
             ctx[contiguo ? 'lineTo' : 'moveTo']((x + .5) * a, (y + .5) * b);
         }
         ctx.strokeStyle = '#071218';

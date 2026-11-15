@@ -1,5 +1,5 @@
-import {COMPASES, PERCUSION, nombreAfinado, notaEscrita, tonalidadNombre} from './arreglo.js';
-import {INSTRUMENTOS} from './audio-pistas.js';
+import {COMPASES, PERCUSION, nombreAfinado, notaEscrita, tonalidadNombre} from './arreglo.js?v=5.8.0';
+import {INSTRUMENTOS} from './audio-pistas.js?v=5.8.0';
 
 const XML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
 const FIGURAS = [[16,'whole',0],[12,'half',1],[8,'half',0],[6,'quarter',1],

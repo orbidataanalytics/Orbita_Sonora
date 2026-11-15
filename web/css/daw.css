@@ -1,11 +1,9 @@
 .daw-dialogo{width:min(95vw,940px);max-height:91vh}.daw-pistas{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
 .daw-pista{min-width:0;border:1px solid var(--edge);border-top:3px solid var(--color-pista);border-radius:8px;background:#0e181c;padding:10px;display:grid;gap:8px}
-.daw-pista h3{color:var(--color-pista)}.daw-pista label,.daw-espacio label,.daw-vivo label{display:grid;gap:3px;font-size:.78rem;color:var(--muted)}
+.daw-pista h3{color:var(--color-pista)}.daw-pista label,.daw-espacio label,.daw-archivo label{display:grid;gap:3px;font-size:.78rem;color:var(--muted)}
 .daw-espacio{display:grid;grid-template-columns:1fr 1fr;gap:7px 15px;border:1px solid var(--edge);border-radius:8px;padding:10px}
 .daw-espacio label{display:flex;align-items:center;gap:7px}.daw-espacio input[type=range]{min-width:40px;flex:1}.daw-espacio output{min-width:36px;text-align:right}
-.daw-vivo{border-top:1px solid var(--edge);padding-top:7px}.daw-vivo summary{cursor:pointer;font-weight:700}.daw-vivo[open]>*:not(summary){margin-top:8px}
-.daw-vivo input[type=text]{width:100%}.daw-eventos{max-height:92px;overflow:auto;font:12px monospace;color:#c5d3d0}
-.daw-evento{padding:3px 5px;border-bottom:1px solid var(--edge)}
+.daw-archivo{border-top:1px solid var(--edge);padding-top:7px}.daw-archivo summary{cursor:pointer;font-weight:700}.daw-archivo[open]>*:not(summary){margin-top:8px}
 .daw-pista input[type=file]{max-width:100%;font-size:.72rem}
 .daw-instrumento { display: flex; align-items: end; gap: .55rem; }
 .daw-instrumento label { min-width: 0; flex: 1; }

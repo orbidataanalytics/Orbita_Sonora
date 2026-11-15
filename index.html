@@ -16,7 +16,7 @@
     <script src="./web/vendor/maplibre-gl.js" defer></script>
     <script src="./web/vendor/tonejs-midi.js" defer></script>
     <script src="./web/vendor/Tone.js" defer></script>
-    <script type="module" src="./web/js/visor/app.js"></script>
+    <script type="module" src="./web/js/visor/app.js?v=5.8.0"></script>
 </head>
 <body>
 <header class="cabecera">
@@ -89,20 +89,13 @@
             <output id="progreso-medio-valor" for="progreso-medio">0 %</output>
         </div></div>
     </div>
-    <figure id="original-panel" class="panel original-panel" hidden>
-        <div id="original-imagen" class="original-imagen"></div>
-        <figcaption>
-            <div><h2>Imagen original</h2><p id="original-titulo"></p></div>
-            <a id="fuente-medio" class="boton discreto" target="_blank" rel="noopener" hidden>Descarga original ↗</a>
-        </figcaption>
-    </figure>
-
     <article class="panel partituras" aria-labelledby="titulo-sonido">
         <div class="transport-top reproduccion-partitura">
             <div><h2 id="titulo-sonido">Reproducción</h2><p id="sonido-estado" role="status">Selecciona un medio.</p></div>
             <div class="controles">
                 <button id="mus-escuchar" class="boton primario" type="button" aria-pressed="false" disabled>▶ Tocar arreglo</button>
                 <button id="pausa" class="boton" type="button" disabled>Pausa</button>
+                <button id="informe" class="boton" type="button" disabled>Informe con partitura</button>
                 <label id="tempo-ensayo">Tempo <input id="mus-bpm" type="number" value="68" required min="40" max="168" step="1" aria-label="Tempo del arreglo"> <span id="mus-pulso">negras por minuto</span></label>
                 <input id="mus-tempo-slider" type="range" min="40" max="168" step="1" value="68" aria-label="Ajustar tempo" disabled>
                 <label>Tónica <select id="mus-tonica" disabled></select></label>
@@ -129,6 +122,20 @@
         </div>
         <p id="regla-zona">70 % del píxel activo y 30 % de sus vecinos.</p>
 
+        <section id="lectura-panel" aria-label="Imagen y canales RGB" hidden>
+            <div class="bandas-panel">
+                <figure id="original-panel"><figcaption>Imagen original</figcaption><div id="original-imagen" class="original-imagen"></div></figure>
+                <figure><figcaption>Recorrido RGB</figcaption><canvas id="banda-RGB" width="256" height="256" aria-label="Composición RGB y recorrido"></canvas></figure>
+                <figure><figcaption class="rojo">R · Rojo</figcaption><canvas id="banda-R" width="256" height="256" aria-label="Canal rojo"></canvas></figure>
+                <figure><figcaption class="verde">G · Verde</figcaption><canvas id="banda-G" width="256" height="256" aria-label="Canal verde"></canvas></figure>
+                <figure><figcaption class="azul">B · Azul</figcaption><canvas id="banda-B" width="256" height="256" aria-label="Canal azul"></canvas></figure>
+            </div>
+            <div class="lectura-pie">
+                <p id="pixel-activo" class="numeros">–</p>
+                <a id="fuente-medio" target="_blank" rel="noopener" hidden>Descarga original ↗</a>
+            </div>
+        </section>
+
         <section id="partitura-musical" aria-labelledby="titulo-partitura">
             <div class="partitura-cabecera">
                 <h3 id="titulo-partitura">Partitura musical</h3>
@@ -152,11 +159,11 @@
                 <button id="mus-midi" type="button" class="boton" disabled>MIDI del arreglo</button>
                 <button id="mus-exportar" type="button" class="boton" disabled>MusicXML</button>
                 <button id="mus-imprimir" type="button" class="boton" disabled>Imprimir / PDF</button>
-                <button id="informe" type="button" class="boton" disabled>Abrir informe</button>
             </div>
             <section id="letra-cancion" class="letra-cancion" aria-labelledby="titulo-letra" hidden>
                 <h4 id="titulo-letra">Letra de la canción</h4>
                 <label><input id="letra-incluir" type="checkbox"> Activar voz y letra para cantar</label>
+                <p id="letra-estado" role="status" hidden></p>
                 <textarea id="letra-sugerida" aria-label="Letra de la canción" rows="7" maxlength="1000" disabled hidden></textarea>
                 <details class="voz-humana" id="voz-panel" hidden>
                     <summary>Añadir una voz grabada</summary>
@@ -198,20 +205,11 @@
                     <label><input id="daw-filtro-y" type="checkbox"> Filtro según Y</label>
                 </div>
             </details>
-            <details id="daw-entrada-vivo" class="daw-vivo">
-                <summary>Entrada MIDI y RGB en vivo</summary>
-                <p>Conecta para recibir notas MIDI o valores RGB. El botón de ejemplo envía datos por la misma conexión.</p>
-                <div class="controles">
-                    <button id="daw-conectar" type="button" class="boton">Conectar</button>
-                    <button id="daw-demo" type="button" class="boton" disabled>Probar conexión</button>
-                    <button id="daw-captura" type="button" class="boton" disabled>Exportar captura MIDI</button>
-                    <a href="https://github.com/orbidataanalytics/OrbitaSonora#24-entrada-midi-y-rgb-en-vivo" target="_blank" rel="noopener">Formato de mensajes ↗</a>
-                </div>
-                <label>URL de la sesión <input id="daw-url" type="text" readonly></label>
-                <label>Reproducir archivo MIDI <input id="daw-archivo-midi" type="file" accept=".mid,.midi,audio/midi"></label>
+            <details id="daw-archivo-panel" class="daw-archivo">
+                <summary>Archivo MIDI local</summary>
+                <label>Abrir MIDI <input id="daw-archivo-midi" type="file" accept=".mid,.midi,audio/midi"></label>
                 <button type="button" id="daw-parar-midi" class="boton" disabled>Detener archivo MIDI</button>
-                <p id="daw-vivo-estado" role="status"></p>
-                <div id="daw-eventos" class="daw-eventos" aria-label="Eventos recientes"></div>
+                <p id="daw-midi-estado" role="status"></p>
             </details>
         </details>
 
@@ -243,7 +241,6 @@
                 </div>
                 <div class="pie-visor">
                     <span id="geo-estado">Sin georreferencia</span>
-                    <label>Opacidad <input id="opacidad" type="range" min="0" max="1" step=".05" value=".82"></label>
                     <button id="centrar" class="boton discreto" type="button">Centrar capa</button>
                 </div>
             </div>
@@ -256,13 +253,7 @@
             </div>
         </div>
     <section id="analisis" class="analisis" aria-labelledby="titulo-analisis">
-        <div class="encabezado analisis-titulo"><div><p class="rotulo">PÍXEL ACTIVO</p><h2 id="titulo-analisis">Imagen y firmas RGB</h2></div><p id="pixel-activo" class="estado numeros">–</p></div>
-        <div class="panel bandas-panel">
-            <figure><figcaption>Composición RGB</figcaption><canvas id="banda-RGB" width="256" height="256" aria-label="Composición RGB"></canvas></figure>
-            <figure><figcaption class="rojo">R · 20–250 Hz</figcaption><canvas id="banda-R" width="256" height="256" aria-label="Canal rojo"></canvas></figure>
-            <figure><figcaption class="verde">G · 350–500 Hz</figcaption><canvas id="banda-G" width="256" height="256" aria-label="Canal verde"></canvas></figure>
-            <figure><figcaption class="azul">B · 600–20 000 Hz</figcaption><canvas id="banda-B" width="256" height="256" aria-label="Canal azul"></canvas></figure>
-        </div>
+        <div class="encabezado analisis-titulo"><h2 id="titulo-analisis">Firmas RGB</h2></div>
         <div class="doble">
             <article class="panel grafico"><h3>Firma del píxel</h3><canvas id="firma" width="640" height="210" aria-label="Intensidades RGB y frecuencias asignadas"></canvas><p id="rgb-sonoro" class="numeros"></p><p id="notas-activas" class="numeros"></p></article>
             <article class="panel grafico"><h3>Ocupación de firmas</h3><div class="ocupacion"><canvas id="mapa-firmas" width="256" height="256" aria-label="Mapa de repetición de firmas"></canvas><div><div class="leyenda-color"></div><div class="leyenda-label"><span>Menos</span><span>Más</span></div><p id="resumen-ocupacion"></p><p>Gris · excluido o pendiente</p><div id="tabla-firmas"></div></div></div><canvas id="curvas-ocupacion" width="640" height="160" aria-label="Curvas de las firmas más repetidas"></canvas></article>
@@ -285,7 +276,7 @@
     <footer class="pie">
         <div><img src="./docs/img/logo-orbidata-analytics.png" width="63" height="63" alt="ORBIDATA ANALYTICS"><span>ORBIDATA ANALYTICS</span></div>
         <div><img src="./docs/img/logo-semillero-itm.png" width="63" height="63" alt="Semillero de Astronomía ITM"><span>Semillero de Astronomía, Instrumentación y Ciencias Espaciales del ITM</span></div>
-        <a href="https://github.com/orbidataanalytics/OrbitaSonora#readme">Documentación · v5.7.0 ↗</a>
+        <a href="https://github.com/orbidataanalytics/Orbita_Sonora#readme">Documentación · v5.8.0 ↗</a>
     </footer>
 </main>
 

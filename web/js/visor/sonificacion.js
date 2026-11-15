@@ -1,9 +1,9 @@
 import {coordenadasRecorrido} from '../recorridos.js';
 import {MascaraMedio} from './mascara.js';
-import {aMidi, mezclaInicial, renderizarArreglo} from './audio-pistas.js';
-import {renderizarRGB} from './sintesis-rgb.js';
+import {aMidi, mezclaInicial, renderizarArreglo, volumenPista} from './audio-pistas.js?v=5.8.0';
+import {renderizarRGB} from './sintesis-rgb.js?v=5.8.0';
 import {MediaZonal, TAMANOS_ZONA} from './estadistica-zonal.js';
-import {prepararMuestras} from './muestras.js';
+import {precargarMuestras, prepararMuestras} from './muestras.js?v=5.8.0';
 
 export const BANDAS = [
     {canal: 'R', min_hz: 20, max_hz: 250, clave: 'fa'},
@@ -132,14 +132,27 @@ async function sintetizarArreglo(arreglo, mezcla, vozGrabada, avance, signal) {
     const s = arreglo.secuencia;
     const datos = {pistas: arreglo.eventosAudio(), duracion: arreglo.duracion, mezcla, vozGrabada,
         lectura: {intensidades: s.intensidadesSonoras, validez: s.validez, duracion: s.duracion_s}};
-    avance(.03);
+    const audible = datos.pistas.some((eventos, i) => eventos.length && volumenPista(mezcla, i)
+        && (mezcla.pistas[i].instrumento !== 'muestra' || mezcla.pistas[i].muestra));
+    if (!audible && !vozGrabada) throw new Error('No hay notas audibles. Revisa el área seleccionada y las pistas del DAW.');
+    avance(.12);
     datos.muestras = await prepararMuestras(datos, signal);
     signal.throwIfAborted();
     avance(.34);
     const progresoMezcla = valor => avance(.34 + .66 * valor);
-    if (typeof Worker === 'undefined') return renderizarArreglo(datos, progresoMezcla);
+    if (typeof Worker === 'function') {
+        try {
+            return await mezclarEnWorker(datos, progresoMezcla, signal);
+        } catch {
+            signal.throwIfAborted();
+        }
+    }
+    return renderizarArreglo(datos, progresoMezcla);
+}
+
+function mezclarEnWorker(datos, progreso, signal) {
     return new Promise((resolve, reject) => {
-        const worker = new Worker(new URL('./audio-worker.js', import.meta.url), {type: 'module'});
+        const worker = new Worker(new URL('./audio-worker.js?v=5.8.0', import.meta.url), {type: 'module'});
         const cerrar = () => {
             worker.terminate();
             signal.removeEventListener('abort', cancelar);
@@ -148,11 +161,20 @@ async function sintetizarArreglo(arreglo, mezcla, vozGrabada, avance, signal) {
         signal.addEventListener('abort', cancelar, {once: true});
         worker.onmessage = ({data}) => {
             if (data.resultado) { cerrar(); resolve(data.resultado); }
-            else progresoMezcla(data.avance);
+            else progreso(data.avance);
         };
-        worker.onerror = () => { cerrar(); reject(new Error('No se pudo preparar el arreglo.')); };
+        worker.onerror = evento => {
+            evento.preventDefault();
+            cerrar();
+            reject(new Error('No se pudo preparar el arreglo en segundo plano.'));
+        };
         worker.onmessageerror = () => { cerrar(); reject(new Error('No se pudo leer el audio del arreglo.')); };
-        worker.postMessage(datos, datos.muestras.filter(Boolean).map(muestra => muestra.buffer));
+        try {
+            worker.postMessage(datos);
+        } catch (error) {
+            cerrar();
+            reject(error);
+        }
     });
 }
 
@@ -165,6 +187,7 @@ export class Transporte {
         this.tiempo = 0;
         this.volumen = .67;
         this.mezcla = mezclaInicial();
+        precargarMuestras(this.mezcla);
         this.modo = 'arreglo';
         this.audios = new Map();
         this.nodo = null;
@@ -205,6 +228,7 @@ export class Transporte {
         const reanudar = afecta && (this.nodo || this.preparando);
         if (afecta) this.pausar(false);
         this.mezcla = mezcla;
+        if (mezcla.pistas.some((pista, i) => anterior.pistas[i].instrumento !== pista.instrumento)) precargarMuestras(mezcla);
         this.arreglo = arreglo;
         this.vozGrabada = vozGrabada;
         if (comun) this.invalidarAudio('rgb');
@@ -259,6 +283,21 @@ export class Transporte {
         return this.contexto;
     }
 
+    async habilitarAudio() {
+        const contexto = this.contextoAudio();
+        if (contexto.state === 'running') return contexto;
+        let timer;
+        try {
+            const plazo = new Promise((_, rechazar) => {
+                timer = setTimeout(() => rechazar(new Error('El navegador no activó el sonido. Pulsa Tocar arreglo de nuevo.')), 5000);
+            });
+            await Promise.race([contexto.resume(), plazo]);
+            return contexto;
+        } finally {
+            clearTimeout(timer);
+        }
+    }
+
     async reproducir(modo) {
         if (!MODOS_REPRODUCCION.includes(modo)) throw new Error('Elige arreglo o píxeles RGB.');
         if (!this.secuencia || modo === 'arreglo' && !this.arreglo) return;
@@ -274,8 +313,7 @@ export class Transporte {
         this.preparando = true;
         this.notificar(this.tiempo, false, true);
         try {
-            const contexto = this.contextoAudio();
-            await contexto.resume();
+            const contexto = await this.habilitarAudio();
             if (generacion !== this.generacion) return;
             const audio = await this.sintetizar(modo);
             if (generacion !== this.generacion) return;

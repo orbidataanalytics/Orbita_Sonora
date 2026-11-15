@@ -1,17 +1,17 @@
 import {coleccionMarcas} from './marcas-sig.js';
 import {Catalogo, extension, recurso} from './catalogo.js';
-import {VisorGIS, leerGeografia, posicionGeografica} from './gis.js';
-import {descargar, Informe} from './informe.js';
+import {VisorGIS, leerGeografia, posicionGeografica} from './gis.js?v=5.8.0';
+import {descargar, Informe} from './informe.js?v=5.8.0';
 import {LectorMedios} from './medios.js';
-import {Paneles} from './paneles.js';
-import {SecuenciaSonora, Transporte} from './sonificacion.js';
+import {Paneles} from './paneles.js?v=5.8.0';
+import {SecuenciaSonora, Transporte} from './sonificacion.js?v=5.8.0';
 import {SeleccionArea} from './mascara.js';
-import {Rocola} from './rocola.js';
-import {EstudioDAW} from './daw.js';
-import {ArregloMusical, nombreAfinado, tonalidadNombre} from './arreglo.js';
-import {PartituraMusical} from './partitura-musical.js';
+import {Rocola} from './rocola.js?v=5.8.0';
+import {EstudioDAW} from './daw.js?v=5.8.0';
+import {ArregloMusical, nombreAfinado, tonalidadNombre} from './arreglo.js?v=5.8.0';
+import {PartituraMusical} from './partitura-musical.js?v=5.8.0';
 import {InterpretacionesEnPantalla} from './interpretaciones.js';
-import {letraInicial} from './letra.js';
+import {letraInicial, sugerirLetra} from './letra.js?v=5.8.0';
 import {VozGrabada} from './voz-grabada.js';
 import {TAMANOS_ZONA, ZONA_INICIAL} from './estadistica-zonal.js';
 import {NOMBRES_RECORRIDO} from '../recorridos.js';
@@ -92,7 +92,8 @@ class AplicacionVisor {
         this.mostrarAvance('audio', valor);
         porId('progreso-audio-texto').textContent = modo === 'arreglo'
             ? (valor === 100 ? 'Arreglo listo' : valor < 34 ? 'Preparando las notas de los instrumentos' : 'Mezclando el arreglo')
-            : (valor === 100 ? 'Audio RGB generado' : 'Sintetizando píxeles RGB con Tone.js');
+            : (valor === 100 ? 'Audio RGB generado' : 'Sintetizando píxeles RGB');
+        if (modo === 'arreglo' && this.transporte.preparando) this.rocola.mensaje(`Preparando audio · ${valor} %`);
         this.daw.progreso(valor, modo);
     }
 
@@ -170,9 +171,13 @@ class AplicacionVisor {
 
     reiniciarMedio(conservarVoz = false) {
         this.secuencia = null;
+        this.reanudarRecorrido = null;
+        this.imagenLetra = null;
+        this.analisisLetra = null;
+        this.letraPersonalizada = false;
         porId('sonido-estado').textContent = 'Selecciona un medio.';
         this.daw.detenerPrueba();
-        porId('original-panel').hidden = true;
+        porId('lectura-panel').hidden = true;
         porId('letra-cancion').hidden = true;
         porId('guitarras-activas').hidden = true;
         porId('original-imagen').replaceChildren();
@@ -248,8 +253,6 @@ class AplicacionVisor {
             this.datos = datos;
             datos.imagen.alt = this.paquete.titulo;
             porId('original-imagen').replaceChildren(datos.imagen);
-            porId('original-titulo').textContent = this.paquete.titulo;
-            porId('original-panel').hidden = false;
             this.medioLeido = elegido;
             this.fondo = modoFondo || {modo: medio.mascara?.modo || 'alfa', tolerancia: 28, poligono: null};
             porId('modo-fondo').value = this.fondo.modo;
@@ -283,13 +286,18 @@ class AplicacionVisor {
 
     async crearSecuencia(signal) {
         if (!this.datos || signal?.aborted) return;
+        if (this.transporte.nodo || this.transporte.preparando) this.reanudarRecorrido = this.transporte.modo;
         this.secuencia = null;
         this.transporte.cargar(null);
         this.partitura.cargar(null);
         this.mostrarAvance('audio', null);
         this.rocola.estado(false, false);
         this.daw.estado(false, false);
-        porId('sonido-estado').textContent = 'Preparando el recorrido.';
+        const recorrido = porId('recorrido').value;
+        const lado = Number(porId('cuadricula').value);
+        const mensaje = 'Leyendo · ' + NOMBRES_RECORRIDO[recorrido];
+        porId('sonido-estado').textContent = mensaje;
+        this.rocola.mensaje(mensaje);
         const letra = porId('letra-sugerida');
         letra.disabled = true;
         this.deshabilitarControles();
@@ -300,15 +308,18 @@ class AplicacionVisor {
         this.progreso(80, 'Calculando recorrido, máscara y zona sonora…');
         await new Promise(resolve => setTimeout(resolve, 0));
         if (!vigente()) return;
+        if (this.datos.fotogramas[0].width !== lado) {
+            this.datos.fotogramas = [this.lector.muestrear(this.datos.imagen, lado)];
+        }
         this.secuencia = new SecuenciaSonora(this.medioLeido, {
             ...this.datos, duracion, velocidad, video: undefined, blob: undefined,
         },
-            Number(porId('cuadricula').value), porId('recorrido').value, this.fondo,
-            Number(porId('tamano-zona').value), porId('escala-frecuencia').value);
+            lado, recorrido, this.fondo, Number(porId('tamano-zona').value), porId('escala-frecuencia').value);
         const s = this.secuencia;
         porId('regla-zona').textContent = s.tamanoZona === 1 ? 'El ritmo responde a los cambios de color durante el recorrido.'
             : '70 % del píxel y 30 % de sus vecinos válidos. El contraste local cambia el ritmo de la guitarra.';
         this.paneles.cargar(this.secuencia);
+        porId('lectura-panel').hidden = false;
         this.paneles.actualizarOcupacion(Number(porId('niveles').value), porId('ambito').value);
         this.indice = -1;
         this.gis.indice = 0;
@@ -324,6 +335,9 @@ class AplicacionVisor {
         this.daw.estado(true, false);
         this.leerMascara();
         this.refrescarGeo();
+        const modo = this.reanudarRecorrido;
+        this.reanudarRecorrido = null;
+        if (modo) this.reproducir(modo);
         this.progreso(95, 'Dibujando la partitura del medio…');
         const secuencia = this.secuencia;
         const clave = this.clave('marcas');
@@ -335,7 +349,14 @@ class AplicacionVisor {
             this.catalogo.ajuste(clave), dibujada, this.catalogo.ajuste(this.clave('letra')),
         ]);
         if (vigente()) {
-            letra.value = typeof letraGuardada === 'string' ? letraGuardada : letraInicial(this.paquete, s);
+            if (this.imagenLetra !== this.datos.imagen) {
+                this.imagenLetra = this.datos.imagen;
+                this.letraPersonalizada = typeof letraGuardada === 'string';
+                const sugerencia = letraInicial(this.paquete, s);
+                letra.value = this.letraPersonalizada ? letraGuardada : sugerencia.texto;
+                porId('letra-estado').textContent = this.letraPersonalizada ? '' : sugerencia.tema;
+                if (porId('letra-incluir').checked) this.analizarLetra();
+            }
             letra.disabled = false;
             porId('letra-cancion').hidden = false;
             porId('informe').disabled = false;
@@ -391,6 +412,7 @@ class AplicacionVisor {
         this.mostrarAvance('audio', null);
         this.estado(error.message, true);
         porId('sonido-estado').textContent = error.message;
+        this.rocola.mensaje(error.message);
     }
 
     reproducir(modo = 'arreglo') {
@@ -426,8 +448,12 @@ class AplicacionVisor {
         porId('pausa').disabled = !activo && !preparando;
         porId('mus-escuchar').disabled = esArreglo && (activo || preparando);
         porId('mus-escuchar').setAttribute('aria-pressed', String(esArreglo && (activo || preparando)));
-        const estado = `${esArreglo ? 'Arreglo para tocar' : 'Sonificación RGB'} · ${s.lado} × ${s.lado}`;
-        if (porId('sonido-estado').textContent !== estado) porId('sonido-estado').textContent = estado;
+        const recorrido = NOMBRES_RECORRIDO[s.recorrido];
+        const estado = `${preparando ? 'Preparando audio · ' : activo ? 'Sonando · ' : ''}${recorrido} · ${s.lado} × ${s.lado}`;
+        if (porId('sonido-estado').textContent !== estado) {
+            porId('sonido-estado').textContent = estado;
+            this.rocola.mensaje(estado);
+        }
         this.rocola.estado(true, activo, preparando);
         this.daw.estado(true, activo, preparando);
         this.paneles.actualizar(indice, !activo);
@@ -485,7 +511,6 @@ class AplicacionVisor {
             ? `${this.geo.tipo === 'esquinas' ? 'Capa GIS' : 'Punto de referencia'} · ${this.geo.origen}`
             : 'Sin georreferencia';
         porId('centrar').disabled = !this.geo;
-        porId('opacidad').disabled = this.geo?.tipo !== 'esquinas';
     }
 
     async asignarGeo(geo) {
@@ -535,9 +560,23 @@ class AplicacionVisor {
         return porId('letra-incluir').checked ? porId('letra-sugerida').value.trim() : '';
     }
 
+    analizarLetra() {
+        const imagen = this.imagenLetra;
+        if (!imagen || !this.secuencia || this.letraPersonalizada || this.analisisLetra) return;
+        const salida = porId('letra-estado');
+        salida.textContent = 'Analizando la imagen para la letra…';
+        this.analisisLetra = sugerirLetra(this.paquete, this.secuencia).then(({tema, texto}) => {
+            if (this.imagenLetra !== imagen || this.letraPersonalizada) return;
+            porId('letra-sugerida').value = texto;
+            salida.textContent = tema;
+        }).catch(() => {
+            if (this.imagenLetra === imagen && !this.letraPersonalizada) salida.textContent = 'Letra basada en los colores de la imagen.';
+        });
+    }
+
     informe() {
         return new Informe(this.secuencia, this.paquete, Number(porId('niveles').value), this.marcas, this.geo,
-            this.daw.mezcla, this.transporte.arreglo, this.letraActual(), porId('mus-parte').value, this.partitura.voz);
+            this.daw.mezcla, this.transporte.arreglo, this.letraActual(), 'todos', this.partitura.voz);
     }
 
     enlazar() {
@@ -547,7 +586,13 @@ class AplicacionVisor {
         porId('archivos').onchange = () => this.importar();
         porId('letra-incluir').onchange = e => {
             porId('letra-sugerida').hidden = !e.target.checked;
+            porId('letra-estado').hidden = !e.target.checked;
             this.partitura.mostrarCantante(e.target.checked);
+            if (e.target.checked) this.analizarLetra();
+        };
+        porId('letra-sugerida').oninput = () => {
+            this.letraPersonalizada = true;
+            porId('letra-estado').textContent = '';
         };
         porId('letra-sugerida').onchange = e => {
             if (!this.secuencia) return;
@@ -582,13 +627,13 @@ class AplicacionVisor {
         porId('pausa').onclick = () => this.transporte.pausar();
         porId('linea-tiempo').oninput = e => this.transporte.buscar(Number(e.target.value)).catch(e => this.errorAudio(e));
         porId('volumen').oninput = e => this.transporte.cambiarVolumen(Number(e.target.value));
-        porId('opacidad').oninput = e => this.gis.cambiarOpacidad(Number(e.target.value));
         porId('centrar').onclick = () => this.gis.centrar();
         porId('recorrido').replaceChildren(...Object.entries(NOMBRES_RECORRIDO).map(([valor, nombre]) =>
             new Option(nombre, valor, valor === 'filas', valor === 'filas')));
         porId('tamano-zona').replaceChildren(...TAMANOS_ZONA.map(n => new Option(n + ' × ' + n, n, n === ZONA_INICIAL, n === ZONA_INICIAL)));
-        for (const id of ['recorrido','duracion','tamano-zona','velocidad-recorrido','escala-frecuencia']) porId(id).onchange = () => this.crearSecuencia(this.peticionMedio?.signal).catch(e => this.estado(e.message, true));
-        porId('cuadricula').onchange = () => this.seleccionarMedio(this.medio, this.opcion, true);
+        for (const id of ['recorrido', 'cuadricula', 'duracion', 'tamano-zona', 'velocidad-recorrido', 'escala-frecuencia']) {
+            porId(id).onchange = () => this.crearSecuencia(this.peticionMedio?.signal).catch(e => this.estado(e.message, true));
+        }
         for (const id of ['niveles', 'ambito']) porId(id).onchange = () => {
             this.paneles.actualizarOcupacion(Number(porId('niveles').value), porId('ambito').value);
             if (this.transporte.secuencia) this.paneles.actualizar(this.indice, true);

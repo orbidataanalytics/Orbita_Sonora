@@ -1,4 +1,4 @@
-import {posicionGeografica} from './gis.js';
+import {posicionGeografica} from './gis.js?v=5.8.0';
 
 export function coleccionMarcas(secuencia, geo, marcas) {
     return {

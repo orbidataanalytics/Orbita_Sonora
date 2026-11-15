@@ -1,7 +1,7 @@
-import {AFINACIONES, COMPASES, TONALIDADES, opcionesPartitura, tonalidadNombre} from './arreglo.js';
+import {AFINACIONES, COMPASES, TONALIDADES, opcionesPartitura, tonalidadNombre} from './arreglo.js?v=5.8.0';
 import {afinacionTexto, MusicXML, pistasDePartitura} from './musicxml.js';
 import {bibliotecaPartituras} from './visor-partituras.js';
-import {descargar} from './informe.js';
+import {descargar} from './informe.js?v=5.8.0';
 import {NOMBRES_RECORRIDO} from '../recorridos.js';
 
 const porId = id => document.getElementById(id);

@@ -7,7 +7,7 @@
 | Acción del usuario | Flujo |
 | --- | --- |
 | Seleccionar una imagen, recorrido o cuadrícula | `SecuenciaSonora` ordena los RGB y sus contrastes. `ArregloMusical.crearArmonia()` elige tríadas según el brillo relativo de cada zona y el balance de color. `figuras()` subdivide el pulso de guitarra cuando el contraste aumenta. |
-| Pulsar **Tocar arreglo** o el botón verde de la rocola | `Transporte` envía las notas de guitarra de nailon y piano al reproductor de muestras `Tone.Sampler`. El worker mezcla cada pista con su envolvente RGB, su nivel y sus efectos. |
+| Pulsar **Tocar arreglo** o el botón verde de la rocola | `Transporte` precarga los bancos MP3 y usa Web Audio del navegador. Cada nota selecciona un recorte dentro del banco. Tone.js calcula su intervalo de afinación. El motor mezcla las pistas con sus envolventes RGB y sincroniza el cursor con el audio. |
 | Cambiar un instrumento en el DAW | `EstudioDAW.editarPista()` guarda la mezcla y llama a `AplicacionVisor.configurarMusica()`. Se actualiza `ArregloMusical` y se descarta su audio anterior. `Transporte` conserva el tiempo y reanuda si estaba reproduciendo. |
 | Abrir la partitura o exportar | `MusicXML` lee `pistas[].compases` del arreglo. `ArchivosMIDI` toma sus mismos eventos de nota. El WAV del arreglo usa el búfer que reproduce `Transporte`. |
 | Activar **Voz y letra para cantar** | `ArregloMusical.vozCantante()` genera el pentagrama vocal a partir del brillo general y la armonía zonal. La toma real se carga de forma independiente. |
@@ -23,17 +23,17 @@ Las pistas R, G y B conservan su índice al cambiar de instrumento. `ArregloMusi
 | `web/js/visor/catalogo.js`, `medios.js` | Cargar paquetes, guardar preferencias locales y leer imágenes o fotogramas. |
 | `web/js/visor/rocola.js`, `web/css/rocola-home.css` | Vinilo, controles del disco e imagen GOES separada. |
 | `web/js/visor/interpretaciones.js`, `videos/` | Pantalla del MP4 publicado o local. Miniatura GOES mientras se reproduce. |
-| `web/js/visor/voz-grabada.js`, `letra.js` | Toma vocal opcional y letra sugerida de la imagen. |
+| `web/js/visor/voz-grabada.js`, `letra.js`, `modelo-imagen.js` | Toma vocal opcional, inferencia visual local y composición de la letra. |
 | `web/js/visor/marcas-sig.js` | Exportación SIG de las celdas marcadas. |
 | `web/js/visor/mascara.js` | Alfa de entrada, fondo uniforme conectado al perímetro y polígono. |
 | `web/js/recorridos.js` | Orden de las coordenadas. Una ruta debe devolver cada punto exactamente una vez. |
 | `web/js/visor/estadistica-zonal.js` | Media espacial 70/30, contraste de brillo y tamaños elegibles. |
-| `web/js/visor/sonificacion.js`, `sintesis-rgb.js` | Secuencia por celda, mapeo de intensidad a Hz, síntesis de tres osciladores Tone.js y reloj de reproducción. |
+| `web/js/visor/sonificacion.js`, `sintesis-rgb.js` | Secuencia por celda, mapeo de intensidad a Hz, síntesis RGB con Web Audio y reloj de reproducción. |
 | `web/js/visor/visor-partituras.js` | Carga el visor de partituras que comparten la vista musical, la impresión y el informe. |
 | `web/js/visor/arreglo.js`, `musicxml.js`, `partitura-musical.js` | Adaptación a instrumentos, ritmo, digitación, escritura MusicXML, cursor y vista imprimible. |
-| `web/js/visor/muestras.js`, `web/muestras/` | Notas grabadas, manifiesto de orígenes, precarga y reproducción con Tone.js. |
+| `web/js/visor/muestras.js`, `web/muestras/` | Bancos compactos, orígenes de notas, precarga y cálculo de afinación con Tone.js. |
 | `web/js/visor/audio-pistas.js`, `audio-worker.js` | Timbres sintetizados, mezcla espacial de todas las pistas y codificación WAV. |
-| `web/js/visor/daw.js`, `midi.js`, `audio-vivo.js` | Editor de tres pistas, importación/exportación MIDI y entrada en vivo. |
+| `web/js/visor/daw.js`, `midi.js`, `audio-vivo.js` | Editor de tres pistas, importación y exportación de archivos MIDI. |
 | `web/js/estadisticas.js`, `web/js/visor/paneles.js`, `informe.js` | Píxel activo, semáforo, estadísticas e informe con partitura y letra opcional. |
 | `web/js/visor/gis.js`, `globo.js` | Punto, capa con cuatro esquinas, mapa y globo. |
 | `api/visor/videos.py` | Decodificación del tramo de la descarga original y conservación del tiempo de origen. |

@@ -1,5 +1,5 @@
-import {INSTRUMENTOS} from './audio-pistas.js';
-import {BANDAS} from './sonificacion.js';
+import {INSTRUMENTOS} from './audio-pistas.js?v=5.8.0';
+import {BANDAS} from './sonificacion.js?v=5.8.0';
 import {nivelGuitarra} from './estadistica-zonal.js';
 
 export const COMPASES = {

@@ -1,8 +1,8 @@
-import {aHz, INSTRUMENTOS, mezclaInicial, archivoWav, renderizarNota, volumenPista} from './audio-pistas.js';
+import {aHz, INSTRUMENTOS, mezclaInicial, archivoWav, renderizarNota, volumenPista} from './audio-pistas.js?v=5.8.0';
 import {ArchivosMIDI} from './midi.js';
-import {AudioVivo, CanalVivo} from './audio-vivo.js';
-import {descargar} from './informe.js';
-import {notaGrabada} from './muestras.js';
+import {AudioVivo} from './audio-vivo.js?v=5.8.0';
+import {descargar} from './informe.js?v=5.8.0';
+import {notaGrabada} from './muestras.js?v=5.8.0';
 
 const porId = id => document.getElementById(id);
 const nombres = ['Rojo', 'Verde', 'Azul'];
@@ -17,13 +17,11 @@ export class EstudioDAW {
         this.mezcla = mezclaInicial();
         this.midi = new ArchivosMIDI();
         this.audioVivo = new AudioVivo(transporte);
-        this.capturados = [];
         this.revisionMuestra = [0, 0, 0];
-        this.opcionesVivo = porId('daw-entrada-vivo');
-        this.opcionesVivo.addEventListener('toggle', () => {
-            if (!this.opcionesVivo.open) this.detenerMIDI();
+        const archivo = porId('daw-archivo-panel');
+        archivo.addEventListener('toggle', () => {
+            if (!archivo.open) this.detenerMIDI();
         });
-        this.vivo = new CanalVivo(dato => this.recibir(dato), (texto, conectado) => this.estadoVivo(texto, conectado));
         this.dibujarPistas();
         this.enlazar();
         this.refrescar();
@@ -159,8 +157,7 @@ export class EstudioDAW {
         if (pista.instrumento === 'muestra' && !pista.muestra) throw new Error('Carga un WAV para probar ese instrumento.');
         this.detenerPrueba();
         const turno = this.turnoPrueba = Symbol();
-        const contexto = this.transporte.contextoAudio();
-        await contexto.resume();
+        const contexto = await this.transporte.habilitarAudio();
         if (turno !== this.turnoPrueba) return;
         const primera = this.transporte.arreglo?.eventosAudio(canal)[0];
         const midi = primera?.midi ?? (INSTRUMENTOS[pista.instrumento].grave ? 40 : 60);
@@ -208,26 +205,6 @@ export class EstudioDAW {
         } catch (error) { this.acciones.informarError(error); }
     }
 
-    recibir(dato) {
-        const eventos = this.audioVivo.enVivo(dato);
-        if (!eventos.length) return;
-        const texto = document.createElement('div');
-        texto.className = 'daw-evento';
-        texto.textContent = dato.type === 'rgb' ? 'RGB · ' + dato.rgb.join(' / ')
-            : 'RGB'[dato.line_id - 1] + ' · nota MIDI ' + dato.note + ' · velocidad ' + dato.velocity;
-        const lista = porId('daw-eventos');
-        lista.prepend(texto);
-        if (lista.children.length > 20) lista.lastElementChild.remove();
-        for (const e of eventos) if (this.capturados.length < 12000) this.capturados.push(e);
-        porId('daw-captura').disabled = !this.capturados.length;
-    }
-
-    estadoVivo(texto, conectado) {
-        porId('daw-vivo-estado').textContent = texto;
-        porId('daw-conectar').textContent = conectado ? 'Desconectar' : 'Conectar';
-        porId('daw-demo').disabled = !conectado;
-    }
-
     enlazar() {
         for (const [id, propiedad] of [['daw-reverb','reverb'], ['daw-espacio','espacio'], ['daw-filtro-y','filtroY']]) {
             const control = porId(id);
@@ -248,28 +225,6 @@ export class EstudioDAW {
         };
         porId('daw-wav').onclick = () => this.exportarWAV('arreglo').catch(error => this.acciones.informarError(error));
         porId('mus-midi').onclick = () => this.exportarMIDI();
-        porId('daw-url').value = this.vivo.url;
-        porId('daw-conectar').onclick = async () => {
-            if (this.vivo.socket?.readyState === WebSocket.OPEN) {
-                this.vivo.desconectar();
-                return;
-            }
-            try {
-                this.detenerPrueba();
-                this.transporte.pausar();
-                await this.transporte.contextoAudio().resume();
-                this.audioVivo.tiempoEnvio = null;
-                await this.vivo.conectar();
-            } catch (error) { this.error(error); }
-        };
-        porId('daw-demo').onclick = () => this.vivo.ejemplo();
-        porId('daw-captura').onclick = () => {
-            try {
-                const base = Math.min(...this.capturados.map(e => e.tiempo));
-                const eventos = this.capturados.map(e => ({...e, tiempo: e.tiempo - base}));
-                descargar(this.midi.crear(eventos, this.mezcla, 'Captura RGB'), 'orbita-captura.mid');
-            } catch (error) { this.error(error); }
-        };
         porId('daw-archivo-midi').onchange = async () => {
             const control = porId('daw-archivo-midi'), fuente = control.files[0];
             if (!fuente) return;
@@ -277,20 +232,20 @@ export class EstudioDAW {
                 if (fuente.size > 5 * 1024 * 1024) throw new Error('Usa un MIDI de hasta 5 MiB.');
                 this.detenerPrueba();
                 this.transporte.pausar();
-                await this.transporte.contextoAudio().resume();
+                await this.transporte.habilitarAudio();
                 const eventos = this.midi.leer(await fuente.arrayBuffer());
                 await this.audioVivo.reproducirArchivo(eventos, () => {
                     porId('daw-parar-midi').disabled = true;
-                    porId('daw-vivo-estado').textContent = 'Terminó el archivo MIDI.';
+                    porId('daw-midi-estado').textContent = 'Terminó el archivo MIDI.';
                 });
                 porId('daw-parar-midi').disabled = false;
-                porId('daw-vivo-estado').textContent = `Reproduciendo ${eventos.length} notas de ${fuente.name}.`;
+                porId('daw-midi-estado').textContent = `Reproduciendo ${eventos.length} notas de ${fuente.name}.`;
             } catch (error) { this.error(error); }
             finally { control.value = ''; }
         };
         porId('daw-parar-midi').onclick = () => {
             this.detenerMIDI();
-            porId('daw-vivo-estado').textContent = 'Archivo MIDI detenido.';
+            porId('daw-midi-estado').textContent = 'Archivo MIDI detenido.';
         };
     }
 }

@@ -159,21 +159,25 @@ export function renderizarArreglo({pistas, duracion, mezcla, lectura, vozGrabada
             if (nota?.fin <= i) nota = null;
             const evento = eventos[pendiente];
             if (evento && i >= Math.round(evento.desde * tasa)) {
+                const recorte = grabacion?.notas[pendiente];
                 pendiente++;
                 const e = espacioPixel(evento.x, evento.y, mezcla, pista.panorama);
                 nota = {
                     desde: i, fin: Math.round(evento.hasta * tasa),
-                    amplitud: (grabacion && esGuitarra ? .70 : .31) * volumen * evento.fuerza * (evento.acento ? 1.08 : 1),
+                    amplitud: (recorte ? .86 : .31) * volumen * evento.fuerza * (evento.acento ? 1.08 : 1),
                     izquierda: Math.cos((e.pan + 1) * Math.PI / 4),
                     derecha: Math.sin((e.pan + 1) * Math.PI / 4),
                     wet: e.wet, coeficiente: e.corte ? 1 - Math.exp(-DOS_PI * e.corte / tasa) : 1,
+                    recorte, posicion: recorte?.inicio,
                 };
-                voz.instrumento = evento.timbre;
-                voz.nota(aHz(evento.midi), true);
+                if (!recorte) {
+                    voz.instrumento = evento.timbre;
+                    voz.nota(aHz(evento.midi), true);
+                }
             }
             let l = 0, r = 0, wet = 0;
             if (nota) {
-                const envolvente = Math.min(1, (i - nota.desde) / 150, (nota.fin - i) / 400);
+                const envolvente = Math.min(1, (i - nota.desde) / 150, (nota.fin - i) / 1600);
                 if (celdas) {
                     const actual = Math.min(celdas - 1, Math.floor(i * avanceCelda));
                     if (actual !== celda) {
@@ -184,7 +188,14 @@ export function renderizarArreglo({pistas, duracion, mezcla, lectura, vozGrabada
                     }
                     nivel += (objetivo - nivel) * suavizado;
                 }
-                const valor = (grabacion ? grabacion[i] : voz.muestraAudio()) * nota.amplitud * envolvente * nivel;
+                let muestra = 0;
+                if (!nota.recorte) muestra = voz.muestraAudio();
+                else if (nota.posicion < nota.recorte.fin - 1) {
+                    const j = Math.floor(nota.posicion), fraccion = nota.posicion - j;
+                    muestra = grabacion.datos[j] * (1 - fraccion) + grabacion.datos[j + 1] * fraccion;
+                    nota.posicion += nota.recorte.paso;
+                }
+                const valor = muestra * nota.amplitud * envolvente * nivel;
                 filtro += (valor - filtro) * nota.coeficiente;
                 l = filtro * nota.izquierda;
                 r = filtro * nota.derecha;

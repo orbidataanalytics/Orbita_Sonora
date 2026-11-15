@@ -1,5 +1,5 @@
-import {INSTRUMENTOS, notaInstrumento, volumenPista} from './audio-pistas.js';
-import {COMPASES} from './arreglo.js';
+import {INSTRUMENTOS, notaInstrumento, volumenPista} from './audio-pistas.js?v=5.8.0';
+import {COMPASES} from './arreglo.js?v=5.8.0';
 
 const acotar = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
 const CLAVES_MIDI = ['Cb', 'Gb', 'Db', 'Ab', 'Eb', 'Bb', 'F', 'C', 'G', 'D', 'A', 'E', 'B', 'F#', 'C#'];

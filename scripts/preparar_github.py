@@ -10,8 +10,9 @@ import subprocess
 
 FUENTE = Path(__file__).resolve().parents[1]
 VERSION = json.loads((FUENTE / "package.json").read_text(encoding="utf-8"))["version"]
-VERSION_CORTA = ".".join(VERSION.split(".")[:2])
-REPOSITORIO = "https://github.com/orbidataanalytics/OrbitaSonora.git"
+NOMBRE_REPO = "Orbita_Sonora"
+PROYECTO = f"orbidataanalytics/{NOMBRE_REPO}"
+REPOSITORIO = f"https://github.com/{PROYECTO}.git"
 CARPETAS = ("api", "datos", "docs", "pruebas", "scripts", "videos", "web")
 ARCHIVOS = (
     ".gitignore", ".nojekyll", "ABRIR_ORBITA.bat", "PUBLICAR_EN_GITHUB.bat",
@@ -39,6 +40,14 @@ ARCHIVOS_ANTIGUOS = (
     f"imagenes_pixel/{pista}/{canal}.png"
     for pista in ("derezzed", "end-of-line", "the-son-of-flynn")
     for canal in ("RGB", "R", "G", "B")
+) + tuple(
+    f"web/muestras/{instrumento}/{midi}.wav"
+    for instrumento, notas in (
+        ("guitarra", range(40, 77, 2)), ("guitarraAcero", range(40, 77, 2)),
+        ("guitarraElectrica", (36, 41, 45, 48, 52, 55, 59, 64, 67, 71, 74, 80, 85)),
+        ("piano", range(48, 85, 4)),
+    )
+    for midi in notas
 )
 
 
@@ -52,14 +61,16 @@ def git(clon, *argumentos, leer=False):
 
 def verificar_clon(clon):
     raiz = Path(git(clon, "rev-parse", "--show-toplevel", leer=True)).resolve()
-    origen = git(clon, "remote", "get-url", "origin", leer=True).lower().rstrip("/").removesuffix(".git")
+    remoto_lectura = git(clon, "remote", "get-url", "origin", leer=True)
+    remoto_escritura = git(clon, "remote", "get-url", "--push", "origin", leer=True)
     origenes = {
         REPOSITORIO.lower().removesuffix(".git"),
-        "git@github.com:orbidataanalytics/orbitasonora",
-        "ssh://git@github.com/orbidataanalytics/orbitasonora",
+        f"git@github.com:{PROYECTO.lower()}",
+        f"ssh://git@github.com/{PROYECTO.lower()}",
     }
-    if raiz != clon or origen not in origenes:
-        raise ValueError("El destino debe ser la raíz del clon de orbidataanalytics/OrbitaSonora.")
+    remotos = {url.lower().rstrip("/").removesuffix(".git") for url in (remoto_lectura, remoto_escritura)}
+    if raiz != clon or not remotos <= origenes:
+        raise ValueError(f"Usa un clon de {PROYECTO} como destino de lectura y publicación.")
     if git(clon, "branch", "--show-current", leer=True) != "main":
         raise ValueError("Selecciona la rama main del repositorio.")
 
@@ -114,6 +125,7 @@ def entrega_preparada(clon):
 
 
 def publicar(clon):
+    verificar_clon(clon)
     comando = ["gh", "auth"]
     sesion = subprocess.run([*comando, "status", "-h", "github.com"],
                             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
@@ -122,16 +134,16 @@ def publicar(clon):
     subprocess.run([*comando, "setup-git", "-h", "github.com"], check=True)
     dif = subprocess.run(["git", "-C", str(clon), "diff", "--cached", "--quiet"])
     if dif.returncode == 1:
-        git(clon, "commit", "-m", f"Publicar Órbita Sonora {VERSION_CORTA}")
+        git(clon, "commit", "-m", f"Publicar Órbita Sonora {VERSION}")
     else:
         dif.check_returncode()
     git(clon, "push", "origin", "main")
-    print("Actualización enviada. Revisa https://github.com/orbidataanalytics/OrbitaSonora/actions")
+    print(f"Actualización enviada. Revisa https://github.com/{PROYECTO}/actions")
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    carpeta = "OrbitaSonora_GitHub_" + VERSION_CORTA.replace(".", "_")
+    carpeta = f"{NOMBRE_REPO}_GitHub_{VERSION.replace('.', '_')}"
     parser.add_argument("clon", type=Path, nargs="?", default=FUENTE.parent / carpeta,
                         help=f"Ruta del clon limpio o de una carpeta nueva. Por defecto usa {carpeta}.")
     parser.add_argument("--publicar", action="store_true", help="Hace el commit y envía la entrega a main.")
@@ -151,7 +163,7 @@ def main():
         parser.exit(1, f"{error}\n")
     print(f"Entrega preparada en {clon}")
     print(f"cd {shlex.quote(str(clon))}")
-    print(f'git commit -m "Publicar Órbita Sonora {VERSION_CORTA}"')
+    print(f'git commit -m "Publicar Órbita Sonora {VERSION}"')
     print("gh auth login --hostname github.com --git-protocol https --web")
     print("gh auth setup-git --hostname github.com")
     print("git push origin main")

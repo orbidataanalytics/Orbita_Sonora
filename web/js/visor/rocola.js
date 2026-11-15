@@ -20,8 +20,13 @@ export class Rocola {
     montar(titulo, subtitulo, portada) {
         porId('disco-titulo').textContent = titulo;
         porId('disco-titulo').title = titulo;
-        porId('disco-subtitulo').textContent = subtitulo;
+        this.mensaje(subtitulo);
         this.arte.style.backgroundImage = portada ? 'url(' + JSON.stringify(portada) + ')' : '';
+    }
+
+    mensaje(texto) {
+        const salida = porId('disco-subtitulo');
+        salida.textContent = salida.title = texto;
     }
 
     estado(listo, sonando, preparando = false) {

@@ -1,9 +1,9 @@
 import {calcularInforme} from '../estadisticas.js';
 import {lienzo} from './medios.js';
-import {BANDAS} from './sonificacion.js';
-import {CANALES, semaforo} from './paneles.js';
-import {posicionGeografica} from './gis.js';
-import {tonalidadNombre} from './arreglo.js';
+import {BANDAS} from './sonificacion.js?v=5.8.0';
+import {CANALES, semaforo} from './paneles.js?v=5.8.0';
+import {posicionGeografica} from './gis.js?v=5.8.0';
+import {tonalidadNombre} from './arreglo.js?v=5.8.0';
 import {PESO_PIXEL} from './estadistica-zonal.js';
 import {NOMBRES_RECORRIDO} from '../recorridos.js';
 import {afinacionTexto, MusicXML, pistasDePartitura} from './musicxml.js';
@@ -88,7 +88,7 @@ export class Informe {
         const s = this.secuencia, lado = s.lado;
         const firmas = new Map(this.resultado.firmas.map(f => [f.firma.join(','), f.veces]));
         const minimo = this.resultado.firmas.at(-1)?.veces || 0, maximo = this.resultado.firmas[0]?.veces || 0;
-        return [...CANALES, 'Ocupación'].map((canal, banda) => {
+        const imagenes = [...CANALES, 'Ocupación'].map((canal, banda) => {
             const canvas = lienzo(lado);
             const ctx = canvas.getContext('2d'), img = ctx.createImageData(lado, lado);
             for (const [indice, [x, y]] of s.coordenadas.entries()) {
@@ -119,6 +119,14 @@ export class Informe {
             }
             return [canal, salida.toDataURL('image/png')];
         });
+        const {imagen, ancho, alto} = s.datos;
+        if (imagen) {
+            const escala = Math.min(1, 640 / Math.max(ancho, alto));
+            const original = lienzo(Math.max(1, Math.round(ancho * escala)), Math.max(1, Math.round(alto * escala)));
+            original.getContext('2d').drawImage(imagen, 0, 0, original.width, original.height);
+            imagenes.unshift(['Imagen original', original.toDataURL('image/png')]);
+        }
+        return imagenes;
     }
 
     tabla(columnas, filas) {
@@ -155,7 +163,7 @@ export class Informe {
         const partes = this.arreglo ? pistasDePartitura(this.arreglo, this.canal, this.voz) : [];
         const afinaciones = partes.filter(p => p.afinacion)
             .map(p => `<p>${escapar(p.nombre)} · Cuerdas de grave a aguda ${escapar(afinacionTexto(p.afinacion))}</p>`).join('');
-        return `<h1>Informe de sonificación y GIS</h1><p>Órbita Sonora · ORBIDATA ANALYTICS</p>
+        return `<h1>Informe de sonificación</h1><p>Órbita Sonora · ORBIDATA ANALYTICS</p>
             <h2>${escapar(d.paquete === d.medio ? d.paquete : d.paquete + ' · ' + d.medio)}</h2>
             <p>${d.lado} × ${d.lado} · ${escapar(NOMBRES_RECORRIDO[d.recorrido])} · ${d.duracion_s.toFixed(3)} s · ${d.niveles} niveles</p>
             <p>${d.validos} muestras válidas · ${d.excluidos} excluidas por máscara.</p>
@@ -220,10 +228,11 @@ export class Informe {
         cerrar.onclick = () => { destino.hidden = true; document.getElementById('informe').focus(); };
         imprimir.onclick = () => window.print();
         exportar.onclick = () => {
-            const html = `<!doctype html><html lang="es"><meta charset="utf-8"><title>Informe de Órbita Sonora</title><style>
+            const html = `<!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+            <title>Informe de Órbita Sonora</title><style>
             body{font:15px system-ui;margin:25px auto;padding:0 16px;max-width:1050px;color:#182621}
             img,svg{max-width:100%}figure{margin:0}table{border-collapse:collapse;width:100%;margin:1rem 0}
-            th,td{padding:5px;text-align:left;border-bottom:1px solid #cbd5cc}.grilla-informe{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+            th,td{padding:5px;text-align:left;border-bottom:1px solid #cbd5cc}.grilla-informe{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
             .letra-impresa p{white-space:pre-wrap}.bloque-partitura-informe svg{width:100%;height:auto;display:block}
             @media print{figure,tr,svg,.bloque-partitura-informe{break-inside:avoid}}</style><body>${contenido.innerHTML}</body></html>`;
             descargar(new Blob([html], {type: 'text/html;charset=utf-8'}), 'orbita-informe.html');

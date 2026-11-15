@@ -17,7 +17,6 @@ export class GloboCanvas {
         this.centro = [-72, 14];
         this.modo = 'globe';
         this.escala = 1;
-        this.opacidad = .82;
         const textura = new Image();
         textura.onload = () => {
             const base = lienzo(textura.width, textura.height);
@@ -187,7 +186,7 @@ export class GloboCanvas {
         if (this.lugares.length && this.capaRGB) {
             for (let k = 0; k < this.lugares.length; k += 2) {
                 const [i, j] = [this.lugares[k], this.lugares[k + 1]];
-                const a = this.opacidad * this.capaRGB[j + 3] / 255;
+                const a = .82 * this.capaRGB[j + 3] / 255;
                 for (let b = 0; b < 3; b++) this.salida.data[i + b] = this.fondo.data[i + b] * (1 - a) + this.capaRGB[j + b] * a;
             }
         }

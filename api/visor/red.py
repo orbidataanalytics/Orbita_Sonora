@@ -85,7 +85,7 @@ class ClientePublico:
         for _ in range(6):
             destino, headers, nasa = self.resolver(url)
             headers["Accept-Encoding"] = "identity"
-            headers["User-Agent"] = "OrbitaSonora/4.0 (+https://github.com/orbidataanalytics/OrbitaSonora)"
+            headers["User-Agent"] = "OrbitaSonora/4.0 (+https://github.com/orbidataanalytics/Orbita_Sonora)"
             if rango:
                 headers["Range"] = rango
             try:

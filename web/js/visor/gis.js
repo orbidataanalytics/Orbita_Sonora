@@ -1,6 +1,6 @@
 import {recurso} from './catalogo.js';
 import {lienzo} from './medios.js';
-import {GloboCanvas} from './globo.js';
+import {GloboCanvas} from './globo.js?v=5.8.0';
 
 const RAD = Math.PI / 180;
 const LATITUD_MAX = 85.051129;
@@ -47,13 +47,12 @@ export function posicionGeografica(geo, x, y, lado) {
 
 export class VisorGIS {
     constructor(contenedor, mensaje, buscar) {
+        this.contenedor = contenedor;
         this.mensaje = mensaje;
         this.buscar = buscar;
         this.proyeccion = 'globe';
-        this.opacidad = .82;
         this.capa = lienzo(2);
         this.listo = false;
-        this.iniciar(contenedor);
     }
 
     iniciar(contenedor) {
@@ -100,11 +99,13 @@ export class VisorGIS {
             this.alternativo = new GloboCanvas(contenedor, punto => this.buscarCoordenada(punto));
             this.mensaje.textContent = 'NASA Blue Marble · arrastra para mover y usa la rueda para acercar';
             this.listo = true;
+            this.reconstruir();
         }
     }
 
     proyectar(proyeccion) {
         this.proyeccion = proyeccion;
+        if (!this.mapa && !this.alternativo) this.iniciar(this.contenedor);
         if (!this.listo) return;
         if (this.alternativo) {
             this.alternativo.proyectar(proyeccion);
@@ -137,7 +138,7 @@ export class VisorGIS {
             this.pintarFotograma(this.indice || 0);
             this.mapa.addSource('medio', {type: 'canvas', canvas: this.capa, animate: false, coordinates: this.geo.coordenadas});
             this.mapa.addLayer({id: 'medio', type: 'raster', source: 'medio', paint: {
-                'raster-opacity': this.opacidad, 'raster-fade-duration': 0,
+                'raster-opacity': .82, 'raster-fade-duration': 0,
             }}, 'marcas');
         }
         this.pintar(Math.min(this.indice || 0, (this.secuencia?.pixeles || 1) - 1));
@@ -190,15 +191,6 @@ export class VisorGIS {
         this.alternativo.configurar(this.geo, this.capa);
         this.pintar(Math.min(this.indice || 0, (this.secuencia?.pixeles || 1) - 1));
         this.centrar();
-    }
-
-    cambiarOpacidad(valor) {
-        this.opacidad = valor;
-        if (this.alternativo) {
-            this.alternativo.opacidad = valor;
-            this.alternativo.actualizarFondo();
-        }
-        if (this.mapa?.getLayer('medio')) this.mapa.setPaintProperty('medio', 'raster-opacity', valor);
     }
 
     centrar() {

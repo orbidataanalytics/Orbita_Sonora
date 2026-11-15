@@ -1,71 +1,80 @@
-import {aHz, TASA_AUDIO, volumenPista} from './audio-pistas.js';
+import {TASA_AUDIO, volumenPista} from './audio-pistas.js?v=5.8.0';
 
 const INSTRUMENTOS_GRABADOS = new Set(['guitarra', 'guitarraAcero', 'guitarraElectrica', 'piano']);
 const RAIZ = new URL('../../muestras/', import.meta.url);
 const bancos = new Map();
-const LIBERACION = .045;
+let pedidoCatalogo;
+let lector;
 
-async function solicitarArchivo(ruta) {
-    const respuesta = await fetch(new URL(ruta, RAIZ), {signal: AbortSignal.timeout(15000)});
-    if (!respuesta.ok) throw new Error('No se pudo cargar el archivo instrumental ' + ruta + '.');
+async function solicitar(ruta) {
+    const respuesta = await fetch(new URL(ruta, RAIZ), {signal: AbortSignal.timeout(6000)});
+    if (!respuesta.ok) throw new Error('No se pudo cargar el banco de notas ' + ruta + '.');
     return respuesta;
 }
 
 function cargarBanco(instrumento) {
     if (!bancos.has(instrumento)) {
-        const tarea = (async () => {
-            const catalogo = await (await solicitarArchivo('catalogo.json')).json();
-            const lector = new OfflineAudioContext(1, 1, TASA_AUDIO);
-            const notas = await Promise.all(Object.entries(catalogo[instrumento]).map(async ([midi, {archivo}]) => {
-                const datos = await (await solicitarArchivo(archivo)).arrayBuffer();
-                return [midi, await lector.decodeAudioData(datos)];
-            }));
-            return Object.fromEntries(notas);
+        const pedido = (async () => {
+            pedidoCatalogo ??= solicitar('catalogo.json?v=5.8.0').then(respuesta => respuesta.json()).catch(error => {
+                pedidoCatalogo = undefined;
+                throw error;
+            });
+            const catalogo = await pedidoCatalogo;
+            const {archivo, tasa, muestrasPorNota, midi} = catalogo[instrumento];
+            const respuesta = await solicitar(archivo);
+            lector ??= new OfflineAudioContext(1, 1, tasa);
+            const audio = await lector.decodeAudioData(await respuesta.arrayBuffer());
+            return {datos: audio.getChannelData(0), tasa: audio.sampleRate, muestrasPorNota, midi};
         })().catch(error => {
             bancos.delete(instrumento);
             throw error;
         });
-        bancos.set(instrumento, tarea);
+        bancos.set(instrumento, pedido);
     }
     return bancos.get(instrumento);
 }
 
-async function interpretar(instrumento, eventos, duracion, signal) {
-    const Tone = globalThis.Tone;
-    if (!Tone?.Sampler) throw new Error('No se pudo cargar Tone.js para reproducir las notas grabadas.');
-    const urls = await cargarBanco(instrumento);
-    signal?.throwIfAborted();
-    const longitud = Math.max(1, Math.ceil(duracion * TASA_AUDIO));
-    const contexto = new Tone.OfflineContext(new OfflineAudioContext(1, longitud, TASA_AUDIO));
-    const sampler = new Tone.Sampler({
-        urls, context: contexto, attack: .006, release: LIBERACION, curve: 'linear',
-    }).toDestination();
-    try {
-        for (const {midi, desde, hasta} of eventos) {
-            sampler.triggerAttackRelease(aHz(midi), Math.max(.018, hasta - desde - LIBERACION), desde, 1);
-        }
-        const audio = await contexto.render();
-        signal?.throwIfAborted();
-        return audio.getChannelData(0).slice();
-    } finally {
-        sampler.dispose();
-        contexto.dispose();
+function intervalo(semitonos) {
+    return globalThis.Tone?.intervalToFrequencyRatio?.(semitonos) ?? 2 ** (semitonos / 12);
+}
+
+function recorte(banco, midi) {
+    let indice = 0;
+    for (let i = 1; i < banco.midi.length; i++) {
+        if (Math.abs(midi - banco.midi[i]) < Math.abs(midi - banco.midi[indice])) indice = i;
+    }
+    const inicio = indice * banco.muestrasPorNota;
+    return {inicio, fin: Math.min(banco.datos.length, inicio + banco.muestrasPorNota),
+        paso: intervalo(midi - banco.midi[indice]) * banco.tasa / TASA_AUDIO};
+}
+
+export function precargarMuestras(mezcla) {
+    const instrumentos = new Set(mezcla.pistas.map(pista => pista.instrumento));
+    for (const instrumento of instrumentos) {
+        if (INSTRUMENTOS_GRABADOS.has(instrumento)) cargarBanco(instrumento).catch(() => {});
     }
 }
 
-export async function prepararMuestras({pistas, duracion, mezcla}, signal) {
-    return Promise.all(pistas.map((eventos, i) => {
+export function prepararMuestras({pistas, mezcla}, signal) {
+    return Promise.all(pistas.map(async (eventos, i) => {
         const instrumento = mezcla.pistas[i].instrumento;
-        return eventos.length && volumenPista(mezcla, i) && INSTRUMENTOS_GRABADOS.has(instrumento)
-            ? interpretar(instrumento, eventos, duracion, signal) : null;
+        if (!eventos.length || !volumenPista(mezcla, i) || !INSTRUMENTOS_GRABADOS.has(instrumento)) return null;
+        const banco = await cargarBanco(instrumento);
+        signal?.throwIfAborted();
+        return {datos: banco.datos, notas: eventos.map(evento => recorte(banco, evento.midi))};
     }));
 }
 
 export async function notaGrabada(contexto, instrumento, midi, nivel) {
     if (!INSTRUMENTOS_GRABADOS.has(instrumento)) return null;
-    const duracion = .75;
-    const datos = await interpretar(instrumento, [{midi, desde: 0, hasta: duracion}], duracion);
-    const buffer = contexto.createBuffer(1, datos.length, TASA_AUDIO);
-    buffer.copyToChannel(datos.map(valor => valor * .52 * nivel), 0);
+    const banco = await cargarBanco(instrumento);
+    const {inicio, fin, paso} = recorte(banco, midi);
+    const longitud = Math.round(.75 * TASA_AUDIO);
+    const buffer = contexto.createBuffer(1, longitud, TASA_AUDIO), datos = buffer.getChannelData(0);
+    for (let i = 0, posicion = inicio; i < longitud && posicion < fin - 1; i++, posicion += paso) {
+        const j = Math.floor(posicion), f = posicion - j;
+        const envolvente = Math.min(1, i / 150, (longitud - i - 1) / 2200);
+        datos[i] = (banco.datos[j] * (1 - f) + banco.datos[j + 1] * f) * nivel * .52 * envolvente;
+    }
     return buffer;
 }
